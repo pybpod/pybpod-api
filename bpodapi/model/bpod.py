@@ -5,6 +5,10 @@ import logging
 import math
 
 from bpodapi.com.bpod_com import BpodCom
+from bpodapi.model.state_machine.state_machine import StateMachine
+from bpodapi.model.hardware import Hardware
+
+from bpodapi.com.serial_containers import HardwareInfoContainer
 
 logger = logging.getLogger(__name__)
 
@@ -20,20 +24,11 @@ class Bpod(object):
 		:param str serialPortName: serial port name
 		"""
 		self.firmware_version = None
-		self.HW = Struct()
-		self.HW.n = Struct()
-		self.HW.Pos = Struct()
-		self.data = Struct()
-		self.HW.inputsEnabled = 0
-		self.eventNames = ()
-		self.stateMachineInfo = Struct()
-		self.stateMachineInfo.Pos = Struct()
-		self.stateMachineInfo.nEvents = 0
-		self.stateMachineInfo.eventNames = ()
-		self.stateMachineInfo.inputChannelNames = ()
-		self.stateMachineInfo.nOutputChannels = 0
-		self.stateMachineInfo.outputChannelNames = ()
-		self.stateMachine = Struct()
+
+		self.hardware = Hardware()
+		self.state_machine = StateMachine()
+
+		self.data = []
 
 		# [Channel,Mode] 255 = no sync, otherwise set to a hardware channel number. Mode 0 = flip logic every trial, 1 = every state
 		self.sync_channel = 255
@@ -42,7 +37,6 @@ class Bpod(object):
 		self.bpod_protocol = BpodCom()
 
 		self.start(serialPortName)
-		self.setup()
 
 	def start(self, serial_port):
 		"""
@@ -67,187 +61,58 @@ class Bpod(object):
 
 		# request hardware description
 		logger.info("Reading HW description...")
-		self.bpod_protocol.hardware_description(self.HW, self.stateMachineInfo)
+		hw_info = HardwareInfoContainer()
+		self.bpod_protocol.hardware_description(hw_info)
+
+		self.hardware.set_up(hw_info)
 
 		# request ports enabling
 		logger.info("Enabling ports...")
-		response = self.bpod_protocol.enable_ports(self.HW.inputsEnabled)
+		response = self.bpod_protocol.enable_ports(self.hardware.inputs_enabled)
 		if not response:
 			raise BpodError('Error: Failed to enable Bpod inputs.')
 
 		# request sync channel and mode configuration
 		logger.info("Setting sync channel and mode...")
-		confirmation = self.bpod_protocol.set_sync_channel_and_mode(sync_channel=self.sync_channel, sync_mode=self.sync_mode)
+		confirmation = self.bpod_protocol.set_sync_channel_and_mode(sync_channel=self.sync_channel,
+		                                                            sync_mode=self.sync_mode)
 		if not confirmation:
 			raise BpodError('Error: Failed to configure syncronization.')
 
-	def setup(self):
-		"""
-		Generate event and input channel names
-
-		:return:
-		"""
-		inputChannelNames = ()
-		eventNames = ()
-		Pos = 0;
-		nUSB = 0;
-		nUART = 0;
-		nBNCs = 0;
-		nWires = 0;
-		nPorts = 0;
-		for i in range(self.HW.n.Inputs):
-			if self.HW.Inputs[i] == 'U':
-				nUART += 1
-				inputChannelNames += ('Serial' + str(nUART),)
-				for j in range(self.HW.n.EventsPerSerialChannel):
-					eventNames += ('Serial' + str(nUART) + '_' + str(j + 1),)
-					Pos += 1
-			elif self.HW.Inputs[i] == 'X':
-				if nUSB == 0:
-					self.HW.Pos.Event_USB = Pos
-				nUSB += 1
-				inputChannelNames += ('USB' + str(nUSB),);
-				for j in range(self.HW.n.EventsPerSerialChannel):
-					eventNames += ('SoftCode' + str(j + 1),)
-					Pos += 1
-			elif self.HW.Inputs[i] == 'P':
-				if nPorts == 0:
-					self.HW.Pos.Event_Port = Pos
-				nPorts += 1;
-				inputChannelNames += ('Port' + str(nPorts),)
-				eventNames += (inputChannelNames[-1] + 'In',)
-				Pos += 1
-				eventNames += (inputChannelNames[-1] + 'Out',)
-				Pos += 1
-			elif self.HW.Inputs[i] == 'B':
-				if nBNCs == 0:
-					self.HW.Pos.Event_BNC = Pos
-				nBNCs += 1;
-				inputChannelNames += ('BNC' + str(nBNCs),)
-				eventNames += (inputChannelNames[-1] + 'In',)
-				Pos += 1
-				eventNames += (inputChannelNames[-1] + 'Out',)
-				Pos += 1
-			elif self.HW.Inputs[i] == 'W':
-				if nWires == 0:
-					self.HW.Pos.Event_Wire = Pos
-				nWires += 1;
-				inputChannelNames += ('Wire' + str(nWires),)
-				eventNames += (inputChannelNames[-1] + 'In',)
-				Pos += 1
-				eventNames += (inputChannelNames[-1] + 'Out',)
-				Pos += 1
-		self.stateMachineInfo.Pos.globalTimer = Pos;
-		for i in range(self.HW.n.GlobalTimers):
-			eventNames += ('GlobalTimer' + str(i + 1) + '_End',)
-			Pos += 1
-		self.stateMachineInfo.Pos.globalCounter = Pos;
-		for i in range(self.HW.n.GlobalCounters):
-			eventNames += ('GlobalCounter' + str(i + 1) + '_End',)
-			Pos += 1
-		self.stateMachineInfo.Pos.condition = Pos;
-		for i in range(self.HW.n.Conditions):
-			eventNames += ('Condition' + str(i + 1),)
-			Pos += 1
-		self.stateMachineInfo.Pos.jump = Pos;
-		for i in range(self.HW.n.UARTSerialChannels):
-			eventNames += ('Serial' + str(i + 1) + 'Jump',)
-			Pos += 1
-		eventNames += ('SoftJump',)
-		Pos += 1
-		eventNames += ('Tup',)
-		self.stateMachineInfo.Pos.Tup = Pos;
-		Pos += 1
-		self.stateMachineInfo.inputChannelNames = inputChannelNames;
-		self.stateMachineInfo.eventNames = eventNames;
-		self.stateMachineInfo.nEvents = Pos;
-		# Generate output channel names
-		outputChannelNames = ()
-		Pos = 0;
-		nUSB = 0;
-		nUART = 0;
-		nSPI = 0;
-		nBNCs = 0;
-		nWires = 0;
-		nPorts = 0;
-		for i in range(self.HW.n.Outputs):
-			if self.HW.Outputs[i] == 'U':
-				nUART += 1
-				outputChannelNames += ('Serial' + str(nUART),)
-				Pos += 1
-			if self.HW.Outputs[i] == 'X':
-				if nUSB == 0:
-					self.HW.Pos.output_USB = Pos;
-				nUSB += 1
-				outputChannelNames += ('SoftCode',)
-				Pos += 1
-			if self.HW.Outputs[i] == 'S':
-				if nSPI == 0:
-					self.HW.Pos.output_SPI = Pos;
-				nSPI += 1
-				outputChannelNames += ('ValveState',)  # Assume an SPI shift register mapping bits of a byte to 8 valves
-				Pos += 1
-			if self.HW.Outputs[i] == 'B':
-				if nBNCs == 0:
-					self.HW.Pos.output_BNC = Pos;
-				nBNCs += 1
-				outputChannelNames += (
-					'BNC' + str(nBNCs),)  # Assume an SPI shift register mapping bits of a byte to 8 valves
-				Pos += 1
-			if self.HW.Outputs[i] == 'W':
-				if nWires == 0:
-					self.HW.Pos.output_Wire = Pos;
-				nWires += 1
-				outputChannelNames += (
-					'Wire' + str(nWires),)  # Assume an SPI shift register mapping bits of a byte to 8 valves
-				Pos += 1
-			if self.HW.Outputs[i] == 'P':
-				if nPorts == 0:
-					self.HW.Pos.output_PWM = Pos;
-				nPorts += 1
-				outputChannelNames += (
-					'PWM' + str(nPorts),)  # Assume an SPI shift register mapping bits of a byte to 8 valves
-				Pos += 1
-		outputChannelNames += ('GlobalTimerTrig',)
-		Pos += 1
-		outputChannelNames += ('GlobalTimerCancel',)
-		Pos += 1
-		outputChannelNames += ('GlobalCounterReset',)
-		Pos += 1
-		self.stateMachineInfo.outputChannelNames = outputChannelNames;
-		self.stateMachineInfo.nOutputChannels = Pos;
+		self.state_machine.set_up(self.hardware)
 
 	def send_state_machine(self, sma):
 		"""
 		Replace undeclared states (at the time they were referenced) with actual state numbers
 
 		:param sma:
+		:type sma: bpodapi.model.state_machine.state_machine.StateMachine
 		:return:
 		"""
 		for i in range(len(sma.undeclared)):
 			undeclaredStateNumber = i + 10000
 			thisStateNumber = sma.manifest.index(sma.undeclared[i])
 			for j in range(sma.nStates):
-				if sma.stateTimerMatrix[j] == undeclaredStateNumber:
-					sma.stateTimerMatrix[j] = thisStateNumber
-				inputTransitions = sma.inputMatrix[j]
+				if sma.state_timer_matrix[j] == undeclaredStateNumber:
+					sma.state_timer_matrix[j] = thisStateNumber
+				inputTransitions = sma.input_matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.inputMatrix[j] = inputTransitions
-				inputTransitions = sma.globalTimers.matrix[j]
+				sma.input_matrix[j] = inputTransitions
+				inputTransitions = sma.global_timers.matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.globalTimers.matrix[j] = inputTransitions
-				inputTransitions = sma.globalCounters.matrix[j]
+				sma.global_timers.matrix[j] = inputTransitions
+				inputTransitions = sma.global_counters.matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.globalCounters.matrix[j] = inputTransitions
+				sma.global_counters.matrix[j] = inputTransitions
 				inputTransitions = sma.conditions.matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
@@ -255,18 +120,20 @@ class Bpod(object):
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
 				sma.conditions.matrix[j] = inputTransitions
 		# Check to make sure all states in manifest exist
+		sma.nStates = len(sma.state_names)
+
 		if len(sma.manifest) > sma.nStates:
 			raise BpodError(
 				'Error: Could not send state machine - some states were referenced by name, but not subsequently declared.')
 		Message = (ord('C'),)
-		Message += (sma.nStates,)
+		Message += (len(sma.state_names),)
 		for i in range(sma.nStates):  # Send state timer transitions (for all states)
-			if math.isnan(sma.stateTimerMatrix[i]):
+			if math.isnan(sma.state_timer_matrix[i]):
 				Message += (sma.nStates,)
 			else:
-				Message += (sma.stateTimerMatrix[i],)
+				Message += (sma.state_timer_matrix[i],)
 		for i in range(sma.nStates):  # Send event-triggered transitions (where they are different from default)
-			currentStateTransitions = sma.inputMatrix[i]
+			currentStateTransitions = sma.input_matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
 			for j in range(nTransitions):
@@ -278,7 +145,7 @@ class Bpod(object):
 				else:
 					Message += (destinationState,)
 		for i in range(sma.nStates):  # Send hardware states (where they are different from default)
-			currentHardwareState = sma.outputMatrix[i]
+			currentHardwareState = sma.output_matrix[i]
 			nDifferences = len(currentHardwareState)
 			Message += (nDifferences,)
 			for j in range(nDifferences):
@@ -286,12 +153,12 @@ class Bpod(object):
 				Message += (thisHardwareConfig[0],)
 				Message += (thisHardwareConfig[1],)
 		for i in range(sma.nStates):  # Send global timer triggered transitions (where they are different from default)
-			currentStateTransitions = sma.globalTimers.matrix[i]
+			currentStateTransitions = sma.global_timers.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
 			for j in range(nTransitions):
 				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0] - self.stateMachineInfo.Pos.globalTimer,)
+				Message += (thisTransition[0] - sma.channels.events_positions.globalTimer,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
 					Message += (sma.nStates,)
@@ -299,12 +166,12 @@ class Bpod(object):
 					Message += (destinationState,)
 		for i in range(
 				sma.nStates):  # Send global counter triggered transitions (where they are different from default)
-			currentStateTransitions = sma.globalCounters.matrix[i]
+			currentStateTransitions = sma.global_counters.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
 			for j in range(nTransitions):
 				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0] - self.stateMachineInfo.Pos.globalCounter,)
+				Message += (thisTransition[0] - sma.channels.events_positions.globalCounter,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
 					Message += (sma.nStates,)
@@ -316,24 +183,27 @@ class Bpod(object):
 			Message += (nTransitions,)
 			for j in range(nTransitions):
 				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0] - self.stateMachineInfo.Pos.condition,)
+				Message += (thisTransition[0] - sma.channels.events_positions.condition,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
 					Message += (sma.nStates,)
 				else:
 					Message += (destinationState,)
-		for i in range(self.HW.n.GlobalCounters):
-			Message += (sma.globalCounters.attachedEvents[i],)
-		for i in range(self.HW.n.Conditions):
+		for i in range(self.hardware.n_global_counters):
+			Message += (sma.global_counters.attached_events[i],)
+		for i in range(self.hardware.n_conditions):
 			Message += (sma.conditions.channels[i],)
-		for i in range(self.HW.n.Conditions):
+		for i in range(self.hardware.n_conditions):
 			Message += (sma.conditions.values[i],)
-		sma.stateTimers = sma.stateTimers[:sma.nStates]
-		ThirtyTwoBitMessage = [i * self.HW.cycleFrequency for i in sma.stateTimers] + [i * self.HW.cycleFrequency for i
-		                                                                               in
-		                                                                               sma.globalTimers.timers] + sma.globalCounters.thresholds
-		#self.serialObject.write(Message, 'uint8', ThirtyTwoBitMessage, 'uint32')
+
+		sma.state_timers = sma.state_timers[:sma.nStates]
+
+		ThirtyTwoBitMessage = [i * self.hardware.cycle_frequency for i in sma.state_timers] + \
+		                      [i * self.hardware.cycle_frequency for i in sma.global_timers.timers] + \
+		                      sma.global_counters.thresholds
+
 		response = self.bpod_protocol.send_state_machine(Message, ThirtyTwoBitMessage)
+
 		if not response:
 			raise BpodError('Error: Failed to send state machine.')
 		self.stateMachine = sma
@@ -350,7 +220,6 @@ class Bpod(object):
 		RawEvents.States = [currentState]
 		RawEvents.StateTimestamps = [0]
 		RawEvents.TrialStartTimestamp = 0;
-		#self.serialObject.write(ord('R'), 'uint8')
 
 		self.bpod_protocol.run_state_machine()
 
@@ -370,7 +239,7 @@ class Bpod(object):
 						else:
 							RawEvents.Events.append(thisEvent)
 							if not TransitionEventFound:
-								thisStateTransitions = self.stateMachine.inputMatrix[currentState]
+								thisStateTransitions = self.stateMachine.input_matrix[currentState]
 								nTransitions = len(thisStateTransitions)
 								for j in range(nTransitions):
 									thisTransition = thisStateTransitions[j]
@@ -381,8 +250,8 @@ class Bpod(object):
 											StateChangeIndexes.append(len(RawEvents.Events) - 1)
 										TransitionEventFound = True
 							if not TransitionEventFound:
-								thisStateTimerTransition = self.stateMachine.stateTimerMatrix[currentState]
-								if thisEvent == self.stateMachineInfo.Pos.Tup:
+								thisStateTimerTransition = self.stateMachine.state_timer_matrix[currentState]
+								if thisEvent == self.state_machine.channels.events_positions.Tup:
 									if not (thisStateTimerTransition == currentState):
 										currentState = thisStateTimerTransition
 										if not math.isnan(currentState):

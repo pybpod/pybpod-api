@@ -5,21 +5,16 @@ import loggingbootstrap
 import logging
 
 from bpodapi.model.bpod import Bpod
-from bpodapi.model.state_machine import StateMachine
+from bpodapi.model.state_machine.state_machine import StateMachine
 
 # setup different loggers but output to single file
-loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log',
-                                      logging.DEBUG)
-
+loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log', logging.DEBUG)
 
 my_bpod = Bpod('/dev/tty.usbmodem1461')  # Create a new instance of a Bpod object on serial port COM13
 
-sma = StateMachine(my_bpod)  # Create a new state machine (events + outputs tailored for myBpod)
+sma = my_bpod.state_machine
 
-sma.add_state('Name', 'myState',
-              'Timer', 1,
-              'StateChangeConditions', ('Tup', 'exit'),
-              'OutputActions', ())
+sma.add_state(state_name='myState', state_timer=1, state_change_conditions={'Tup': 'exit'}, output_actions={})
 
 my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 

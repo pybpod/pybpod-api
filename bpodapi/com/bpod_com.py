@@ -51,77 +51,55 @@ class BpodCom(object):
 
 		return response
 
-	def hardware_description(self, hw, state_machine_info):
+	def hardware_description(self, hardware_info):
 		"""
 		Request hardware description from Bpod
-		TODO: THIS METHOD SHOULD ONLY DO COMM STUFF, THIS IS ONLY TEMPORARY
-		:param hw:
-		:param state_machine_info:
-		:return:
+		:type hardware_info: bpodapi.com.serial_containers.HardwareInfoContainer
+		:param hardware_info: empty container to be filled with serial data
 		"""
 		logger.debug("Requesting hardware description (%s)...", BpodProtocol.HARDWARE_DESCRIPTION)
-
 		self.arcom.write_char(BpodProtocol.HARDWARE_DESCRIPTION)
-		max_states = self.arcom.read_uint16()
-		logger.debug("Max states: %s", max_states)
 
-		hw.cyclePeriod = self.arcom.read_uint16()
-		logger.debug("Cycle period: %s", hw.cyclePeriod)
-		hw.cycleFrequency = 1000000 / hw.cyclePeriod
-		hw.n.EventsPerSerialChannel = self.arcom.read_uint8()
-		logger.debug("Number of events per serial channel: %s", hw.n.EventsPerSerialChannel)
+		hardware_info.max_states = self.arcom.read_uint16()
+		logger.debug("Read max states: %s", hardware_info.max_states)
 
-		hw.n.GlobalTimers = self.arcom.read_uint8()
-		logger.debug("Number of global timers: %s", hw.n.GlobalTimers)
+		hardware_info.cycle_period = self.arcom.read_uint16()
+		logger.debug("Read cycle period: %s", hardware_info.cycle_period)
 
-		hw.n.GlobalCounters = self.arcom.read_uint8()
-		logger.debug("Number of global counters: %s", hw.n.GlobalCounters)
+		hardware_info.n_events_per_serial_channel = self.arcom.read_uint8()
+		logger.debug("Read number of events per serial channel: %s", hardware_info.n_events_per_serial_channel)
 
-		hw.n.Conditions = self.arcom.read_uint8()
-		logger.debug("Number of conditions: %s", hw.n.Conditions)
+		hardware_info.n_global_timers = self.arcom.read_uint8()
+		logger.debug("Read number of global timers: %s", hardware_info.n_global_timers)
 
-		hw.n.Inputs = self.arcom.read_uint8()
-		logger.debug("Number of inputs: %s", hw.n.Inputs)
+		hardware_info.n_global_counters = self.arcom.read_uint8()
+		logger.debug("Read number of global counters: %s", hardware_info.n_global_counters)
 
-		hw.Inputs = self.arcom.read_char_array(array_size=hw.n.Inputs)
-		logger.debug("Inputs: %s", hw.Inputs)
+		hardware_info.n_conditions = self.arcom.read_uint8()
+		logger.debug("Read number of conditions: %s", hardware_info.n_conditions)
 
-		hw.n.Outputs = self.arcom.read_uint8()
-		logger.debug("Number of outputs: %s", hw.n.Outputs)
+		hardware_info.n_inputs = self.arcom.read_uint8()
+		logger.debug("Read number of inputs: %s", hardware_info.n_inputs)
 
-		hw.Outputs = self.arcom.read_char_array(array_size=hw.n.Outputs)
-		logger.debug("Outputs: %s", hw.Outputs)
-		hw.Outputs.append('GGG')  # WHAT IS THIS FOR??
+		hardware_info.inputs = self.arcom.read_char_array(array_size=hardware_info.n_inputs)
+		logger.debug("Read inputs: %s", hardware_info.inputs)
 
-		state_machine_info.nOutputChannels = hw.n.Outputs + 3;
-		state_machine_info.maxStates = max_states;
+		hardware_info.n_outputs = self.arcom.read_uint8()
+		logger.debug("Read number of outputs: %s", hardware_info.n_outputs)
 
-		hw.n.UARTSerialChannels = 0;
-		for i in range(hw.n.Inputs):
-			if hw.Inputs[i] == 'U':
-				hw.n.UARTSerialChannels += 1
-
-		# Set input channel enable/disable
-		hw.inputsEnabled = [0] * hw.n.Inputs
-		PortsFound = 0
-		for i in range(hw.n.Inputs):
-			if hw.Inputs[i] == 'B':
-				hw.inputsEnabled[i] = 1
-			elif hw.Inputs[i] == 'W':
-				hw.inputsEnabled[i] = 1
-			if PortsFound == 0 and hw.Inputs[i] == 'P':  # Enable ports 1-3 by default
-				PortsFound = 1
-				hw.inputsEnabled[i] = 1
-				hw.inputsEnabled[i + 1] = 1
-				hw.inputsEnabled[i + 2] = 1
+		hardware_info.outputs = self.arcom.read_char_array(array_size=hardware_info.n_outputs)
+		logger.debug("Read outputs: %s", hardware_info.outputs)
 
 	def enable_ports(self, inputs_enabled):
+		"""
+
+		:param inputs_enabled:
+		:return:
+		"""
 		logger.debug("Requesting ports enabling (%s)", BpodProtocol.ENABLE_PORTS)
 		logger.debug("Inputs enabled (%s): %s", len(inputs_enabled), inputs_enabled)
 
-		self.arcom.write_char(BpodProtocol.ENABLE_PORTS)
-
-		self.arcom.write_uint8_array(inputs_enabled)
+		self.arcom.write_array([ord(BpodProtocol.ENABLE_PORTS)] + inputs_enabled)
 
 		response = self.arcom.read_uint8()
 
@@ -132,16 +110,7 @@ class BpodCom(object):
 	def set_sync_channel_and_mode(self, sync_channel, sync_mode):
 		logger.debug("Requesting sync configuration (%s)", BpodProtocol.SYNC_CHANNEL_MODE)
 
-		self.arcom.write_uint8_array([ord(BpodProtocol.SYNC_CHANNEL_MODE)] + [sync_channel, sync_mode])
-
-		# self.arcom.write_char(BpodProtocol.SYNC_CHANNEL_MODE)
-		#
-		# logger.debug("Setting sync channel (%s)", sync_channel)
-		# response = self.arcom.write_uint8(sync_channel)
-		#
-		# logger.debug("Setting sync mode (%s)", sync_mode)
-		# response = self.arcom.write_uint8(sync_mode)
-		#
+		self.arcom.write_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), sync_channel, sync_mode])
 
 		response = self.arcom.read_uint8()
 
@@ -160,9 +129,9 @@ class BpodCom(object):
 		logger.debug("Sending state machine (%s)", Message)
 		logger.debug("Data to send (%s)", ThirtyTwoBitMessage)
 
-		self.arcom.write_uint8_array(Message)
+		self.arcom.write_array(Message)
 
-		self.arcom.write_uint8_array(ThirtyTwoBitMessage)
+		self.arcom.write_array(ThirtyTwoBitMessage)
 
 		response = self.arcom.read_uint8()
 

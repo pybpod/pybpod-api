@@ -64,7 +64,7 @@ class ArCOM(object):
 	def write_uint8(self, value):
 		self.serialObject.write(bytes(value))
 
-	def write_uint8_array(self, data):
+	def write_array(self, data):
 		self.serialObject.write(np.array(data).tobytes())
 
 	def read_char(self):
