@@ -15,10 +15,12 @@ class BpodCom(object):
 	"""
 
 	def __init__(self):
+		# type arcom: bpodapi.com.arcom.ArCOM
 		self.arcom = None
 
 	def connect(self, serial_port, baudrate=115200):
-		self.arcom = ArCOM(serial_port, baudrate)  # Create a new instance of an ArCOM serial port
+		self.arcom = ArCOM()
+		self.arcom.open(serial_port, baudrate)
 
 	def handshake(self):
 		"""
@@ -81,13 +83,13 @@ class BpodCom(object):
 		hardware_info.n_inputs = self.arcom.read_uint8()
 		logger.debug("Read number of inputs: %s", hardware_info.n_inputs)
 
-		hardware_info.inputs = self.arcom.read_char_array(array_size=hardware_info.n_inputs)
+		hardware_info.inputs = self.arcom.read_char_array(array_len=hardware_info.n_inputs)
 		logger.debug("Read inputs: %s", hardware_info.inputs)
 
 		hardware_info.n_outputs = self.arcom.read_uint8()
 		logger.debug("Read number of outputs: %s", hardware_info.n_outputs)
 
-		hardware_info.outputs = self.arcom.read_char_array(array_size=hardware_info.n_outputs)
+		hardware_info.outputs = self.arcom.read_char_array(array_len=hardware_info.n_outputs)
 		logger.debug("Read outputs: %s", hardware_info.outputs)
 
 	def enable_ports(self, inputs_enabled):
@@ -143,3 +145,67 @@ class BpodCom(object):
 		logger.debug("Requesting state machine run (%s)", BpodProtocol.RUN_STATE_MACHINE)
 
 		self.arcom.write_char(BpodProtocol.RUN_STATE_MACHINE)
+
+		while True:
+			if self.data_available():
+				print(self.arcom.read_uint8())
+
+	def data_available(self):
+		return self.arcom.bytes_available() > 0
+
+	def read_opcode_message(self):
+		response = self.arcom.read_uint8_array(array_len=2)
+		opcode = response[0]
+		data = response[1]
+
+		logger.debug("Read opcode message: opcode=%s, data=%s", opcode, data)
+
+		return opcode, data
+
+	def read_trial_start_timestamp_ms(self):
+		response = self.arcom.read_uint32()
+
+		trial_start_timestamp = float(response) / 1000  # Start-time of the trial in milliseconds
+
+		return trial_start_timestamp
+
+	def read_timestamps(self):
+		n_timestamps = self.arcom.read_uint16()
+
+		timestamps = self.arcom.read_uint32_array(array_len=n_timestamps)
+
+		return timestamps
+
+	def read_current_events(self, n_events):
+		current_events = self.arcom.read_uint8_array(array_len=n_events)
+
+		logger.debug("Read current events: %s", current_events)
+
+		return current_events
+
+	def load_serial_message(self, message):
+		logger.debug("Requesting load serial message (%s)", BpodProtocol.LOAD_SERIAL_MESSAGE)
+
+		self.arcom.write_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), message])
+
+		response = self.arcom.read_uint8()
+
+		logger.debug("Confirmation: %s", response)
+
+		return response
+
+	def reset_serial_messages(self):
+		logger.debug("Requesting serial messages reset (%s)", BpodProtocol.RESET_SERIAL_MESSAGES)
+
+		self.arcom.write_char(BpodProtocol.RESET_SERIAL_MESSAGES)
+
+		response = self.arcom.read_uint8()
+
+		logger.debug("Confirmation: %s", response)
+
+		return response
+
+	def disconnect(self):
+		logger.debug("Requesting disconnect (%s)", BpodProtocol.DISCONNECT)
+
+		self.arcom.write_char(BpodProtocol.DISCONNECT)

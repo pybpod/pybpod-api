@@ -3,6 +3,7 @@
 
 import logging
 import math
+from datetime import datetime
 
 from bpodapi.com.bpod_com import BpodCom
 from bpodapi.model.state_machine.state_machine import StateMachine
@@ -26,6 +27,8 @@ class Bpod(object):
 		self.firmware_version = None
 
 		self.hardware = Hardware()
+
+		# type: StateMachine
 		self.state_machine = StateMachine()
 
 		self.data = []
@@ -81,7 +84,7 @@ class Bpod(object):
 
 		self.state_machine.set_up(self.hardware)
 
-	def send_state_machine(self, sma):
+	def send_state_machine(self):
 		"""
 		Replace undeclared states (at the time they were referenced) with actual state numbers
 
@@ -89,6 +92,9 @@ class Bpod(object):
 		:type sma: bpodapi.model.state_machine.state_machine.StateMachine
 		:return:
 		"""
+
+		sma = self.state_machine
+
 		for i in range(len(sma.undeclared)):
 			undeclaredStateNumber = i + 10000
 			thisStateNumber = sma.manifest.index(sma.undeclared[i])
@@ -206,80 +212,71 @@ class Bpod(object):
 
 		if not response:
 			raise BpodError('Error: Failed to send state machine.')
-		self.stateMachine = sma
+
+	def _process_opcode(self, opcode, data, raw_events, state_change_indexes, current_state):
+
+		if opcode == 1:  # Read events
+			n_current_events = data
+			current_events = self.bpod_protocol.read_current_events(n_current_events)
+			transition_event_found = False
+			for event in current_events:
+				if event == 255:
+					self.state_machine.is_running = False
+				else:
+					raw_events.events.append(event)
+					if not transition_event_found:
+						for transition in self.state_machine.input_matrix[current_state]:
+							if transition[0] == event:
+								current_state = transition[1]
+								if not math.isnan(current_state):
+									raw_events.states.append(current_state)
+									state_change_indexes.append(len(raw_events.events) - 1)
+								transition_event_found = True
+					if not transition_event_found:
+						this_state_timer_transition = self.state_machine.state_timer_matrix[current_state]
+						if event == self.state_machine.channels.events_positions.Tup:
+							if not (this_state_timer_transition == current_state):
+								current_state = this_state_timer_transition
+								if not math.isnan(current_state):
+									raw_events.states.append(current_state)
+									state_change_indexes.append(len(raw_events.events) - 1)
+								transition_event_found = True
+					if not transition_event_found:
+						for transition in self.state_machine.global_timers.matrix[current_state]:
+							if transition[0] == event:
+								current_state = transition[1]
+								if not math.isnan(current_state):
+									raw_events.states.append(current_state)
+									state_change_indexes.append(len(raw_events.events) - 1)
+								transition_event_found = True
+		elif opcode == 2:  # Handle soft code
+			logger.info("Soft code: %s", data)
 
 	def run_state_machine(self):
-		from datetime import datetime
 		self.stateMachineStartTime = datetime.now()
-		RawEvents = Struct()
-		eventPos = 0
-		currentState = 0
-		StateChangeIndexes = []
-		RawEvents.Events = []
-		RawEvents.EventTimestamps = []
-		RawEvents.States = [currentState]
-		RawEvents.StateTimestamps = [0]
-		RawEvents.TrialStartTimestamp = 0;
+
+		raw_events = RawEvents()
+		state_change_indexes = []
+
+		current_state = 0
 
 		self.bpod_protocol.run_state_machine()
 
-		runningStateMachine = True
-		while runningStateMachine:
-			if self.bpod_protocol.arcom.bytesAvailable() > 0:
-				opCodeBytes = self.serialObject.readArray(2, 'uint8')
-				opCode = opCodeBytes[0]
-				if opCode == 1:  # Read events
-					nCurrentEvents = opCodeBytes[1]
-					CurrentEvents = self.bpod_protocol.arcom.read_uint8(nCurrentEvents)
-					TransitionEventFound = False
-					for i in range(nCurrentEvents):
-						thisEvent = CurrentEvents[i]
-						if thisEvent == 255:
-							runningStateMachine = False
-						else:
-							RawEvents.Events.append(thisEvent)
-							if not TransitionEventFound:
-								thisStateTransitions = self.stateMachine.input_matrix[currentState]
-								nTransitions = len(thisStateTransitions)
-								for j in range(nTransitions):
-									thisTransition = thisStateTransitions[j]
-									if thisTransition[0] == thisEvent:
-										currentState = thisTransition[1]
-										if not math.isnan(currentState):
-											RawEvents.States.append(currentState)
-											StateChangeIndexes.append(len(RawEvents.Events) - 1)
-										TransitionEventFound = True
-							if not TransitionEventFound:
-								thisStateTimerTransition = self.stateMachine.state_timer_matrix[currentState]
-								if thisEvent == self.state_machine.channels.events_positions.Tup:
-									if not (thisStateTimerTransition == currentState):
-										currentState = thisStateTimerTransition
-										if not math.isnan(currentState):
-											RawEvents.States.append(currentState)
-											StateChangeIndexes.append(len(RawEvents.Events) - 1)
-										TransitionEventFound = True
-							if not TransitionEventFound:
-								thisGlobalTimerTransitions = self.stateMachine.globalTimers.matrix[currentState]
-								nTransitions = len(thisGlobalTimerTransitions)
-								for j in range(nTransitions):
-									thisTransition = thisGlobalTimerTransitions[j]
-									if thisTransition[0] == thisEvent:
-										currentState = thisTransition[1]
-										if not math.isnan(currentState):
-											RawEvents.States.append(currentState)
-											StateChangeIndexes.append(len(RawEvents.Events) - 1)
-										TransitionEventFound = True
-				elif opCode == 2:  # Handle soft code
-					SoftCode = opCodeBytes[1]
-		RawEvents.TrialStartTimestamp = float(
-			self.serialObject.read('uint32')) / 1000  # Start-time of the trial in milliseconds
-		nTimeStamps = self.serialObject.read('uint16')
-		TimeStamps = self.serialObject.readArray(nTimeStamps, 'uint32')
-		RawEvents.EventTimestamps = [i / float(self.HW.cycleFrequency) for i in TimeStamps];
-		for i in range(len(StateChangeIndexes)):
-			RawEvents.StateTimestamps.append(RawEvents.EventTimestamps[StateChangeIndexes[i]])
-		RawEvents.StateTimestamps.append(RawEvents.EventTimestamps[-1])
-		return RawEvents
+		self.state_machine.is_running = True
+		while self.state_machine.is_running:
+			if self.bpod_protocol.data_available():
+				opcode, data = self.bpod_protocol.read_opcode_message()
+				self._process_opcode(opcode, data, raw_events, state_change_indexes, current_state)
+
+		raw_events.trial_start_timestamp = self.bpod_protocol.read_trial_start_timestamp_ms()
+		timestamps = self.bpod_protocol.read_timestamps()
+
+		raw_events.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
+		for state_change_idx in state_change_indexes:
+			raw_events.state_timestamps.append(raw_events.event_timestamps[state_change_idx])
+		raw_events.state_timestamps.append(raw_events.event_timestamps[-1])
+
+		return raw_events
 
 	def addTrialEvents(self, RawEvents):
 		if not hasattr(self.data, 'nTrials'):
@@ -343,54 +340,64 @@ class Bpod(object):
 			setattr(self.data.rawEvents.Trial[self.data.nTrials].Events, thisEventName, thisEventTimestamps)
 		self.data.nTrials += 1
 
-	def manualOverride(self, channelType, channelName, channelNumber, value):
-		if channelType.lower() == 'input':
+	def manual_override(self, channel_type, channel_name, channel_number, value):
+		if channel_type.lower() == 'input':
 			raise BpodError('Manually overriding a Bpod input channel is not yet supported in Python.')
-		elif channelType.lower() == 'output':
-			if channelName == 'Valve':
+		elif channel_type.lower() == 'output':
+			if channel_name == 'Valve':
 				if value > 0:
-					value = math.pow(2, channelNumber - 1)
-				channelNumber = self.HW.Pos.output_SPI
-				byteString = (ord('O'), channelNumber, value)
-			elif channelName == 'Serial':
-				byteString = (ord('U'), channelNumber, value)
+					value = math.pow(2, channel_number - 1)
+					channel_number = self.state_machine.channels.events_positions.output_SPI
+				byteString = (ord('O'), channel_number, value)
+			elif channel_name == 'Serial':
+				byteString = (ord('U'), channel_number, value)
 			else:
 				try:
-					channelNumber = self.stateMachineInfo.outputChannelNames.index(channelName + str(channelNumber))
-					byteString = (ord('O'), channelNumber, value)
+					channel_number = self.stateMachineInfo.outputChannelNames.index(channel_name + str(channel_number))
+					byteString = (ord('O'), channel_number, value)
 				except:
-					raise BpodError('Error using manualOverride: ' + channelName + ' is not a valid channel name.')
+					raise BpodError('Error using manualOverride: ' + channel_name + ' is not a valid channel name.')
 			self.serialObject.write(byteString, 'uint8')
 		else:
 			raise BpodError('Error using manualOverride: first argument must be "Input" or "Output".')
 
-	def loadSerialMessage(self, serialChannel, messageID, message):
+	def load_serial_message(self, serial_channel, message_ID, message):
 		nMessages = 1
-		messageLength = len(message)
-		if messageLength > 3:
+
+		if len(message) > 3:
 			raise BpodError('Error: Serial messages cannot be more than 3 bytes in length.')
-		if (messageID > 255) or (messageID < 1):
+
+		if message_ID > 255 or message_ID < 1:
 			raise BpodError('Error: Bpod can only store 255 serial messages (indexed 1-255).')
-		ByteString = (ord('L'), serialChannel - 1, nMessages, messageID, messageLength) + message
-		print
-		ByteString
-		self.serialObject.write(ByteString, 'uint8')
-		Confirmed = self.serialObject.read('uint8');
-		if (not Confirmed):
+
+		message_container = (serial_channel - 1, nMessages, message_ID, len(message), message)
+
+		response = self.bpod_protocol.load_serial_message(message_container);
+		if not response:
 			raise BpodError('Error: Failed to set serial message.')
 
-	def resetSerialMessages(self):
-		self.serialObject.write(ord('>'), 'uint8')
-		Confirmed = self.serialObject.read('uint8');
-		if (not Confirmed):
+	def reset_serial_messages(self):
+		"""
+		Reset serial messages
+		"""
+		response = self.reset_serial_messages()
+		if not response:
 			raise BpodError('Error: Failed to reset serial message library.')
 
 	def disconnect(self):
-		self.serialObject.write(ord('Z'), 'uint8')
+		"""
+		Close connection with Bpod
+		"""
+		self.bpod_protocol.disconnect()
 
 
-class Struct:
-	pass
+class RawEvents:
+	def __init__(self):
+		self.events = []
+		self.event_timestamps = []
+		self.states = [0]
+		self.state_timestamps = [0]
+		self.trial_start_timestamp = 0;
 
 
 class BpodError(Exception):

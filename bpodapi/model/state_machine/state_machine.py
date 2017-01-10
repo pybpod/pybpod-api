@@ -74,7 +74,6 @@ class StateMachine(object):
 			state_name_idx = self.manifest.index(state_name)
 			self.state_names[state_name_idx] = state_name
 
-		print(state_name_idx)
 		self.state_timer_matrix[state_name_idx] = state_name_idx
 
 		self.state_timers[state_name_idx] = state_timer

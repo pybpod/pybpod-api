@@ -12,11 +12,9 @@ loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log', l
 
 my_bpod = Bpod('/dev/tty.usbmodem1461')  # Create a new instance of a Bpod object on serial port COM13
 
-sma = my_bpod.state_machine
+my_bpod.state_machine.add_state(state_name='myState', state_timer=1, state_change_conditions={'Tup': 'exit'}, output_actions={})
 
-sma.add_state(state_name='myState', state_timer=1, state_change_conditions={'Tup': 'exit'}, output_actions={})
-
-my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
+my_bpod.send_state_machine()  # Send state machine description to Bpod device
 
 raw_events = my_bpod.run_state_machine()  # Run state machine and return events
 
