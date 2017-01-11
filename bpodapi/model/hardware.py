@@ -63,7 +63,7 @@ class Hardware(object):
 	@cycle_period.setter
 	def cycle_period(self, value):
 		self._cycle_period = value
-		self.cycle_frequency = self.DEFAULT_FREQUENCY_DIVIDER / value
+		self.cycle_frequency = int(self.DEFAULT_FREQUENCY_DIVIDER / value)
 
 	@property
 	def cycle_frequency(self):

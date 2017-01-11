@@ -399,6 +399,15 @@ class RawEvents:
 		self.state_timestamps = [0]
 		self.trial_start_timestamp = 0;
 
+	def __str__(self):
+		data_dict = {'States': self.states,
+		             'TrialStartTimestamp': self.trial_start_timestamp,
+		             'EventTimestamps': self.event_timestamps,
+		             'Events': self.events,
+		             'StateTimestamps': self.state_timestamps}
+
+		return str(data_dict)
+
 
 class BpodError(Exception):
 	pass

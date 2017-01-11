@@ -56,10 +56,22 @@ class ArCOM(object):
 		self.serial_object.write(str.encode(value))
 
 	def write_uint8(self, value):
-		self.serial_object.write(bytes(value))
+		self.serial_object.write(np.array([value], dtype=ArduinoTypes.UINT8.name).tobytes())
 
-	def write_array(self, data):
-		self.serial_object.write(np.array(data).tobytes())
+	def write_uint16(self, value):
+		self.serial_object.write(np.array([value], dtype=ArduinoTypes.UINT16.name).tobytes())
+
+	def write_uint32(self, value):
+		self.serial_object.write(np.array([value], dtype=ArduinoTypes.UINT32.name).tobytes())
+
+	def write_uint8_array(self, array):
+		self.serial_object.write(np.array(array, dtype=ArduinoTypes.UINT8.name).tobytes())
+
+	def write_uint16_array(self, array):
+		self.serial_object.write(np.array(array, dtype=ArduinoTypes.UINT16.name).tobytes())
+
+	def write_uint32_array(self, array):
+		self.serial_object.write(np.array(array, dtype=ArduinoTypes.UINT32.name).tobytes())
 
 	def read_char(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.CHAR.size)

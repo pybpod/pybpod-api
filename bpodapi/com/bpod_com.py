@@ -101,7 +101,7 @@ class BpodCom(object):
 		logger.debug("Requesting ports enabling (%s)", BpodProtocol.ENABLE_PORTS)
 		logger.debug("Inputs enabled (%s): %s", len(inputs_enabled), inputs_enabled)
 
-		self.arcom.write_array([ord(BpodProtocol.ENABLE_PORTS)] + inputs_enabled)
+		self.arcom.write_uint8_array([ord(BpodProtocol.ENABLE_PORTS)] + inputs_enabled)
 
 		response = self.arcom.read_uint8()
 
@@ -112,7 +112,7 @@ class BpodCom(object):
 	def set_sync_channel_and_mode(self, sync_channel, sync_mode):
 		logger.debug("Requesting sync configuration (%s)", BpodProtocol.SYNC_CHANNEL_MODE)
 
-		self.arcom.write_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), sync_channel, sync_mode])
+		self.arcom.write_uint8_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), sync_channel, sync_mode])
 
 		response = self.arcom.read_uint8()
 
@@ -128,12 +128,12 @@ class BpodCom(object):
 		:return:
 		"""
 
-		logger.debug("Sending state machine (%s)", Message)
-		logger.debug("Data to send (%s)", ThirtyTwoBitMessage)
+		logger.debug("Sending state machine: %s", Message)
+		logger.debug("Data to send: %s", ThirtyTwoBitMessage)
 
-		self.arcom.write_array(Message)
+		self.arcom.write_uint8_array(Message)
 
-		self.arcom.write_array(ThirtyTwoBitMessage)
+		self.arcom.write_uint32_array(ThirtyTwoBitMessage)
 
 		response = self.arcom.read_uint8()
 
@@ -145,10 +145,6 @@ class BpodCom(object):
 		logger.debug("Requesting state machine run (%s)", BpodProtocol.RUN_STATE_MACHINE)
 
 		self.arcom.write_char(BpodProtocol.RUN_STATE_MACHINE)
-
-		while True:
-			if self.data_available():
-				print(self.arcom.read_uint8())
 
 	def data_available(self):
 		return self.arcom.bytes_available() > 0
@@ -186,7 +182,7 @@ class BpodCom(object):
 	def load_serial_message(self, message):
 		logger.debug("Requesting load serial message (%s)", BpodProtocol.LOAD_SERIAL_MESSAGE)
 
-		self.arcom.write_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), message])
+		self.arcom.write_uint8_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), message])
 
 		response = self.arcom.read_uint8()
 
