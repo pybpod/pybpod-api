@@ -98,7 +98,7 @@ class Bpod(object):
 		for i in range(len(sma.undeclared)):
 			undeclaredStateNumber = i + 10000
 			thisStateNumber = sma.manifest.index(sma.undeclared[i])
-			for j in range(sma.nStates):
+			for j in range(sma.total_states_added):
 				if sma.state_timer_matrix[j] == undeclaredStateNumber:
 					sma.state_timer_matrix[j] = thisStateNumber
 				inputTransitions = sma.input_matrix[j]
@@ -125,20 +125,19 @@ class Bpod(object):
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
 				sma.conditions.matrix[j] = inputTransitions
-		# Check to make sure all states in manifest exist
-		sma.nStates = len(sma.state_names)
 
-		if len(sma.manifest) > sma.nStates:
+		# Check to make sure all states in manifest exist
+		logger.debug("Total states added: %s | Manifested sates: %s", self.state_machine.total_states_added, len(self.state_machine.manifest))
+		if len(sma.manifest) > sma.total_states_added:
 			raise BpodError(
 				'Error: Could not send state machine - some states were referenced by name, but not subsequently declared.')
-		Message = (ord('C'),)
-		Message += (len(sma.state_names),)
-		for i in range(sma.nStates):  # Send state timer transitions (for all states)
+		Message = [len(sma.state_names),]
+		for i in range(sma.total_states_added):  # Send state timer transitions (for all states)
 			if math.isnan(sma.state_timer_matrix[i]):
-				Message += (sma.nStates,)
+				Message += (sma.total_states_added,)
 			else:
 				Message += (sma.state_timer_matrix[i],)
-		for i in range(sma.nStates):  # Send event-triggered transitions (where they are different from default)
+		for i in range(sma.total_states_added):  # Send event-triggered transitions (where they are different from default)
 			currentStateTransitions = sma.input_matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -147,10 +146,10 @@ class Bpod(object):
 				Message += (thisTransition[0],)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
-					Message += (sma.nStates,)
+					Message += (sma.total_states_added,)
 				else:
 					Message += (destinationState,)
-		for i in range(sma.nStates):  # Send hardware states (where they are different from default)
+		for i in range(sma.total_states_added):  # Send hardware states (where they are different from default)
 			currentHardwareState = sma.output_matrix[i]
 			nDifferences = len(currentHardwareState)
 			Message += (nDifferences,)
@@ -158,7 +157,7 @@ class Bpod(object):
 				thisHardwareConfig = currentHardwareState[j]
 				Message += (thisHardwareConfig[0],)
 				Message += (thisHardwareConfig[1],)
-		for i in range(sma.nStates):  # Send global timer triggered transitions (where they are different from default)
+		for i in range(sma.total_states_added):  # Send global timer triggered transitions (where they are different from default)
 			currentStateTransitions = sma.global_timers.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -167,11 +166,11 @@ class Bpod(object):
 				Message += (thisTransition[0] - sma.channels.events_positions.globalTimer,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
-					Message += (sma.nStates,)
+					Message += (sma.total_states_added,)
 				else:
 					Message += (destinationState,)
 		for i in range(
-				sma.nStates):  # Send global counter triggered transitions (where they are different from default)
+				sma.total_states_added):  # Send global counter triggered transitions (where they are different from default)
 			currentStateTransitions = sma.global_counters.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -180,10 +179,10 @@ class Bpod(object):
 				Message += (thisTransition[0] - sma.channels.events_positions.globalCounter,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
-					Message += (sma.nStates,)
+					Message += (sma.total_states_added,)
 				else:
 					Message += (destinationState,)
-		for i in range(sma.nStates):  # Send condition triggered transitions (where they are different from default)
+		for i in range(sma.total_states_added):  # Send condition triggered transitions (where they are different from default)
 			currentStateTransitions = sma.conditions.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -192,7 +191,7 @@ class Bpod(object):
 				Message += (thisTransition[0] - sma.channels.events_positions.condition,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
-					Message += (sma.nStates,)
+					Message += (sma.total_states_added,)
 				else:
 					Message += (destinationState,)
 		for i in range(self.hardware.n_global_counters):
@@ -202,7 +201,7 @@ class Bpod(object):
 		for i in range(self.hardware.n_conditions):
 			Message += (sma.conditions.values[i],)
 
-		sma.state_timers = sma.state_timers[:sma.nStates]
+		sma.state_timers = sma.state_timers[:sma.total_states_added]
 
 		ThirtyTwoBitMessage = [i * self.hardware.cycle_frequency for i in sma.state_timers] + \
 		                      [i * self.hardware.cycle_frequency for i in sma.global_timers.timers] + \

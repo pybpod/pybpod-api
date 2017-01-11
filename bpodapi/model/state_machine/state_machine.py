@@ -43,6 +43,7 @@ class StateMachine(object):
 
 		self.state_names = []
 		self.state_timers = [0] * self.hardware.max_states
+		self.total_states_added = 0 # holds all states added, even if name is repeated
 
 		# state change conditions
 		self.state_timer_matrix = [0] * self.hardware.max_states
@@ -66,6 +67,7 @@ class StateMachine(object):
 		:param output_actions:
 		"""
 
+		# TODO: WHY DO WE NEED THIS IF-ELSE?
 		if state_name not in self.manifest:
 			self.state_names.append(state_name)
 			self.manifest.append(state_name)
@@ -103,7 +105,9 @@ class StateMachine(object):
 			else:
 				self.input_matrix[state_name_idx].append((event_code, destination_state_number))
 
-		for action_name, action_value in output_actions.items():
+		for action in output_actions:
+			action_name = action[0]
+			action_value = action[1]
 			if action_name in self.meta_output_names:
 				meta_action = self.meta_output_names.index(action_name)
 				if meta_action == 0:  # Valve
@@ -123,6 +127,8 @@ class StateMachine(object):
 				output_value = action_value
 
 			self.output_matrix[state_name_idx].append((output_code, output_value))
+
+		self.total_states_added +=1
 
 	def set_global_timer(self, timer_number, timer_duration):
 		"""

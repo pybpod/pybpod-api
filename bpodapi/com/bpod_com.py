@@ -131,7 +131,7 @@ class BpodCom(object):
 		logger.debug("Sending state machine: %s", Message)
 		logger.debug("Data to send: %s", ThirtyTwoBitMessage)
 
-		self.arcom.write_uint8_array(Message)
+		self.arcom.write_uint8([ord(BpodProtocol.NEW_STATE_MATRIX)] + Message)
 
 		self.arcom.write_uint32_array(ThirtyTwoBitMessage)
 
