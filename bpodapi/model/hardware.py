@@ -57,6 +57,27 @@ class Hardware(object):
 				self.inputs_enabled[i + 2] = 1
 
 	@property
+	def firmware_version(self):
+		return self._firmware_version
+
+	@firmware_version.setter
+	def firmware_version(self, value):
+		self._firmware_version = value
+
+		if self._firmware_version < 7:
+			self.bpod_version = 5
+		else:
+			self.bpod_version = 7
+
+	@property
+	def bpod_version(self):
+		return self._bpod_version
+
+	@bpod_version.setter
+	def bpod_version(self, value):
+		self._bpod_version = value
+
+	@property
 	def cycle_period(self):
 		return self._cycle_period
 

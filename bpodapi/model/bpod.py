@@ -24,14 +24,12 @@ class Bpod(object):
 
 		:param str serialPortName: serial port name
 		"""
-		self.firmware_version = None
-
 		self.hardware = Hardware()
 
 		# type: StateMachine
 		self.state_machine = StateMachine()
 
-		self.data = []
+		self.data = TrialsData()
 
 		# [Channel,Mode] 255 = no sync, otherwise set to a hardware channel number. Mode 0 = flip logic every trial, 1 = every state
 		self.sync_channel = 255
@@ -57,10 +55,10 @@ class Bpod(object):
 			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
 		# request firmware version
-		self.firmware_version = self.bpod_protocol.firmware_version()
+		self.hardware.firmware_version = self.bpod_protocol.firmware_version()
 		if self.firmware_version < 8:
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
-		logger.info("Firmware version: %s", self.firmware_version)
+		logger.info("Firmware version: %s", self.hardware.firmware_version)
 
 		# request hardware description
 		logger.info("Reading HW description...")
@@ -267,7 +265,7 @@ class Bpod(object):
 				opcode, data = self.bpod_protocol.read_opcode_message()
 				self._process_opcode(opcode, data, raw_events, state_change_indexes, current_state)
 
-		raw_events.trial_start_timestamp = self.bpod_protocol.read_trial_start_timestamp_ms()
+		raw_events.trial_start_timestamp.append(self.bpod_protocol.read_trial_start_timestamp_ms()) # start timestamp of first trial
 		timestamps = self.bpod_protocol.read_timestamps()
 
 		raw_events.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
@@ -277,14 +275,9 @@ class Bpod(object):
 
 		return raw_events
 
-	def addTrialEvents(self, RawEvents):
-		if not hasattr(self.data, 'nTrials'):
-			self.data.nTrials = 0
-			self.data.info = Struct()
-			if self.firmwareVersion < 7:
-				self.data.info.BpodVersion = 5
-			else:
-				self.data.info.BpodVersion = 7
+	def add_trial_events(self):
+
+		if self.data.n_trials == 0:
 			self.data.sessionDateTime = self.stateMachineStartTime
 			self.data.sessionStartTime = str(self.stateMachineStartTime)
 			self.data.trialStartTimestamp = []
@@ -389,14 +382,21 @@ class Bpod(object):
 		"""
 		self.bpod_protocol.disconnect()
 
+class TrialsData(object):
+	def __init__(self):
+		self.n_trials = 0
+		self.session_date_time = None
+		self.session_start_time = None
+		self.raw_data = []
 
-class RawEvents:
+class RawEvents(object):
 	def __init__(self):
 		self.events = []
 		self.event_timestamps = []
 		self.states = [0]
 		self.state_timestamps = [0]
 		self.trial_start_timestamp = 0;
+		self.trials = []
 
 	def __str__(self):
 		data_dict = {'States': self.states,
