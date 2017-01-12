@@ -6,7 +6,6 @@ import math
 from datetime import datetime
 
 from bpodapi.com.bpod_com import BpodCom
-from bpodapi.model.state_machine.state_machine import StateMachine
 from bpodapi.model.hardware import Hardware
 
 from bpodapi.com.serial_containers import HardwareInfoContainer
@@ -25,9 +24,6 @@ class Bpod(object):
 		:param str serialPortName: serial port name
 		"""
 		self.hardware = Hardware()
-
-		# type: StateMachine
-		self.state_machine = StateMachine()
 
 		self.data = TrialsData()
 
@@ -56,7 +52,7 @@ class Bpod(object):
 
 		# request firmware version
 		self.hardware.firmware_version = self.bpod_protocol.firmware_version()
-		if self.firmware_version < 8:
+		if self.hardware.firmware_version < 8:
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
 		logger.info("Firmware version: %s", self.hardware.firmware_version)
 
@@ -80,9 +76,7 @@ class Bpod(object):
 		if not confirmation:
 			raise BpodError('Error: Failed to configure syncronization.')
 
-		self.state_machine.set_up(self.hardware)
-
-	def send_state_machine(self):
+	def send_state_machine(self, sma):
 		"""
 		Replace undeclared states (at the time they were referenced) with actual state numbers
 
@@ -90,8 +84,6 @@ class Bpod(object):
 		:type sma: bpodapi.model.state_machine.state_machine.StateMachine
 		:return:
 		"""
-
-		sma = self.state_machine
 
 		for i in range(len(sma.undeclared)):
 			undeclaredStateNumber = i + 10000
@@ -125,7 +117,7 @@ class Bpod(object):
 				sma.conditions.matrix[j] = inputTransitions
 
 		# Check to make sure all states in manifest exist
-		logger.debug("Total states added: %s | Manifested sates: %s", self.state_machine.total_states_added, len(self.state_machine.manifest))
+		logger.debug("Total states added: %s | Manifested sates: %s", sma.total_states_added, len(sma.manifest))
 		if len(sma.manifest) > sma.total_states_added:
 			raise BpodError(
 				'Error: Could not send state machine - some states were referenced by name, but not subsequently declared.')
@@ -210,7 +202,7 @@ class Bpod(object):
 		if not response:
 			raise BpodError('Error: Failed to send state machine.')
 
-	def _process_opcode(self, opcode, data, raw_events, state_change_indexes, current_state):
+	def _process_opcode(self, sma, opcode, data, raw_events, state_change_indexes, current_state):
 
 		if opcode == 1:  # Read events
 			n_current_events = data
@@ -218,11 +210,11 @@ class Bpod(object):
 			transition_event_found = False
 			for event in current_events:
 				if event == 255:
-					self.state_machine.is_running = False
+					sma.is_running = False
 				else:
 					raw_events.events.append(event)
 					if not transition_event_found:
-						for transition in self.state_machine.input_matrix[current_state]:
+						for transition in sma.input_matrix[current_state]:
 							if transition[0] == event:
 								current_state = transition[1]
 								if not math.isnan(current_state):
@@ -230,8 +222,8 @@ class Bpod(object):
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
 					if not transition_event_found:
-						this_state_timer_transition = self.state_machine.state_timer_matrix[current_state]
-						if event == self.state_machine.channels.events_positions.Tup:
+						this_state_timer_transition = sma.state_timer_matrix[current_state]
+						if event == sma.channels.events_positions.Tup:
 							if not (this_state_timer_transition == current_state):
 								current_state = this_state_timer_transition
 								if not math.isnan(current_state):
@@ -239,7 +231,7 @@ class Bpod(object):
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
 					if not transition_event_found:
-						for transition in self.state_machine.global_timers.matrix[current_state]:
+						for transition in sma.global_timers.matrix[current_state]:
 							if transition[0] == event:
 								current_state = transition[1]
 								if not math.isnan(current_state):
@@ -249,7 +241,7 @@ class Bpod(object):
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
 
-	def run_state_machine(self):
+	def run_state_machine(self, sma):
 		self.stateMachineStartTime = datetime.now()
 
 		raw_events = RawEvents()
@@ -259,11 +251,11 @@ class Bpod(object):
 
 		self.bpod_protocol.run_state_machine()
 
-		self.state_machine.is_running = True
-		while self.state_machine.is_running:
+		sma.is_running = True
+		while sma.is_running:
 			if self.bpod_protocol.data_available():
 				opcode, data = self.bpod_protocol.read_opcode_message()
-				self._process_opcode(opcode, data, raw_events, state_change_indexes, current_state)
+				self._process_opcode(sma, opcode, data, raw_events, state_change_indexes, current_state)
 
 		raw_events.trial_start_timestamp.append(self.bpod_protocol.read_trial_start_timestamp_ms()) # start timestamp of first trial
 		timestamps = self.bpod_protocol.read_timestamps()
@@ -332,14 +324,14 @@ class Bpod(object):
 			setattr(self.data.rawEvents.Trial[self.data.nTrials].Events, thisEventName, thisEventTimestamps)
 		self.data.nTrials += 1
 
-	def manual_override(self, channel_type, channel_name, channel_number, value):
+	def manual_override(self, sma, channel_type, channel_name, channel_number, value):
 		if channel_type.lower() == 'input':
 			raise BpodError('Manually overriding a Bpod input channel is not yet supported in Python.')
 		elif channel_type.lower() == 'output':
 			if channel_name == 'Valve':
 				if value > 0:
 					value = math.pow(2, channel_number - 1)
-					channel_number = self.state_machine.channels.events_positions.output_SPI
+					channel_number = sma.channels.events_positions.output_SPI
 				byteString = (ord('O'), channel_number, value)
 			elif channel_name == 'Serial':
 				byteString = (ord('U'), channel_number, value)
@@ -395,7 +387,7 @@ class RawEvents(object):
 		self.event_timestamps = []
 		self.states = [0]
 		self.state_timestamps = [0]
-		self.trial_start_timestamp = 0;
+		self.trial_start_timestamp = [];
 		self.trials = []
 
 	def __str__(self):

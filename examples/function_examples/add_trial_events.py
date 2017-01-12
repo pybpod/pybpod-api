@@ -6,6 +6,7 @@ import logging
 import random
 
 from bpodapi.model.bpod import Bpod
+from bpodapi.model.state_machine.state_machine import StateMachine
 
 # setup different loggers but output to single file
 loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log', logging.DEBUG)
@@ -32,35 +33,37 @@ for i in range(nTrials):  # Main loop
 		rightAction = 'Reward'
 		rewardValve = 3
 
-	my_bpod.state_machine.add_state(
+	sma = StateMachine(my_bpod.hardware)
+
+	sma.add_state(
 		state_name='WaitForPort2Poke',
 		state_timer=1,
 		state_change_conditions={'Port2In': 'FlashStimulus'},
 		output_actions=[('PWM2', 255)])
-	my_bpod.state_machine.add_state(
+	sma.add_state(
 		state_name='FlashStimulus',
 		state_timer=0.1,
 		state_change_conditions={'Tup': 'WaitForResponse'},
 		output_actions=[(stimulus, 255)])
-	my_bpod.state_machine.add_state(
+	sma.add_state(
 		state_name='WaitForResponse',
 		state_timer=1,
 		state_change_conditions={'Port1In': leftAction, 'Port3In': rightAction},
 		output_actions=[])
-	my_bpod.state_machine.add_state(
+	sma.add_state(
 		state_name='Reward',
 		state_timer=0.1,
 		state_change_conditions={'Tup': 'exit'},
 		output_actions=[('Valve', rewardValve)])  # Reward correct choice
-	my_bpod.state_machine.add_state(
+	sma.add_state(
 		state_name='Punish',
 		state_timer=3,
 		state_change_conditions={'Tup': 'exit'},
 		output_actions=[('LED', 1), ('LED', 2), ('LED', 3)])  # Signal incorrect choice
 
-	my_bpod.send_state_machine()  # Send state machine description to Bpod device
+	my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 
-	raw_events = my_bpod.run_state_machine()  # Run state machine and return events
+	raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
 
 	print(raw_events)  # Print events to console
 

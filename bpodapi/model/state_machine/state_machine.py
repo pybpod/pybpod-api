@@ -29,10 +29,7 @@ class Conditions(object):
 
 
 class StateMachine(object):
-	def __init__(self):
-		pass
-
-	def set_up(self, hardware):
+	def __init__(self, hardware):
 		self.hardware = hardware
 
 		self.channels = StateMachineChannels()
