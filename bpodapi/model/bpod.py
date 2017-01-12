@@ -267,7 +267,7 @@ class Bpod(object):
 
 		return raw_events
 
-	def add_trial_events(self):
+	def add_trial_events(self, ):
 
 		if self.data.n_trials == 0:
 			self.data.sessionDateTime = self.stateMachineStartTime
@@ -373,6 +373,20 @@ class Bpod(object):
 		Close connection with Bpod
 		"""
 		self.bpod_protocol.disconnect()
+
+class Session(object):
+	def __init__(self):
+		self.trials = [] # type: list[Trial]
+		self.firmware_version = None # type: int
+		self.bpod_version = None # type: int
+		self.datetime = None # type: datetime
+
+class Trial(object):
+	def __init__(self):
+		self.bpod_start_timestamp = None # type: float
+		self.events_timestamps = [] # list[float]
+
+
 
 class TrialsData(object):
 	def __init__(self):
