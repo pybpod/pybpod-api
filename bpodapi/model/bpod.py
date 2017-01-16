@@ -25,7 +25,7 @@ class Bpod(object):
 		"""
 		self.hardware = Hardware()
 
-		self.data = TrialsData()
+		self.session = Session()  # type: Session
 
 		# [Channel,Mode] 255 = no sync, otherwise set to a hardware channel number. Mode 0 = flip logic every trial, 1 = every state
 		self.sync_channel = 255
@@ -121,13 +121,14 @@ class Bpod(object):
 		if len(sma.manifest) > sma.total_states_added:
 			raise BpodError(
 				'Error: Could not send state machine - some states were referenced by name, but not subsequently declared.')
-		Message = [len(sma.state_names),]
+		Message = [len(sma.state_names), ]
 		for i in range(sma.total_states_added):  # Send state timer transitions (for all states)
 			if math.isnan(sma.state_timer_matrix[i]):
 				Message += (sma.total_states_added,)
 			else:
 				Message += (sma.state_timer_matrix[i],)
-		for i in range(sma.total_states_added):  # Send event-triggered transitions (where they are different from default)
+		for i in range(
+				sma.total_states_added):  # Send event-triggered transitions (where they are different from default)
 			currentStateTransitions = sma.input_matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -147,7 +148,8 @@ class Bpod(object):
 				thisHardwareConfig = currentHardwareState[j]
 				Message += (thisHardwareConfig[0],)
 				Message += (thisHardwareConfig[1],)
-		for i in range(sma.total_states_added):  # Send global timer triggered transitions (where they are different from default)
+		for i in range(
+				sma.total_states_added):  # Send global timer triggered transitions (where they are different from default)
 			currentStateTransitions = sma.global_timers.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -172,7 +174,8 @@ class Bpod(object):
 					Message += (sma.total_states_added,)
 				else:
 					Message += (destinationState,)
-		for i in range(sma.total_states_added):  # Send condition triggered transitions (where they are different from default)
+		for i in range(
+				sma.total_states_added):  # Send condition triggered transitions (where they are different from default)
 			currentStateTransitions = sma.conditions.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			Message += (nTransitions,)
@@ -257,7 +260,8 @@ class Bpod(object):
 				opcode, data = self.bpod_protocol.read_opcode_message()
 				self._process_opcode(sma, opcode, data, raw_events, state_change_indexes, current_state)
 
-		raw_events.trial_start_timestamp.append(self.bpod_protocol.read_trial_start_timestamp_ms()) # start timestamp of first trial
+		raw_events.trial_start_timestamp.append(
+			self.bpod_protocol.read_trial_start_timestamp_ms())  # start timestamp of first trial
 		timestamps = self.bpod_protocol.read_timestamps()
 
 		raw_events.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
@@ -267,62 +271,62 @@ class Bpod(object):
 
 		return raw_events
 
-	def add_trial_events(self, ):
+	def add_trial_events(self, sma, raw_events):
+		"""
 
-		if self.data.n_trials == 0:
-			self.data.sessionDateTime = self.stateMachineStartTime
-			self.data.sessionStartTime = str(self.stateMachineStartTime)
-			self.data.trialStartTimestamp = []
-			self.data.rawData = []
-			self.data.rawEvents = Struct()
-			self.data.rawEvents.Trial = []
+		:param StateMachine sma:
+		:param RawEvents raw_events:
+		:return:
+		"""
 
-		self.data.rawEvents.Trial.append(Struct())
-		self.data.rawEvents.Trial[self.data.nTrials].Events = Struct()
-		self.data.rawEvents.Trial[self.data.nTrials].States = Struct()
-		self.data.trialStartTimestamp.append(RawEvents.TrialStartTimestamp)
-		self.data.rawData.append(RawEvents)
-		states = RawEvents.States
-		events = RawEvents.Events
-		nStates = len(states)
-		nEvents = len(events)
-		nPossibleStates = self.stateMachine.nStates
+		new_trial = Trial()
+		new_trial.raw_events = raw_events
+		new_trial.bpod_start_timestamp = raw_events.trial_start_timestamp
+
+		nPossibleStates = self.hardware.max_states
+
 		visitedStates = [0] * nPossibleStates
 		# determine unique states while preserving visited order
 		uniqueStates = []
 		nUniqueStates = 0
-		uniqueStateIndexes = [0] * nStates
-		for i in range(nStates):
-			if states[i] in uniqueStates:
-				uniqueStateIndexes[i] = uniqueStates.index(states[i])
+		uniqueStateIndexes = [0] * len(raw_events.states)
+
+		for i in range(len(raw_events.states)):
+			if raw_events.states[i] in uniqueStates:
+				uniqueStateIndexes[i] = uniqueStates.index(raw_events.states[i])
 			else:
 				uniqueStateIndexes[i] = nUniqueStates
 				nUniqueStates += 1
-				uniqueStates.append(states[i])
-				visitedStates[states[i]] = 1
-		uniqueStateDataMatrices = [[] for i in range(nStates)]
+				uniqueStates.append(raw_events.states[i])
+				visitedStates[raw_events.states[i]] = 1
+
 		# Create a 2-d matrix for each state in a list
-		for i in range(nStates):
-			uniqueStateDataMatrices[uniqueStateIndexes[i]] += [
-				(RawEvents.StateTimestamps[i], RawEvents.StateTimestamps[i + 1])]
+		uniqueStateDataMatrices = [[] for i in range(len(raw_events.states))]
+
 		# Append one matrix for each unique state
+		for i in range(len(raw_events.states)):
+			uniqueStateDataMatrices[uniqueStateIndexes[i]] += [
+				(raw_events.state_timestamps[i], raw_events.state_timestamps[i + 1])]
+
 		for i in range(nUniqueStates):
-			thisStateName = self.stateMachine.stateNames[uniqueStates[i]]
-			setattr(self.data.rawEvents.Trial[self.data.nTrials].States, thisStateName, uniqueStateDataMatrices[i])
+			thisStateName = sma.state_names[uniqueStates[i]]
+			new_trial.states_timestamps[thisStateName] = uniqueStateDataMatrices[i]
+
 		for i in range(nPossibleStates):
-			thisStateName = self.stateMachine.stateNames[i]
+			thisStateName = sma.state_names[i]
 			if not visitedStates[i]:
-				setattr(self.data.rawEvents.Trial[self.data.nTrials].States, thisStateName,
-				        [(float('NaN'), float('NaN'))])
-		for i in range(nEvents):
-			thisEvent = events[i]
-			thisEventName = self.stateMachineInfo.eventNames[thisEvent]
-			thisEventIndexes = [j for j, k in enumerate(events) if k == thisEvent]
+				new_trial.states_timestamps[thisStateName] = [(float('NaN'), float('NaN'))]
+
+		for i in range(len(raw_events.events)):
+			thisEvent = raw_events.events[i]
+			thisEventName = sma.channels.event_names[thisEvent]
+			thisEventIndexes = [j for j, k in enumerate(raw_events.events) if k == thisEvent]
 			thisEventTimestamps = []
 			for i in thisEventIndexes:
-				thisEventTimestamps.append(RawEvents.EventTimestamps[i])
-			setattr(self.data.rawEvents.Trial[self.data.nTrials].Events, thisEventName, thisEventTimestamps)
-		self.data.nTrials += 1
+				thisEventTimestamps.append(raw_events.EventTimestamps[i])
+			new_trial.events_timestamps[thisEventName] = thisEventTimestamps
+
+		self.session.append(new_trial)
 
 	def manual_override(self, sma, channel_type, channel_name, channel_number, value):
 		if channel_type.lower() == 'input':
@@ -374,26 +378,22 @@ class Bpod(object):
 		"""
 		self.bpod_protocol.disconnect()
 
+
 class Session(object):
 	def __init__(self):
-		self.trials = [] # type: list[Trial]
-		self.firmware_version = None # type: int
-		self.bpod_version = None # type: int
-		self.datetime = None # type: datetime
+		self.trials = []  # type: list[Trial]
+		self.firmware_version = None  # type: int
+		self.bpod_version = None  # type: int
+		self.datetime = None  # type: datetime
+
 
 class Trial(object):
 	def __init__(self):
-		self.bpod_start_timestamp = None # type: float
-		self.events_timestamps = [] # list[float]
+		self.bpod_start_timestamp = None  # type: float
+		self.raw_events = None  # raw events that come from state machine run
+		self.states_timestamps = {}  # {'Reward': [(429496.7295, 429496.7295)], 'WaitForPort2Poke': [(0, 429496.7295)], 'FlashStimulus': [(429496.7295, 429496.7295)], 'WaitForResponse': [(429496.7295, 429496.7295)], 'Punish': [(nan, nan)]}
+		self.events_timestamps = {}  # {'Tup': [429496.7295, 429496.7295], 'Port3In': [429496.7295, 429496.7295], 'Port2In': [429496.7295, 429496.7295], 'Port2Out': [429496.7295, 429496.7295], 'Port3Out': [429496.7295], 'Port1Out': [429496.7295]}
 
-
-
-class TrialsData(object):
-	def __init__(self):
-		self.n_trials = 0
-		self.session_date_time = None
-		self.session_start_time = None
-		self.raw_data = []
 
 class RawEvents(object):
 	def __init__(self):

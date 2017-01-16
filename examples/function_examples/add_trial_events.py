@@ -67,10 +67,9 @@ for i in range(nTrials):  # Main loop
 
 	print(raw_events)  # Print events to console
 
-	# my_bpod.add_trial_events(sma) # Add trial events to myBpod.data struct, formatted for human readability
+	my_bpod.add_trial_events(sma, raw_events)  # Add trial events to myBpod.data struct, formatted for human readability
 
-	#    print('States: {0}'.format(str(myBpod.data.rawEvents.Trial[i].States.__dict__)
-	#    print 'Events:'
-	#    print myBpod.data.rawEvents.Trial[i].Events.__dict__
+	print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
+	print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
 
 	my_bpod.disconnect()  # Disconnect Bpod
