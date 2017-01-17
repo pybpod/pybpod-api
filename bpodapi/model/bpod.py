@@ -3,12 +3,15 @@
 
 import logging
 import math
-from datetime import datetime
 
 from bpodapi.com.bpod_com import BpodCom
-from bpodapi.model.hardware import Hardware
-
-from bpodapi.com.serial_containers import HardwareInfoContainer
+from bpodapi.com.hardware_info_container import HardwareInfoContainer
+from bpodapi.hardware.hardware import Hardware
+from bpodapi.hardware.channels import ChannelType
+from bpodapi.hardware.channels import ChannelName
+from bpodapi.model.session import Session
+from bpodapi.model.state_machine.state_machine import StateMachine
+from bpodapi.model.trial import Trial
 
 logger = logging.getLogger(__name__)
 
@@ -18,63 +21,74 @@ class Bpod(object):
 	Bpod main class
 	"""
 
-	def __init__(self, serialPortName):
+	#########################################
+	############## PROPERTIES ###############
+	#########################################
+
+	@property
+	def session(self):
+		return self._session  # type: Session
+
+	@session.setter
+	def session(self, value):
+		self._session = value  # type: Session
+
+	@property
+	def hardware(self):
+		return self._hardware  # type: Hardware
+
+	@hardware.setter
+	def hardware(self, value):
+		self._hardware = value  # type: Hardware
+
+	#########################################
+	############ PUBLIC METHODS #############
+	#########################################
+
+	def start(self, serial_port, baudrate=115200, sync_channel=255, sync_mode=1):
+		"""
+		Starts Bpod.
+
+		Connect to Bpod board through serial port, test handshake, retrieve firmware version,
+		retrieve hardware description, enable input ports and configure channel synchronization.
+
+		:param str serial_port: serial port to connect
+		:param int baudrate: baudrate for serial connection
+		:param int sync_channel: Serial synchronization channel: 255 = no sync, otherwise set to a hardware channel number
+		:param int sync_mode: Serial synchronization mode: 0 = flip logic every trial, 1 = every state
+		:return: reference to Bpod class
+		:return type: Bpod
 		"""
 
-		:param str serialPortName: serial port name
-		"""
-		self.hardware = Hardware()
-
+		self.hardware = Hardware()  # type: Hardware
 		self.session = Session()  # type: Session
+		self.bpod_protocol = BpodCom()  # type: BpodCom
 
-		# [Channel,Mode] 255 = no sync, otherwise set to a hardware channel number. Mode 0 = flip logic every trial, 1 = every state
-		self.sync_channel = 255
-		self.sync_mode = 1
+		self.bpod_protocol.connect(serial_port, baudrate)
 
-		self.bpod_protocol = BpodCom()
-
-		self.start(serialPortName)
-
-	def start(self, serial_port):
-		"""
-		Connect to bpod using serial port
-
-		:param str serial_port:
-		:return:
-		"""
-
-		self.bpod_protocol.connect(serial_port)
-
-		# request handshake
-		response = self.bpod_protocol.handshake()
-		if response != '5':
+		if not self.bpod_protocol.handshake():
 			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
-		# request firmware version
 		self.hardware.firmware_version = self.bpod_protocol.firmware_version()
 		if self.hardware.firmware_version < 8:
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
-		logger.info("Firmware version: %s", self.hardware.firmware_version)
 
-		# request hardware description
-		logger.info("Reading HW description...")
 		hw_info = HardwareInfoContainer()
+		hw_info.sync_channel = sync_channel
+		hw_info.sync_mode = sync_mode
 		self.bpod_protocol.hardware_description(hw_info)
-
 		self.hardware.set_up(hw_info)
 
-		# request ports enabling
-		logger.info("Enabling ports...")
-		response = self.bpod_protocol.enable_ports(self.hardware.inputs_enabled)
-		if not response:
+		if not self.bpod_protocol.enable_ports(self.hardware.inputs_enabled):
 			raise BpodError('Error: Failed to enable Bpod inputs.')
 
-		# request sync channel and mode configuration
-		logger.info("Setting sync channel and mode...")
-		confirmation = self.bpod_protocol.set_sync_channel_and_mode(sync_channel=self.sync_channel,
-		                                                            sync_mode=self.sync_mode)
-		if not confirmation:
+		if not self.bpod_protocol.set_sync_channel_and_mode(sync_channel=sync_channel,
+		                                                    sync_mode=sync_mode):
 			raise BpodError('Error: Failed to configure syncronization.')
+
+		logger.info("Bpod successfully started!")
+
+		return self
 
 	def send_state_machine(self, sma):
 		"""
@@ -205,7 +219,111 @@ class Bpod(object):
 		if not response:
 			raise BpodError('Error: Failed to send state machine.')
 
-	def _process_opcode(self, sma, opcode, data, raw_events, state_change_indexes, current_state):
+	def run_state_machine(self, sma):
+
+		self.session.add_trial(sma)
+
+		state_change_indexes = []
+
+		current_state = 0
+
+		self.bpod_protocol.run_state_machine()
+
+		sma.is_running = True
+		while sma.is_running:
+			if self.bpod_protocol.data_available():
+				opcode, data = self.bpod_protocol.read_opcode_message()
+				self.__process_opcode(sma, opcode, data, state_change_indexes, current_state)
+
+		sma.raw_data.trial_start_timestamp.append(
+			self.bpod_protocol.read_trial_start_timestamp_ms())  # start timestamp of first trial
+		timestamps = self.bpod_protocol.read_timestamps()
+
+		sma.raw_data.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
+		logger.debug("state_change_indexes: %s", state_change_indexes)
+		for i in range(len(state_change_indexes)):
+			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
+			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
+
+		return sma.raw_data
+
+	def add_trial_events(self):
+		"""
+
+		:param StateMachine sma: state machine associated with this trial
+		:param raw_events:
+		"""
+
+		self.session.add_trial_events()
+
+	def manual_override(self, channel_type, channel_name, channel_number, value):
+		"""
+		Manually override a Bpod channel
+
+		:param ChannelType channel_type: channel type input or output
+		:param ChannelName channel_name: channel name like PWM, Valve, etc.
+		:param channel_number:
+		:param int value: value to write on channel
+		"""
+		if channel_type == ChannelType.INPUT:
+			raise BpodError('Manually overriding a Bpod input channel is not yet supported in Python.')
+		elif channel_type == ChannelType.OUTPUT:
+			if channel_name == ChannelName.VALVE:
+				if value > 0:
+					value = math.pow(2, channel_number - 1)
+				channel_number = self.hardware.channels.events_positions.output_SPI
+				self.bpod_protocol.override_digital_hardware_state(channel_number, value)
+			elif channel_name == 'Serial':
+				self.bpod_protocol.send_byte_to_hardware_serial(channel_number, value)
+			else:
+				try:
+					channel_number = self.hardware.channels.output_channel_names.index(
+						channel_name + str(channel_number))
+					self.bpod_protocol.override_digital_hardware_state(channel_number, value)
+				except:
+					raise BpodError('Error using manual_override: ' + channel_name + ' is not a valid channel name.')
+		else:
+			raise BpodError('Error using manualOverride: first argument must be "Input" or "Output".')
+
+	def load_serial_message(self, serial_channel, message_ID, message):
+
+		n_messages = 1
+
+		if len(message) > 3:
+			raise BpodError('Error: Serial messages cannot be more than 3 bytes in length.')
+
+		if message_ID > 255 or message_ID < 1:
+			raise BpodError('Error: Bpod can only store 255 serial messages (indexed 1-255).')
+
+		message_container = [serial_channel - 1, n_messages, message_ID, len(message)] + message
+
+		response = self.bpod_protocol.load_serial_message(message_container);
+
+		if not response:
+			raise BpodError('Error: Failed to set serial message.')
+
+	def reset_serial_messages(self):
+		"""
+		Reset serial messages to equivalent byte codes (i.e. message# 4 = one byte, 0x4)
+		"""
+		response = self.bpod_protocol.reset_serial_messages()
+
+		if not response:
+			raise BpodError('Error: Failed to reset serial message library.')
+
+	def disconnect(self):
+		"""
+		Close connection with Bpod
+		"""
+		self.bpod_protocol.disconnect()
+
+	#########################################
+	############ PRIVATE METHODS ############
+	#########################################
+
+	def __process_opcode(self, sma, opcode, data, state_change_indexes, current_state):
+
+		raw_events = sma.raw_data  # legacy fix
 
 		if opcode == 1:  # Read events
 			n_current_events = data
@@ -243,175 +361,6 @@ class Bpod(object):
 								transition_event_found = True
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
-
-	def run_state_machine(self, sma):
-		self.stateMachineStartTime = datetime.now()
-
-		raw_events = RawEvents()
-		state_change_indexes = []
-
-		current_state = 0
-
-		self.bpod_protocol.run_state_machine()
-
-		sma.is_running = True
-		while sma.is_running:
-			if self.bpod_protocol.data_available():
-				opcode, data = self.bpod_protocol.read_opcode_message()
-				self._process_opcode(sma, opcode, data, raw_events, state_change_indexes, current_state)
-
-		raw_events.trial_start_timestamp.append(
-			self.bpod_protocol.read_trial_start_timestamp_ms())  # start timestamp of first trial
-		timestamps = self.bpod_protocol.read_timestamps()
-
-		raw_events.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
-		for state_change_idx in state_change_indexes:
-			raw_events.state_timestamps.append(raw_events.event_timestamps[state_change_idx])
-		raw_events.state_timestamps.append(raw_events.event_timestamps[-1])
-
-		return raw_events
-
-	def add_trial_events(self, sma, raw_events):
-		"""
-
-		:param StateMachine sma:
-		:param RawEvents raw_events:
-		:return:
-		"""
-
-		new_trial = Trial()
-		new_trial.raw_events = raw_events
-		new_trial.bpod_start_timestamp = raw_events.trial_start_timestamp
-
-		nPossibleStates = self.hardware.max_states
-
-		visitedStates = [0] * nPossibleStates
-		# determine unique states while preserving visited order
-		uniqueStates = []
-		nUniqueStates = 0
-		uniqueStateIndexes = [0] * len(raw_events.states)
-
-		for i in range(len(raw_events.states)):
-			if raw_events.states[i] in uniqueStates:
-				uniqueStateIndexes[i] = uniqueStates.index(raw_events.states[i])
-			else:
-				uniqueStateIndexes[i] = nUniqueStates
-				nUniqueStates += 1
-				uniqueStates.append(raw_events.states[i])
-				visitedStates[raw_events.states[i]] = 1
-
-		# Create a 2-d matrix for each state in a list
-		uniqueStateDataMatrices = [[] for i in range(len(raw_events.states))]
-
-		# Append one matrix for each unique state
-		for i in range(len(raw_events.states)):
-			uniqueStateDataMatrices[uniqueStateIndexes[i]] += [
-				(raw_events.state_timestamps[i], raw_events.state_timestamps[i + 1])]
-
-		for i in range(nUniqueStates):
-			thisStateName = sma.state_names[uniqueStates[i]]
-			new_trial.states_timestamps[thisStateName] = uniqueStateDataMatrices[i]
-
-		for i in range(nPossibleStates):
-			thisStateName = sma.state_names[i]
-			if not visitedStates[i]:
-				new_trial.states_timestamps[thisStateName] = [(float('NaN'), float('NaN'))]
-
-		for i in range(len(raw_events.events)):
-			thisEvent = raw_events.events[i]
-			thisEventName = sma.channels.event_names[thisEvent]
-			thisEventIndexes = [j for j, k in enumerate(raw_events.events) if k == thisEvent]
-			thisEventTimestamps = []
-			for i in thisEventIndexes:
-				thisEventTimestamps.append(raw_events.EventTimestamps[i])
-			new_trial.events_timestamps[thisEventName] = thisEventTimestamps
-
-		self.session.append(new_trial)
-
-	def manual_override(self, sma, channel_type, channel_name, channel_number, value):
-		if channel_type.lower() == 'input':
-			raise BpodError('Manually overriding a Bpod input channel is not yet supported in Python.')
-		elif channel_type.lower() == 'output':
-			if channel_name == 'Valve':
-				if value > 0:
-					value = math.pow(2, channel_number - 1)
-					channel_number = sma.channels.events_positions.output_SPI
-				byteString = (ord('O'), channel_number, value)
-			elif channel_name == 'Serial':
-				byteString = (ord('U'), channel_number, value)
-			else:
-				try:
-					channel_number = self.stateMachineInfo.outputChannelNames.index(channel_name + str(channel_number))
-					byteString = (ord('O'), channel_number, value)
-				except:
-					raise BpodError('Error using manualOverride: ' + channel_name + ' is not a valid channel name.')
-			self.serialObject.write(byteString, 'uint8')
-		else:
-			raise BpodError('Error using manualOverride: first argument must be "Input" or "Output".')
-
-	def load_serial_message(self, serial_channel, message_ID, message):
-		nMessages = 1
-
-		if len(message) > 3:
-			raise BpodError('Error: Serial messages cannot be more than 3 bytes in length.')
-
-		if message_ID > 255 or message_ID < 1:
-			raise BpodError('Error: Bpod can only store 255 serial messages (indexed 1-255).')
-
-		message_container = (serial_channel - 1, nMessages, message_ID, len(message), message)
-
-		response = self.bpod_protocol.load_serial_message(message_container);
-		if not response:
-			raise BpodError('Error: Failed to set serial message.')
-
-	def reset_serial_messages(self):
-		"""
-		Reset serial messages
-		"""
-		response = self.reset_serial_messages()
-		if not response:
-			raise BpodError('Error: Failed to reset serial message library.')
-
-	def disconnect(self):
-		"""
-		Close connection with Bpod
-		"""
-		self.bpod_protocol.disconnect()
-
-
-class Session(object):
-	def __init__(self):
-		self.trials = []  # type: list[Trial]
-		self.firmware_version = None  # type: int
-		self.bpod_version = None  # type: int
-		self.datetime = None  # type: datetime
-
-
-class Trial(object):
-	def __init__(self):
-		self.bpod_start_timestamp = None  # type: float
-		self.raw_events = None  # raw events that come from state machine run
-		self.states_timestamps = {}  # {'Reward': [(429496.7295, 429496.7295)], 'WaitForPort2Poke': [(0, 429496.7295)], 'FlashStimulus': [(429496.7295, 429496.7295)], 'WaitForResponse': [(429496.7295, 429496.7295)], 'Punish': [(nan, nan)]}
-		self.events_timestamps = {}  # {'Tup': [429496.7295, 429496.7295], 'Port3In': [429496.7295, 429496.7295], 'Port2In': [429496.7295, 429496.7295], 'Port2Out': [429496.7295, 429496.7295], 'Port3Out': [429496.7295], 'Port1Out': [429496.7295]}
-
-
-class RawEvents(object):
-	def __init__(self):
-		self.events = []
-		self.event_timestamps = []
-		self.states = [0]
-		self.state_timestamps = [0]
-		self.trial_start_timestamp = [];
-		self.trials = []
-
-	def __str__(self):
-		data_dict = {'States': self.states,
-		             'TrialStartTimestamp': self.trial_start_timestamp,
-		             'EventTimestamps': self.event_timestamps,
-		             'Events': self.events,
-		             'StateTimestamps': self.state_timestamps}
-
-		return str(data_dict)
 
 
 class BpodError(Exception):

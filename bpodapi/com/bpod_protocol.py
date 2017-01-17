@@ -16,4 +16,9 @@ class BpodProtocol(object):
 	RUN_STATE_MACHINE = 'R'
 	LOAD_SERIAL_MESSAGE = 'L'
 	RESET_SERIAL_MESSAGES = '>'
+	OVERRIDE_DIGITAL_HW_STATE = 'O'
+	SEND_TO_HW_SERIAL = 'U'
 	DISCONNECT = 'Z'
+
+class BpodProtocolReceive(object):
+	HANDSHAKE_OK = '5'

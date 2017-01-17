@@ -1,11 +1,12 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import loggingbootstrap
 import logging
 
+import loggingbootstrap
+
 from bpodapi.model.bpod import Bpod
-from bpodapi.model.state_machine.state_machine import StateMachine
+from bpodapi.model.state_machine import StateMachine
 
 # setup different loggers but output to single file
 loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log', logging.DEBUG)

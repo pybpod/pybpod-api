@@ -5,6 +5,7 @@ import logging
 
 from bpodapi.com.arcom import ArCOM
 from bpodapi.com.bpod_protocol import BpodProtocol
+from bpodapi.com.bpod_protocol import BpodProtocolReceive
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,13 @@ class BpodCom(object):
 		self.arcom = None
 
 	def connect(self, serial_port, baudrate=115200):
-		self.arcom = ArCOM()
-		self.arcom.open(serial_port, baudrate)
+		"""
+		Connect to Bpod using serial connection
+		:param str serial_port: serial port to connect
+		:param int baudrate: baudrate for serial connection
+		"""
+		logger.debug("Connecting on port: %s", serial_port)
+		self.arcom = ArCOM().open(serial_port, baudrate)
 
 	def handshake(self):
 		"""
@@ -36,27 +42,27 @@ class BpodCom(object):
 
 		logger.debug("Response command is: %s", response)
 
-		return response
+		return True if response == BpodProtocolReceive.HANDSHAKE_OK else False
 
 	def firmware_version(self):
 		"""
 		Request firmware version from Bpod
 		:return:
 		"""
-		logger.debug("Requesting firmware version: %s", BpodProtocol.FIRMWARE_VERSION)
+		logger.debug("Requesting firmware version (%s)", BpodProtocol.FIRMWARE_VERSION)
 
 		self.arcom.write_char(BpodProtocol.FIRMWARE_VERSION)
 
 		response = self.arcom.read_uint32()  # Receive response
 
-		logger.debug("FW version: %s", response)
+		logger.debug("Firmware version: %s", response)
 
 		return response
 
 	def hardware_description(self, hardware_info):
 		"""
 		Request hardware description from Bpod
-		:type hardware_info: bpodapi.com.serial_containers.HardwareInfoContainer
+		:type hardware_info: bpodapi.com.hardware_info_container.HardwareInfoContainer
 		:param hardware_info: empty container to be filled with serial data
 		"""
 		logger.debug("Requesting hardware description (%s)...", BpodProtocol.HARDWARE_DESCRIPTION)
@@ -110,7 +116,13 @@ class BpodCom(object):
 		return response
 
 	def set_sync_channel_and_mode(self, sync_channel, sync_mode):
-		logger.debug("Requesting sync configuration (%s)", BpodProtocol.SYNC_CHANNEL_MODE)
+		"""
+		Request sync channel and mode configuration
+		:param sync_channel:
+		:param sync_mode:
+		:return:
+		"""
+		logger.debug("Requesting sync channel and mode (%s)", BpodProtocol.SYNC_CHANNEL_MODE)
 
 		self.arcom.write_uint8_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), sync_channel, sync_mode])
 
@@ -154,7 +166,7 @@ class BpodCom(object):
 		opcode = response[0]
 		data = response[1]
 
-		logger.debug("Read opcode message: opcode=%s, data=%s", opcode, data)
+		# logger.debug("Read opcode message: opcode=%s, data=%s", opcode, data)
 
 		return opcode, data
 
@@ -175,14 +187,14 @@ class BpodCom(object):
 	def read_current_events(self, n_events):
 		current_events = self.arcom.read_uint8_array(array_len=n_events)
 
-		logger.debug("Read current events: %s", current_events)
+		# logger.debug("Read current events: %s", current_events)
 
 		return current_events
 
 	def load_serial_message(self, message):
 		logger.debug("Requesting load serial message (%s)", BpodProtocol.LOAD_SERIAL_MESSAGE)
-
-		self.arcom.write_uint8_array([ord(BpodProtocol.SYNC_CHANNEL_MODE), message])
+		logger.debug("Message: %s", message)
+		self.arcom.write_uint8_array([ord(BpodProtocol.LOAD_SERIAL_MESSAGE)] + message)
 
 		response = self.arcom.read_uint8()
 
@@ -200,6 +212,26 @@ class BpodCom(object):
 		logger.debug("Confirmation: %s", response)
 
 		return response
+
+	def override_digital_hardware_state(self, channel_number, value):
+		"""
+		Set digital value on channel
+		:param int channel_number:
+		:param int value:
+		:return:
+		"""
+
+		self.arcom.write_uint8_array([ord(BpodProtocol.OVERRIDE_DIGITAL_HW_STATE), channel_number, value])
+
+	def send_byte_to_hardware_serial(self, channel_number, value):
+		"""
+		Recieve byte from USB and send to hardware serial channel 1-3
+		:param int channel_number:
+		:param int value:
+		:return:
+		"""
+
+		self.arcom.write_uint8_array([ord(BpodProtocol.SEND_TO_HW_SERIAL), channel_number, value])
 
 	def disconnect(self):
 		logger.debug("Requesting disconnect (%s)", BpodProtocol.DISCONNECT)

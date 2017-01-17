@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import math
+
+from bpodapi.hardware.channels import Channels
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class Hardware(object):
 		"""
 
 		:param hw_info_container:
-		:type hw_info_container: bpodapi.com.serial_containers.HardwareInfoContainer
+		:type hw_info_container: bpodapi.com.hardware_info_container.HardwareInfoContainer
 		:return:
 		"""
 		self.max_states = hw_info_container.max_states
@@ -30,9 +31,18 @@ class Hardware(object):
 		self.inputs = hw_info_container.inputs
 		self.outputs = hw_info_container.outputs + ['G', 'G', 'G']  # nOutputChannels
 
+		self.sync_channel = hw_info_container.sync_channel
+		self.sync_mode = hw_info_container.sync_mode
+
 		self.n_uart_channels = len([idx for idx in self.inputs if idx == 'U'])
 
 		self._configure_inputs()
+
+		self.channels = Channels()  # type: Channels
+		self.channels.set_up_input_channels(self)
+		self.channels.set_up_output_channels(self.outputs)
+
+		logger.debug(self.channels)
 
 		logger.debug(str(self))
 

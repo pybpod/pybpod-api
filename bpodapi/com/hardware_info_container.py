@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class HardwareInfoContainer(object):
 	"""
-	Temporarily store information read from serial
+	Temporarily store hardware information read from Bpod
 	"""
 
 	def __init__(self):
@@ -22,3 +22,5 @@ class HardwareInfoContainer(object):
 		self.inputs = None
 		self.n_outputs = None
 		self.outputs = None
+		self.sync_channel = None # type: int
+		self.sync_mode = None # type: int

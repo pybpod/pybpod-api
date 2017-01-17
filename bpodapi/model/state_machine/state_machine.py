@@ -3,44 +3,28 @@
 
 import logging
 import math
-from bpodapi.model.state_machine.channels import StateMachineChannels
+from bpodapi.hardware.hardware import Hardware
+from bpodapi.model.state_machine.conditions import Conditions
+from bpodapi.model.state_machine.global_counters import GlobalCounters
+from bpodapi.model.state_machine.global_timers import GlobalTimers
+from bpodapi.model.state_machine.raw_data import RawData
 
 logger = logging.getLogger(__name__)
 
 
-class GlobalTimers(object):
-	def __init__(self, max_states, n_global_timers):
-		self.matrix = [[] for i in range(max_states)]
-		self.timers = [0] * n_global_timers
-
-
-class GlobalCounters(object):
-	def __init__(self, max_states, n_global_counters):
-		self.matrix = [[] for i in range(max_states)]
-		self.attached_events = [254] * n_global_counters
-		self.thresholds = [0] * n_global_counters
-
-
-class Conditions(object):
-	def __init__(self, max_states, n_conditions):
-		self.matrix = [[] for i in range(max_states)]
-		self.values = [0] * n_conditions
-		self.channels = [0] * n_conditions
-
-
 class StateMachine(object):
 	def __init__(self, hardware):
-		self.hardware = hardware
+		"""
 
-		self.channels = StateMachineChannels()
-		self.channels.set_up_input_channels(self.hardware)
-		self.channels.set_up_output_channels(self.hardware.outputs)
+		:param Hardware hardware:
+		"""
+		self.hardware = hardware  # type: Hardware
 
-		logger.debug(self.channels)
+		self.channels = hardware.channels  # TODO: temporary fix, this is not needed
 
 		self.state_names = []
 		self.state_timers = [0] * self.hardware.max_states
-		self.total_states_added = 0 # holds all states added, even if name is repeated
+		self.total_states_added = 0  # holds all states added, even if name is repeated
 
 		# state change conditions
 		self.state_timer_matrix = [0] * self.hardware.max_states
@@ -54,6 +38,8 @@ class StateMachine(object):
 		# output actions
 		self.meta_output_names = ('Valve', 'LED')
 		self.output_matrix = [[] for i in range(self.hardware.max_states)]
+
+		self.raw_data = RawData()
 
 	def add_state(self, state_name, state_timer, state_change_conditions={}, output_actions=()):
 		"""
@@ -125,7 +111,7 @@ class StateMachine(object):
 
 			self.output_matrix[state_name_idx].append((output_code, output_value))
 
-		self.total_states_added +=1
+		self.total_states_added += 1
 
 	def set_global_timer(self, timer_number, timer_duration):
 		"""

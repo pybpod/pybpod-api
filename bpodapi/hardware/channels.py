@@ -5,12 +5,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+class ChannelType(object):
+	INPUT = 1
+	OUTPUT = 2
+
+class ChannelName(object):
+	PWM = 'PWM'
+	VALVE = 'Valve'
+	BNC = 'BNC'
+	WIRE = 'Wire'
+	SERIAL = 'Serial'
+
 
 class EventsPositions(object):
 	pass
 
 
-class StateMachineChannels(object):
+class Channels(object):
 	"""
 	Bpod main class
 	"""

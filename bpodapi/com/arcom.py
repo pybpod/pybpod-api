@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import struct
-import sys
 import serial
 import numpy as np
 
@@ -37,6 +35,8 @@ class ArCOM(object):
 		:return:
 		"""
 		self.serial_object = serial.Serial(serialPortName, baudRate, timeout=1)
+
+		return self
 
 	def close(self):
 		"""
@@ -80,19 +80,19 @@ class ArCOM(object):
 
 	def read_uint8(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.UINT8.size)
-		logger.debug("Read %s bytes: %s", ArduinoTypes.UINT8.size, message_bytes)
+		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT8.size, message_bytes)
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 
 	def read_uint16(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.UINT16.size)
-		logger.debug("Read %s bytes: %s", ArduinoTypes.UINT16.size, message_bytes)
+		#logger.debug("Read %s bytes: %s", ArduinoTypes.UINT16.size, message_bytes)
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 
 	def read_uint32(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.UINT32.size)
-		logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
+		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 

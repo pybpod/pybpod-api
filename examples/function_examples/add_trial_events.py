@@ -1,9 +1,10 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import loggingbootstrap
 import logging
 import random
+
+import loggingbootstrap
 
 from bpodapi.model.bpod import Bpod
 from bpodapi.model.state_machine.state_machine import StateMachine
@@ -14,13 +15,13 @@ loggingbootstrap.create_double_logger("add_trial_events", logging.DEBUG, 'bpodap
 
 logger = logging.getLogger("add_trial_events")
 
-my_bpod = Bpod('/dev/tty.usbmodem1461')  # Create a new instance of a Bpod object on serial port COM13
+my_bpod = Bpod().start('/dev/tty.usbmodem1461')  # Create a new instance of a Bpod object on serial port COM13
 
 nTrials = 5
 trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
 
 for i in range(nTrials):  # Main loop
-	logger.info('Trial: %s', str(i))
+	print('Trial: ', i+1)
 	thisTrialType = random.choice(trialTypes)  # Randomly choose trial type =
 	if thisTrialType == 1:
 		stimulus = 'PWM1'  # set stimulus channel for trial type 1
@@ -65,11 +66,11 @@ for i in range(nTrials):  # Main loop
 
 	raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
 
-	print(raw_events)  # Print events to console
+	# print("Raw events: ", raw_events)  # Print events to console
 
-	my_bpod.add_trial_events(sma, raw_events)  # Add trial events to myBpod.data struct, formatted for human readability
+	my_bpod.add_trial_events()  # Add trial events to myBpod.data struct, formatted for human readability
 
-	print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
-	print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
+	# print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
+	# print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
 
-	my_bpod.disconnect()  # Disconnect Bpod
+my_bpod.disconnect()  # Disconnect Bpod
