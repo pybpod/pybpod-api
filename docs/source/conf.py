@@ -61,7 +61,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pybpod-api'
-copyright = '2017, Carlos Mão de Ferro'
+copyright = '2017, CF Scientific Software Platform'
 author = 'Carlos Mão de Ferro'
 
 # The version info for the project you're documenting, acts as replacement for
