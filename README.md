@@ -19,7 +19,7 @@ We typical work on computer vision / tracking, behavioral experiments, image reg
 All examples and Bpod's state machine and communication logic were based on the original version made available by [Josh Sanders](https://github.com/sanworks).
 
 ## License
-This is Open Source software. We use the MIT license, which provides almost no restrictions on the use of the code.
+This is Open Source software. We use the `GNU General Public License version 3 <https://www.gnu.org/licenses/gpl.html>`_.
 
 ## Running examples
 
