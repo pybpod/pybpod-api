@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class StateMachine(object):
+	"""
+	State Machine for Bpod
+	"""
 	def __init__(self, hardware):
 		"""
 
@@ -43,6 +46,7 @@ class StateMachine(object):
 
 	def add_state(self, state_name, state_timer, state_change_conditions={}, output_actions=()):
 		"""
+		Add new state
 
 		:param name:
 		:param timer:
