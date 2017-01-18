@@ -10,7 +10,7 @@ Bpod
 Overview
 ========
 
-The BoardTask aggregates information from a board, a task and a setup (a.k.a. subject).
+TODO
 
 Implementation
 ==============
