@@ -3,7 +3,7 @@
 
 import logging
 
-from bpodapi.hardware.channels import Channels
+from pybpodapi.hardware.channels import Channels
 
 logger = logging.getLogger(__name__)
 

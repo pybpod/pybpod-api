@@ -4,14 +4,14 @@
 import logging
 import math
 
-from bpodapi.com.bpod_com import BpodCom
-from bpodapi.com.hardware_info_container import HardwareInfoContainer
-from bpodapi.hardware.hardware import Hardware
-from bpodapi.hardware.channels import ChannelType
-from bpodapi.hardware.channels import ChannelName
-from bpodapi.model.session import Session
-from bpodapi.model.state_machine.state_machine import StateMachine
-from bpodapi.model.trial import Trial
+from pybpodapi.com.bpod_com import BpodCom
+from pybpodapi.com.hardware_info_container import HardwareInfoContainer
+from pybpodapi.hardware.hardware import Hardware
+from pybpodapi.hardware.channels import ChannelType
+from pybpodapi.hardware.channels import ChannelName
+from pybpodapi.model.session import Session
+from pybpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.trial import Trial
 
 logger = logging.getLogger(__name__)
 

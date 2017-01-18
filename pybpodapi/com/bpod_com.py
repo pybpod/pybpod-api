@@ -3,9 +3,9 @@
 
 import logging
 
-from bpodapi.com.arcom import ArCOM
-from bpodapi.com.bpod_protocol import BpodProtocol
-from bpodapi.com.bpod_protocol import BpodProtocolReceive
+from pybpodapi.com.arcom import ArCOM
+from pybpodapi.com.bpod_protocol import BpodProtocol
+from pybpodapi.com.bpod_protocol import BpodProtocolReceive
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class BpodCom(object):
 	"""
 
 	def __init__(self):
-		# type arcom: bpodapi.com.arcom.ArCOM
+		# type arcom: pybpodapi.com.arcom.ArCOM
 		self.arcom = None
 
 	def connect(self, serial_port, baudrate=115200):

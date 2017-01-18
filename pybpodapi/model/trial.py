@@ -3,7 +3,7 @@
 
 import logging
 
-from bpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.state_machine.state_machine import StateMachine
 
 logger = logging.getLogger(__name__)
 

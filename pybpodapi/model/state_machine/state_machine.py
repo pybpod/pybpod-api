@@ -3,11 +3,11 @@
 
 import logging
 import math
-from bpodapi.hardware.hardware import Hardware
-from bpodapi.model.state_machine.conditions import Conditions
-from bpodapi.model.state_machine.global_counters import GlobalCounters
-from bpodapi.model.state_machine.global_timers import GlobalTimers
-from bpodapi.model.state_machine.raw_data import RawData
+from pybpodapi.hardware.hardware import Hardware
+from pybpodapi.model.state_machine.conditions import Conditions
+from pybpodapi.model.state_machine.global_counters import GlobalCounters
+from pybpodapi.model.state_machine.global_timers import GlobalTimers
+from pybpodapi.model.state_machine.raw_data import RawData
 
 logger = logging.getLogger(__name__)
 

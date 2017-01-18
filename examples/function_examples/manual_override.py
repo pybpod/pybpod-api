@@ -22,13 +22,13 @@ import time
 import loggingbootstrap
 import logging
 
-from bpodapi.model.bpod import Bpod
-from bpodapi.hardware.channels import ChannelType
-from bpodapi.hardware.channels import ChannelName
+from pybpodapi.model.bpod import Bpod
+from pybpodapi.hardware.channels import ChannelType
+from pybpodapi.hardware.channels import ChannelName
 
 # setup different loggers but output to single file
-loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log', logging.DEBUG)
-loggingbootstrap.create_double_logger("add_trial_events", logging.DEBUG, 'bpodapi.log', logging.DEBUG)
+loggingbootstrap.create_double_logger("pybpodapi", logging.DEBUG, 'pybpodapi.log', logging.DEBUG)
+loggingbootstrap.create_double_logger("add_trial_events", logging.DEBUG, 'pybpodapi.log', logging.DEBUG)
 
 logger = logging.getLogger("add_trial_events")
 

@@ -6,12 +6,12 @@ import random
 
 import loggingbootstrap
 
-from bpodapi.model.bpod import Bpod
-from bpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.bpod import Bpod
+from pybpodapi.model.state_machine.state_machine import StateMachine
 
 # setup different loggers but output to single file
-loggingbootstrap.create_double_logger("bpodapi", logging.DEBUG, 'bpodapi.log', logging.DEBUG)
-loggingbootstrap.create_double_logger("add_trial_events", logging.DEBUG, 'bpodapi.log', logging.DEBUG)
+loggingbootstrap.create_double_logger("pybpodapi", logging.DEBUG, 'pybpodapi.log', logging.DEBUG)
+loggingbootstrap.create_double_logger("add_trial_events", logging.DEBUG, 'pybpodapi.log', logging.DEBUG)
 
 logger = logging.getLogger("add_trial_events")
 

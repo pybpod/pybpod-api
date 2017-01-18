@@ -4,8 +4,8 @@
 import logging
 from datetime import datetime
 
-from bpodapi.model.state_machine.state_machine import StateMachine
-from bpodapi.model.trial import Trial
+from pybpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.trial import Trial
 
 logger = logging.getLogger(__name__)
 

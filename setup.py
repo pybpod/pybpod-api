@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 import re
 
 version = ''
-with open('bpodapi/__init__.py', 'r') as fd: version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+with open('pybpodapi/__init__.py', 'r') as fd: version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                                                                       fd.read(), re.MULTILINE).group(1)
 if not version:
 	raise RuntimeError('Cannot find version information')
@@ -16,7 +16,7 @@ requirements = [
 ]
 
 setup(
-	name='pycontrol-gui',
+	name='pybpod-api',
 	version=version,
 	description="""BPod Python API""",
 	author=['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro'],
