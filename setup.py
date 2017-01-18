@@ -21,7 +21,7 @@ setup(
 	description="""BPod Python API""",
 	author=['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro'],
 	author_email=['joshua21@gmail.com', 'cajomferro@gmail.com', 'ricardojvr@gmail.com'],
-	license='The MIT License (MIT) Copyright 2017 Champalimaud Foundation',
+	license='Copyright (C) 2007 Free Software Foundation, Inc.<http://fsf.org/>',
 	url='https://bitbucket.org/fchampalimaud/pybpod-api',
 	include_package_data=True,
 	packages=find_packages(exclude=['contrib', 'docs', 'tests', 'examples', 'deploy', 'reports']),

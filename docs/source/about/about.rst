@@ -1,9 +1,9 @@
+*****
 About
-=============
+*****
 
 The SWP Team
-------------
-
+============
 
 .. image:: /_images/fc_logo.jpg
 	:scale: 50 %
@@ -15,18 +15,17 @@ The Scientific Software Platform (SWP) from the Champalimaud Foundation provides
 We typical work on computer vision / tracking, behavioral experiments, image registration and database management.
 
 Bpod project
-------------
+============
 **pybpod-api** is a python port of the `Bpod Matlab project <https://github.com/sanworks/Bpod>`_.
 
 All examples and Bpod's state machine and communication logic were based on the original version made available by `Josh Sanders <https://github.com/sanworks>`_.
 
 License
--------
-This is Open Source software. We use the MIT license, which provides almost no restrictions on the use of the code.
-
+=======
+This is Open Source software. We use the `GNU General Public License version 3 <https://www.gnu.org/licenses/gpl.html>`_.
 
 Maintenance team
-----------------
+================
 
 The current and past members of the **pybpod-api** team.
 
