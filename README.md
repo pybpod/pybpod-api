@@ -22,4 +22,18 @@ All examples and Bpod's state machine and communication logic were based on the 
 This is Open Source software. We use the MIT license, which provides almost no restrictions on the use of the code.
 
 ## Running examples
-TODO
+
+1. Duplicate *user_settings.py.template* and save it as *user_settings.py*
+
+        Define the SERIAL_PORT attribute with your machine serial port where Bpod is connected to
+        Define the API_LOG_LEVEL with logging.DEBUG if you want detailed logging for the API
+
+2. On the project root folder run:
+    
+        pip3 install -r requirements.txt --upgrade # installs dependencies
+        pip3 install . # installs this API
+    
+3. Then move to the examples folder and run example:
+ 
+        cd PROJECT_FOLDER/examples/function_examples
+        python3 add_trial_events.py # run example

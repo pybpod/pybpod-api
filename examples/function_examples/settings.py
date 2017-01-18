@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+# THIS IS THE SETTINGS FILE FOR EXAMPLES
+#
+# DO NOT CHANGE THIS FILE!!!
+#
+# PLEASE REFER TO THE user_settings.py.template
+
 import logging
 import loggingbootstrap
 

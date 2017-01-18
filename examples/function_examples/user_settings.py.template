@@ -11,7 +11,7 @@
 
 import logging
 
-API_LOG_LEVEL = logging.INFO
+API_LOG_LEVEL = logging.INFO # For more detail use logging.DEBUG
 EXAMPLE_SCRIPT_LOG_LEVEL = logging.INFO
 
 SERIAL_PORT = 'YOUR SERIAL PORT HERE'
