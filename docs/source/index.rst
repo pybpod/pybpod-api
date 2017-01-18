@@ -8,6 +8,10 @@ Welcome to pybpod-api's documentation!
 
 **pybpod-api** is a Python library API for the `Bpod device <https://sanworks.io/shop/viewproduct?productID=1011>`_.
 
+.. note::
+
+   All examples and Bpod's state machine and communication logic were based on the original version made available by `Josh Sanders (Sanworks) <https://github.com/sanworks>`_.
+
 .. toctree::
    :maxdepth: 2
 

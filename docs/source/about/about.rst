@@ -18,7 +18,7 @@ Bpod project
 ============
 **pybpod-api** is a python port of the `Bpod Matlab project <https://github.com/sanworks/Bpod>`_.
 
-All examples and Bpod's state machine and communication logic were based on the original version made available by `Josh Sanders <https://github.com/sanworks>`_.
+All examples and Bpod's state machine and communication logic were based on the original version made available by `Josh Sanders (Sanworks) <https://github.com/sanworks>`_.
 
 License
 =======
