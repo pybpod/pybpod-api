@@ -1,21 +1,25 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+"""
+Demonstration of AddTrialEvents used in a simple visual 2AFC session.
+AddTrialEvents formats each trial's data in a human-readable struct, and adds to myBpod.data (to save to disk later)
+Connect noseports to ports 1-3.
+
+Example adapted from Josh Sanders' original version on Sanworks Bpod repository
+"""
+
 import logging
 import random
 
-import loggingbootstrap
+import settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine.state_machine import StateMachine
 
-# setup different loggers but output to single file
-loggingbootstrap.create_double_logger("pybpodapi", logging.DEBUG, 'pybpodapi.log', logging.DEBUG)
-loggingbootstrap.create_double_logger("add_trial_events", logging.DEBUG, 'pybpodapi.log', logging.DEBUG)
+logger = logging.getLogger("pybodapi-examples")
 
-logger = logging.getLogger("add_trial_events")
-
-my_bpod = Bpod().start('/dev/tty.usbmodem1461')  # Create a new instance of a Bpod object on serial port COM13
+my_bpod = Bpod().start(settings.SERIAL_PORT)  # Start bpod
 
 nTrials = 5
 trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)

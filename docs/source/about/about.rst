@@ -16,7 +16,9 @@ We typical work on computer vision / tracking, behavioral experiments, image reg
 
 Bpod project
 ------------
-**pybpod-api** is a python port of the `Bpod Matlab project <https://github.com/sanworks/Bpod>`_. It is an adaption from the original version made available by `Josh Sanders <https://github.com/sanworks>`_.
+**pybpod-api** is a python port of the `Bpod Matlab project <https://github.com/sanworks/Bpod>`_.
+
+All examples and Bpod's state machine and communication logic were based on the original version made available by `Josh Sanders <https://github.com/sanworks>`_.
 
 License
 -------
