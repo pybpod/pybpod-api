@@ -1,19 +1,20 @@
-**********************
-Communication Protocol
-**********************
+=================
+Protocol Commands
+=================
 
 .. contents:: Contents
     :local:
 
+--------
 Overview
-========
+--------
 
-TODO
+This module defines protocol commands that are available to interact with the Bpod device.
 
+--------------
 Implementation
-==============
+--------------
 
-
-.. automodule:: pybpodapi.com.bpod_protocol
+.. automodule:: pybpodapi.com.protocol
     :members:
     :private-members:

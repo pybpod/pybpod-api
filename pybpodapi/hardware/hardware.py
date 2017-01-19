@@ -4,67 +4,21 @@
 import logging
 
 from pybpodapi.hardware.channels import Channels
+from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 
 logger = logging.getLogger(__name__)
 
 
 class Hardware(object):
 	"""
-	Hardware description
+	Represents an hardware description based on information received from the current connected Bpod deviced.
 	"""
 
 	DEFAULT_FREQUENCY_DIVIDER = 1000000
 
-	def set_up(self, hw_info_container):
-		"""
-
-		:param hw_info_container:
-		:type hw_info_container: bpodapi.com.hardware_info_container.HardwareInfoContainer
-		:return:
-		"""
-		self.max_states = hw_info_container.max_states
-		self.cycle_period = hw_info_container.cycle_period
-		self.n_events_per_serial_channel = hw_info_container.n_events_per_serial_channel
-		self.n_global_timers = hw_info_container.n_global_timers
-		self.n_global_counters = hw_info_container.n_global_counters
-		self.n_conditions = hw_info_container.n_conditions
-		self.inputs = hw_info_container.inputs
-		self.outputs = hw_info_container.outputs + ['G', 'G', 'G']  # nOutputChannels
-
-		self.sync_channel = hw_info_container.sync_channel
-		self.sync_mode = hw_info_container.sync_mode
-
-		self.n_uart_channels = len([idx for idx in self.inputs if idx == 'U'])
-
-		self._configure_inputs()
-
-		self.channels = Channels()  # type: Channels
-		self.channels.set_up_input_channels(self)
-		self.channels.set_up_output_channels(self.outputs)
-
-		logger.debug(self.channels)
-
-		logger.debug(str(self))
-
-	def _configure_inputs(self):
-		"""
-		TODO: improve this method
-		:return:
-		"""
-
-		self.inputs_enabled = [0] * len(self.inputs)
-
-		PortsFound = 0
-		for i in range(len(self.inputs)):
-			if self.inputs[i] == 'B':
-				self.inputs_enabled[i] = 1
-			elif self.inputs[i] == 'W':
-				self.inputs_enabled[i] = 1
-			if PortsFound == 0 and self.inputs[i] == 'P':  # Enable ports 1-3 by default
-				PortsFound = 1
-				self.inputs_enabled[i] = 1
-				self.inputs_enabled[i + 1] = 1
-				self.inputs_enabled[i + 2] = 1
+	##################################################
+	#################### PROPERTIES ##################
+	##################################################
 
 	@property
 	def firmware_version(self):
@@ -111,6 +65,53 @@ class Hardware(object):
 	@n_events_per_serial_channel.setter
 	def n_events_per_serial_channel(self, value):
 		self._n_events_per_serial_channel = value
+
+	##################################################
+	#################### METHODS #####################
+	##################################################
+
+	def set_up(self, hw_info_container):
+		"""
+		Set up hardware based on hardware description obtained from Bpod device
+
+		:param HardwareInfoContainer hw_info_container: hardware parameters received from Bpod
+		"""
+		self.max_states = hw_info_container.max_states
+		self.cycle_period = hw_info_container.cycle_period
+		self.n_events_per_serial_channel = hw_info_container.n_events_per_serial_channel
+		self.n_global_timers = hw_info_container.n_global_timers
+		self.n_global_counters = hw_info_container.n_global_counters
+		self.n_conditions = hw_info_container.n_conditions
+		self.inputs = hw_info_container.inputs
+		self.outputs = hw_info_container.outputs + ['G', 'G', 'G']  # nOutputChannels
+
+		self.sync_channel = hw_info_container.sync_channel # 255 = no sync, otherwise set to a hardware channel number
+		self.sync_mode = hw_info_container.sync_mode # 0 = flip logic every trial, 1 = every state
+
+		self.n_uart_channels = len([idx for idx in self.inputs if idx == 'U'])
+
+		# configure inputs enabled
+		self.inputs_enabled = [0] * len(self.inputs)
+		PortsFound = 0
+		for i in range(len(self.inputs)):
+			if self.inputs[i] == 'B':
+				self.inputs_enabled[i] = 1
+			elif self.inputs[i] == 'W':
+				self.inputs_enabled[i] = 1
+			if PortsFound == 0 and self.inputs[i] == 'P':  # Enable ports 1-3 by default
+				PortsFound = 1
+				self.inputs_enabled[i] = 1
+				self.inputs_enabled[i + 1] = 1
+				self.inputs_enabled[i + 2] = 1
+
+		# set up channels
+		self.channels = Channels()  # type: Channels
+		self.channels.set_up_input_channels(self)
+		self.channels.set_up_output_channels(self.outputs)
+
+		logger.debug(self.channels)
+
+		logger.debug(str(self))
 
 	def __str__(self):
 		return "Hardware Configuration\n" \

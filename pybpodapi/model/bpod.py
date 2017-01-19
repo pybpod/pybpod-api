@@ -4,14 +4,16 @@
 import logging
 import math
 
-from pybpodapi.com.bpod_com import BpodCom
+from pybpodapi.com.protocol import Protocol
 from pybpodapi.com.hardware_info_container import HardwareInfoContainer
+from pybpodapi.com.serial_message_container import SerialMessageContainer
 from pybpodapi.hardware.hardware import Hardware
 from pybpodapi.hardware.channels import ChannelType
 from pybpodapi.hardware.channels import ChannelName
 from pybpodapi.model.session import Session
 from pybpodapi.model.state_machine.state_machine import StateMachine
 from pybpodapi.model.trial import Trial
+
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +64,7 @@ class Bpod(object):
 
 		self.hardware = Hardware()  # type: Hardware
 		self.session = Session()  # type: Session
-		self.bpod_protocol = BpodCom()  # type: BpodCom
+		self.bpod_protocol = Protocol()  # type: Protocol
 
 		self.bpod_protocol.connect(serial_port, baudrate)
 
@@ -285,19 +287,20 @@ class Bpod(object):
 		else:
 			raise BpodError('Error using manualOverride: first argument must be "Input" or "Output".')
 
-	def load_serial_message(self, serial_channel, message_ID, message):
+	def load_serial_message(self, serial_channel, message_ID, serial_message, n_messages=1):
+		"""
+		Load serial message on Bpod
 
-		n_messages = 1
+		:param serial_channel:
+		:param message_ID:
+		:param serial_message:
+		:param n_messages:
+		:return:
+		"""
 
-		if len(message) > 3:
-			raise BpodError('Error: Serial messages cannot be more than 3 bytes in length.')
+		message_container = SerialMessageContainer(serial_channel, message_ID, serial_message, n_messages) # type: SerialMessageContainer
 
-		if message_ID > 255 or message_ID < 1:
-			raise BpodError('Error: Bpod can only store 255 serial messages (indexed 1-255).')
-
-		message_container = [serial_channel - 1, n_messages, message_ID, len(message)] + message
-
-		response = self.bpod_protocol.load_serial_message(message_container);
+		response = self.bpod_protocol.load_serial_message(message_container.format_for_sending());
 
 		if not response:
 			raise BpodError('Error: Failed to set serial message.')
