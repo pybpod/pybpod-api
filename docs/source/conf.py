@@ -48,8 +48,11 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode']
 
-# Do not sort autodoc alphabetically, use source code appearance order
+# Do not sort autodoc alphabetically, use source code appearance order.
 autodoc_member_order= 'bysource'
+
+# Both the class’ and the __init__ method’s docstring are concatenated and inserted.
+autoclass_content = 'both'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

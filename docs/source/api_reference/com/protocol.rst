@@ -1,6 +1,6 @@
-=================
-Protocol Commands
-=================
+===========================
+Requesting Commands to Bpod
+===========================
 
 .. contents:: Contents
     :local:

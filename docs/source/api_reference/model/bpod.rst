@@ -1,21 +1,21 @@
 .. _bpod-class-label:
 
-****
+====
 Bpod
-****
+====
 
 .. contents:: Contents
     :local:
 
 Overview
-========
+--------
 
 TODO
 
 Implementation
-==============
+--------------
 
 
-.. automodule:: pybpodapi.model.bpod
+.. autoclass:: pybpodapi.model.bpod.Bpod
     :members:
     :private-members:

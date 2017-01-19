@@ -1,5 +1,6 @@
-Hardware description
-====================
+********
+Hardware
+********
 
 Contents:
 

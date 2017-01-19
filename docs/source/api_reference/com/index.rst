@@ -1,6 +1,6 @@
-**********************
-Communication Protocol
-**********************
+*************
+Communication
+*************
 
 Contents:
 
@@ -11,3 +11,4 @@ Contents:
    message_headers
    arcom
    hw_info_container
+   serial_message_container

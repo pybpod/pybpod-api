@@ -1,10 +1,11 @@
-Entities Model
-==============
+********
+Entities
+********
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    bpod
    state_machine

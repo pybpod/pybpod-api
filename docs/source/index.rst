@@ -13,7 +13,7 @@ Welcome to pybpod-api's documentation!
    All examples and Bpod's state machine and communication logic were based on the original version made available by `Josh Sanders (Sanworks) <https://github.com/sanworks>`_.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    getting_started
    writing_protocols

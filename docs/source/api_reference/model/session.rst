@@ -1,19 +1,18 @@
-*******
+=======
 Session
-*******
+=======
 
 .. contents:: Contents
     :local:
 
 Overview
-========
+--------
 
 TODO
 
 Implementation
-==============
+--------------
 
-
-.. automodule:: pybpodapi.model.session
+.. autoclass:: pybpodapi.model.session.Session
     :members:
     :private-members:
