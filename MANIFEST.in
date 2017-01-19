@@ -1,3 +1,2 @@
-include LICENSE
+include LICENSE.md
 include README.md
-recursive-include pycontrolgui/resources *
