@@ -2,6 +2,7 @@ name: pybpod-api-env
 dependencies:
   - python=3.5
   - numpy
+  - sphinx>=1.5
   - pip:
       - pyserial>=3.1.1
       - https://github.com/snide/sphinx_rtd_theme/archive/master.zip
