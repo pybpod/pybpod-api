@@ -1,9 +1,6 @@
-=======================
-Hardware Info Container
-=======================
-
-.. contents:: Contents
-    :local:
+==========================================================
+:mod:`hardware_info_container` --- Hardware Info Container
+==========================================================
 
 --------
 Overview

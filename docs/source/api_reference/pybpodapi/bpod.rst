@@ -1,11 +1,11 @@
 .. _bpod-class-label:
 
-====
-Bpod
-====
+*******************
+:mod:`bpod`--- Bpod
+*******************
 
-.. contents:: Contents
-    :local:
+.. module:: bpod
+   :synopsis: Bpod main module
 
 Overview
 --------

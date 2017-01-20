@@ -1,12 +1,17 @@
-###############
-Model Reference
-###############
+#############
+API Reference
+#############
 
-Contents:
+**Modules Hierarchy**
 
 .. toctree::
    :maxdepth: 2
+   :titlesonly:
 
-   model/index
-   hardware/index
-   com/index
+   pybpodapi/index
+
+**Principal Classes (and modules)**
+
+.. image:: /_images/main_classes.png
+   :scale: 100 %
+

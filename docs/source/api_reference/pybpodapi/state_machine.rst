@@ -1,9 +1,9 @@
-*************
-State Machine
-*************
+*************************************
+:mod:`state_machine`--- State Machine
+*************************************
 
-.. contents:: Contents
-    :local:
+.. module:: state_machine
+   :synopsis: modules related to state machine
 
 Overview
 ========

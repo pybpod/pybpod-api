@@ -1,6 +1,9 @@
-===========================
-Requesting Commands to Bpod
-===========================
+===============================================
+:mod:`protocol` --- Requesting Commands to Bpod
+===============================================
+
+.. module:: com.protocol
+   :synopsis: communication with Bpod device
 
 .. contents:: Contents
     :local:

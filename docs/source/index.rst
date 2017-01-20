@@ -14,6 +14,7 @@ Welcome to pybpod-api's documentation!
 
 .. toctree::
    :maxdepth: 4
+   :includehidden:
 
    getting_started
    writing_protocols

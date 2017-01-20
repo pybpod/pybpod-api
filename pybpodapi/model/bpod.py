@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Bpod(object):
 	"""
-	Bpod main class
+	Bpod is the main entity.
 	"""
 
 	#########################################
@@ -42,6 +42,14 @@ class Bpod(object):
 	@hardware.setter
 	def hardware(self, value):
 		self._hardware = value  # type: Hardware
+
+	@property
+	def bpod_protocol(self):
+		return self._bpod_protocol  # type: Protocol
+
+	@bpod_protocol.setter
+	def bpod_protocol(self, value):
+		self._bpod_protocol = value  # type: Protocol
 
 	#########################################
 	############ PUBLIC METHODS #############

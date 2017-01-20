@@ -1,9 +1,9 @@
-*****
-Trial
-*****
+*********************
+:mod:`trial`--- Trial
+*********************
 
-.. contents:: Contents
-    :local:
+.. module:: trial
+   :synopsis: A session trial
 
 Overview
 ========

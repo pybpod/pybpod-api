@@ -1,9 +1,6 @@
-========================
-Protocol Message Headers
-========================
-
-.. contents:: Contents
-    :local:
+===================================================
+:mod:`message_headers` --- Protocol Message Headers
+===================================================
 
 --------
 Overview

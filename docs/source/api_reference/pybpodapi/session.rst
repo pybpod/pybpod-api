@@ -1,9 +1,9 @@
-=======
-Session
-=======
+*************************
+:mod:`session`--- Session
+*************************
 
-.. contents:: Contents
-    :local:
+.. module:: session
+   :synopsis: session to run on bpod
 
 Overview
 --------
