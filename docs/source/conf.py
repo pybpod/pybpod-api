@@ -114,7 +114,7 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     'collapse_navigation': False,
     'display_version': True,
-    'navigation_depth': 3
+#    'navigation_depth': 3 # only for sphinx 1.5 not supported on RTD yet
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
