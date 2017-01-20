@@ -12,7 +12,7 @@ Overview
 This container is used to store serial message information.
 
 .. seealso::
-    :meth:`pybpodapi.com.protocol.Protocol.load_serial_message`
+    :meth:`pybpodapi.com.message_api.MessageAPI.load_serial_message`
 
 --------------
 Implementation

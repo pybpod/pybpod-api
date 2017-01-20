@@ -30,8 +30,6 @@ class Session(object):
 
 		self.trials.append(new_trial)
 
-		logger.info("New trial added: %s", str(new_trial))
-
 	def add_trial_events(self):
 
 		current_trial = self.current_trial()  # type: Trial
@@ -82,6 +80,8 @@ class Session(object):
 			for i in thisEventIndexes:
 				thisEventTimestamps.append(sma_data.event_timestamps[i])
 			current_trial.events_timestamps[thisEventName] = thisEventTimestamps
+
+		logger.info("Trial info: %s", str(current_trial))
 
 	def current_trial(self):
 		return self.trials[-1]

@@ -12,7 +12,7 @@ from pybpodapi.com.serial_message_container import SerialMessageContainer
 logger = logging.getLogger(__name__)
 
 
-class Protocol(object):
+class MessageAPI(object):
 	"""
 	Define command actions that can be requested to Bpod device.
 

@@ -4,7 +4,7 @@
 import logging
 import math
 
-from pybpodapi.com.protocol import Protocol
+from pybpodapi.com.message_api import MessageAPI
 from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 from pybpodapi.com.serial_message_container import SerialMessageContainer
 from pybpodapi.hardware.hardware import Hardware
@@ -45,11 +45,11 @@ class Bpod(object):
 
 	@property
 	def bpod_protocol(self):
-		return self._bpod_protocol  # type: Protocol
+		return self._bpod_protocol  # type: MessageAPI
 
 	@bpod_protocol.setter
 	def bpod_protocol(self, value):
-		self._bpod_protocol = value  # type: Protocol
+		self._bpod_protocol = value  # type: MessageAPI
 
 	#########################################
 	############ PUBLIC METHODS #############
@@ -72,7 +72,7 @@ class Bpod(object):
 
 		self.hardware = Hardware()  # type: Hardware
 		self.session = Session()  # type: Session
-		self.bpod_protocol = Protocol()  # type: Protocol
+		self.bpod_protocol = MessageAPI()  # type: MessageAPI
 
 		self.bpod_protocol.connect(serial_port, baudrate)
 
