@@ -84,34 +84,34 @@ class MessageAPI(object):
 		logger.debug("Requesting hardware description (%s)...", SendMessageHeader.HARDWARE_DESCRIPTION)
 		self._arcom.write_char(SendMessageHeader.HARDWARE_DESCRIPTION)
 
-		hardware_info.max_states = self._arcom.read_uint16()
+		hardware_info.max_states = self._arcom.read_uint16() # type: int
 		logger.debug("Read max states: %s", hardware_info.max_states)
 
-		hardware_info.cycle_period = self._arcom.read_uint16()
+		hardware_info.cycle_period = self._arcom.read_uint16() # type: int
 		logger.debug("Read cycle period: %s", hardware_info.cycle_period)
 
-		hardware_info.n_events_per_serial_channel = self._arcom.read_uint8()
+		hardware_info.n_events_per_serial_channel = self._arcom.read_uint8() # type: int
 		logger.debug("Read number of events per serial channel: %s", hardware_info.n_events_per_serial_channel)
 
-		hardware_info.n_global_timers = self._arcom.read_uint8()
+		hardware_info.n_global_timers = self._arcom.read_uint8() # type: int
 		logger.debug("Read number of global timers: %s", hardware_info.n_global_timers)
 
-		hardware_info.n_global_counters = self._arcom.read_uint8()
+		hardware_info.n_global_counters = self._arcom.read_uint8() # type: int
 		logger.debug("Read number of global counters: %s", hardware_info.n_global_counters)
 
-		hardware_info.n_conditions = self._arcom.read_uint8()
+		hardware_info.n_conditions = self._arcom.read_uint8() # type: int
 		logger.debug("Read number of conditions: %s", hardware_info.n_conditions)
 
-		hardware_info.n_inputs = self._arcom.read_uint8()
+		hardware_info.n_inputs = self._arcom.read_uint8() # type: int
 		logger.debug("Read number of inputs: %s", hardware_info.n_inputs)
 
-		hardware_info.inputs = self._arcom.read_char_array(array_len=hardware_info.n_inputs)
+		hardware_info.inputs = self._arcom.read_char_array(array_len=hardware_info.n_inputs) # type: list(str)
 		logger.debug("Read inputs: %s", hardware_info.inputs)
 
-		hardware_info.n_outputs = self._arcom.read_uint8()
+		hardware_info.n_outputs = self._arcom.read_uint8() # type: int
 		logger.debug("Read number of outputs: %s", hardware_info.n_outputs)
 
-		hardware_info.outputs = self._arcom.read_char_array(array_len=hardware_info.n_outputs)
+		hardware_info.outputs = self._arcom.read_char_array(array_len=hardware_info.n_outputs) # type: list(str)
 		logger.debug("Read outputs: %s", hardware_info.outputs)
 
 	def enable_ports(self, inputs_enabled):

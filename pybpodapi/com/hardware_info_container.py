@@ -19,8 +19,8 @@ class HardwareInfoContainer(object):
 		self.n_global_counters = None # type: int
 		self.n_conditions = None # type: int
 		self.n_inputs = None # type: int
-		self.inputs = None
+		self.inputs = None # type: list(str)
 		self.n_outputs = None # type: int
-		self.outputs = None
+		self.outputs = None # type: list(str)
 		self.sync_channel = None # type: int
 		self.sync_mode = None # type: int
