@@ -1,0 +1,5 @@
+pyserial>=3.1.1
+https://bitbucket.org/fchampalimaud/logging-bootstrap/get/master.zip
+numpy
+sphinx>=1.5
+https://github.com/snide/sphinx_rtd_theme/archive/master.zip
