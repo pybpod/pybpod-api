@@ -18,6 +18,7 @@ Welcome to pybpod-api's documentation!
 
    getting_started
    writing_protocols
+   exporting
    api_reference/index
    about/about
 

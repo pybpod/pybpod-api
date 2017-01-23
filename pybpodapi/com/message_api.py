@@ -226,7 +226,7 @@ class MessageAPI(object):
 		:return: timestamps array
 		:rtype: list(float)
 		"""
-		n_timestamps = self._arcom.read_uint16()
+		n_timestamps = self._arcom.read_uint16() # type: int
 
 		timestamps = self._arcom.read_uint32_array(array_len=n_timestamps)
 

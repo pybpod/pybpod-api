@@ -10,7 +10,9 @@ API Reference
 
    pybpodapi/index
 
-**Principal Classes (and modules)**
+===============================
+Classes Diagram (and modules)
+===============================
 
 .. image:: /_images/pybpodapi_main_classes.svg
    :scale: 100 %
@@ -27,4 +29,9 @@ Sequence Diagrams
 **Send state machine**
 
 .. image:: /_images/sd_bpod_send_sm.svg
+   :scale: 100 %
+
+**Run state machine**
+
+.. image:: /_images/sd_bpod_run_sm.svg
    :scale: 100 %
