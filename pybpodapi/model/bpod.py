@@ -11,9 +11,9 @@ from pybpodapi.hardware.hardware import Hardware
 from pybpodapi.hardware.channels import ChannelType
 from pybpodapi.hardware.channels import ChannelName
 from pybpodapi.model.session import Session
-from pybpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.state_machine import StateMachine
 from pybpodapi.model.trial import Trial
-
+from pybpodapi.model.state_machine.raw_data import RawData
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +44,12 @@ class Bpod(object):
 		self._hardware = value  # type: Hardware
 
 	@property
-	def bpod_protocol(self):
-		return self._bpod_protocol  # type: MessageAPI
+	def message_api(self):
+		return self._message_api  # type: MessageAPI
 
-	@bpod_protocol.setter
-	def bpod_protocol(self, value):
-		self._bpod_protocol = value  # type: MessageAPI
+	@message_api.setter
+	def message_api(self, value):
+		self._message_api = value  # type: MessageAPI
 
 	#########################################
 	############ PUBLIC METHODS #############
@@ -72,28 +72,28 @@ class Bpod(object):
 
 		self.hardware = Hardware()  # type: Hardware
 		self.session = Session()  # type: Session
-		self.bpod_protocol = MessageAPI()  # type: MessageAPI
+		self.message_api = MessageAPI()  # type: MessageAPI
 
-		self.bpod_protocol.connect(serial_port, baudrate)
+		self.message_api.connect(serial_port, baudrate)
 
-		if not self.bpod_protocol.handshake():
+		if not self.message_api.handshake():
 			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
-		self.hardware.firmware_version = self.bpod_protocol.firmware_version()
+		self.hardware.firmware_version = self.message_api.firmware_version()
 		if self.hardware.firmware_version < 8:
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
 
 		hw_info = HardwareInfoContainer()
 		hw_info.sync_channel = sync_channel
 		hw_info.sync_mode = sync_mode
-		self.bpod_protocol.hardware_description(hw_info)
+		self.message_api.hardware_description(hw_info)
 		self.hardware.set_up(hw_info)
 
-		if not self.bpod_protocol.enable_ports(self.hardware.inputs_enabled):
+		if not self.message_api.enable_ports(self.hardware.inputs_enabled):
 			raise BpodError('Error: Failed to enable Bpod inputs.')
 
-		if not self.bpod_protocol.set_sync_channel_and_mode(sync_channel=sync_channel,
-		                                                    sync_mode=sync_mode):
+		if not self.message_api.set_sync_channel_and_mode(sync_channel=sync_channel,
+		                                                  sync_mode=sync_mode):
 			raise BpodError('Error: Failed to configure syncronization.')
 
 		logger.info("Bpod successfully started!")
@@ -102,134 +102,33 @@ class Bpod(object):
 
 	def send_state_machine(self, sma):
 		"""
-		Replace undeclared states (at the time they were referenced) with actual state numbers
+		Send state machine to Bpod
 
-		:param sma:
-		:type sma: bpodapi.model.state_machine.state_machine.StateMachine
-		:return:
+		:param sma: initialized state machine
+		:type sma: StateMachine
 		"""
 
-		for i in range(len(sma.undeclared)):
-			undeclaredStateNumber = i + 10000
-			thisStateNumber = sma.manifest.index(sma.undeclared[i])
-			for j in range(sma.total_states_added):
-				if sma.state_timer_matrix[j] == undeclaredStateNumber:
-					sma.state_timer_matrix[j] = thisStateNumber
-				inputTransitions = sma.input_matrix[j]
-				for k in range(0, len(inputTransitions)):
-					thisTransition = inputTransitions[k]
-					if thisTransition[1] == undeclaredStateNumber:
-						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.input_matrix[j] = inputTransitions
-				inputTransitions = sma.global_timers.matrix[j]
-				for k in range(0, len(inputTransitions)):
-					thisTransition = inputTransitions[k]
-					if thisTransition[1] == undeclaredStateNumber:
-						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.global_timers.matrix[j] = inputTransitions
-				inputTransitions = sma.global_counters.matrix[j]
-				for k in range(0, len(inputTransitions)):
-					thisTransition = inputTransitions[k]
-					if thisTransition[1] == undeclaredStateNumber:
-						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.global_counters.matrix[j] = inputTransitions
-				inputTransitions = sma.conditions.matrix[j]
-				for k in range(0, len(inputTransitions)):
-					thisTransition = inputTransitions[k]
-					if thisTransition[1] == undeclaredStateNumber:
-						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				sma.conditions.matrix[j] = inputTransitions
+		sma.update_state_numbers()
 
-		# Check to make sure all states in manifest exist
-		logger.debug("Total states added: %s | Manifested sates: %s", sma.total_states_added, len(sma.manifest))
-		if len(sma.manifest) > sma.total_states_added:
-			raise BpodError(
-				'Error: Could not send state machine - some states were referenced by name, but not subsequently declared.')
-		Message = [len(sma.state_names), ]
-		for i in range(sma.total_states_added):  # Send state timer transitions (for all states)
-			if math.isnan(sma.state_timer_matrix[i]):
-				Message += (sma.total_states_added,)
-			else:
-				Message += (sma.state_timer_matrix[i],)
-		for i in range(
-				sma.total_states_added):  # Send event-triggered transitions (where they are different from default)
-			currentStateTransitions = sma.input_matrix[i]
-			nTransitions = len(currentStateTransitions)
-			Message += (nTransitions,)
-			for j in range(nTransitions):
-				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0],)
-				destinationState = thisTransition[1]
-				if math.isnan(destinationState):
-					Message += (sma.total_states_added,)
-				else:
-					Message += (destinationState,)
-		for i in range(sma.total_states_added):  # Send hardware states (where they are different from default)
-			currentHardwareState = sma.output_matrix[i]
-			nDifferences = len(currentHardwareState)
-			Message += (nDifferences,)
-			for j in range(nDifferences):
-				thisHardwareConfig = currentHardwareState[j]
-				Message += (thisHardwareConfig[0],)
-				Message += (thisHardwareConfig[1],)
-		for i in range(
-				sma.total_states_added):  # Send global timer triggered transitions (where they are different from default)
-			currentStateTransitions = sma.global_timers.matrix[i]
-			nTransitions = len(currentStateTransitions)
-			Message += (nTransitions,)
-			for j in range(nTransitions):
-				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0] - sma.channels.events_positions.globalTimer,)
-				destinationState = thisTransition[1]
-				if math.isnan(destinationState):
-					Message += (sma.total_states_added,)
-				else:
-					Message += (destinationState,)
-		for i in range(
-				sma.total_states_added):  # Send global counter triggered transitions (where they are different from default)
-			currentStateTransitions = sma.global_counters.matrix[i]
-			nTransitions = len(currentStateTransitions)
-			Message += (nTransitions,)
-			for j in range(nTransitions):
-				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0] - sma.channels.events_positions.globalCounter,)
-				destinationState = thisTransition[1]
-				if math.isnan(destinationState):
-					Message += (sma.total_states_added,)
-				else:
-					Message += (destinationState,)
-		for i in range(
-				sma.total_states_added):  # Send condition triggered transitions (where they are different from default)
-			currentStateTransitions = sma.conditions.matrix[i]
-			nTransitions = len(currentStateTransitions)
-			Message += (nTransitions,)
-			for j in range(nTransitions):
-				thisTransition = currentStateTransitions[j]
-				Message += (thisTransition[0] - sma.channels.events_positions.condition,)
-				destinationState = thisTransition[1]
-				if math.isnan(destinationState):
-					Message += (sma.total_states_added,)
-				else:
-					Message += (destinationState,)
-		for i in range(self.hardware.n_global_counters):
-			Message += (sma.global_counters.attached_events[i],)
-		for i in range(self.hardware.n_conditions):
-			Message += (sma.conditions.channels[i],)
-		for i in range(self.hardware.n_conditions):
-			Message += (sma.conditions.values[i],)
+		message = sma.build_message()
 
-		sma.state_timers = sma.state_timers[:sma.total_states_added]
+		message32 = sma.build_message_32_bits()
 
-		ThirtyTwoBitMessage = [i * self.hardware.cycle_frequency for i in sma.state_timers] + \
-		                      [i * self.hardware.cycle_frequency for i in sma.global_timers.timers] + \
-		                      sma.global_counters.thresholds
-
-		response = self.bpod_protocol.send_state_machine(Message, ThirtyTwoBitMessage)
+		response = self.message_api.send_state_machine(message, message32)
 
 		if not response:
 			raise BpodError('Error: Failed to send state machine.')
 
 	def run_state_machine(self, sma):
+		"""
+
+		Run state machine on Bpod now
+
+		:param sma: initialized state machine
+		:type sma: StateMachine
+		:return: state machine raw data
+		:rtype: RawData
+		"""
 
 		self.session.add_trial(sma)
 
@@ -237,17 +136,17 @@ class Bpod(object):
 
 		current_state = 0
 
-		self.bpod_protocol.run_state_machine()
+		self.message_api.run_state_machine()
 
 		sma.is_running = True
 		while sma.is_running:
-			if self.bpod_protocol.data_available():
-				opcode, data = self.bpod_protocol.read_opcode_message()
+			if self.message_api.data_available():
+				opcode, data = self.message_api.read_opcode_message()
 				self.__process_opcode(sma, opcode, data, state_change_indexes, current_state)
 
 		sma.raw_data.trial_start_timestamp.append(
-			self.bpod_protocol.read_trial_start_timestamp_ms())  # start timestamp of first trial
-		timestamps = self.bpod_protocol.read_timestamps()
+			self.message_api.read_trial_start_timestamp_ms())  # start timestamp of first trial
+		timestamps = self.message_api.read_timestamps()
 
 		sma.raw_data.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
 		logger.debug("state_change_indexes: %s", state_change_indexes)
@@ -282,14 +181,14 @@ class Bpod(object):
 				if value > 0:
 					value = math.pow(2, channel_number - 1)
 				channel_number = self.hardware.channels.events_positions.output_SPI
-				self.bpod_protocol.override_digital_hardware_state(channel_number, value)
+				self.message_api.override_digital_hardware_state(channel_number, value)
 			elif channel_name == 'Serial':
-				self.bpod_protocol.send_byte_to_hardware_serial(channel_number, value)
+				self.message_api.send_byte_to_hardware_serial(channel_number, value)
 			else:
 				try:
 					channel_number = self.hardware.channels.output_channel_names.index(
 						channel_name + str(channel_number))
-					self.bpod_protocol.override_digital_hardware_state(channel_number, value)
+					self.message_api.override_digital_hardware_state(channel_number, value)
 				except:
 					raise BpodError('Error using manual_override: ' + channel_name + ' is not a valid channel name.')
 		else:
@@ -306,9 +205,10 @@ class Bpod(object):
 		:return:
 		"""
 
-		message_container = SerialMessageContainer(serial_channel, message_ID, serial_message, n_messages) # type: SerialMessageContainer
+		message_container = SerialMessageContainer(serial_channel, message_ID, serial_message,
+		                                           n_messages)  # type: SerialMessageContainer
 
-		response = self.bpod_protocol.load_serial_message(message_container.format_for_sending());
+		response = self.message_api.load_serial_message(message_container.format_for_sending());
 
 		if not response:
 			raise BpodError('Error: Failed to set serial message.')
@@ -317,7 +217,7 @@ class Bpod(object):
 		"""
 		Reset serial messages to equivalent byte codes (i.e. message# 4 = one byte, 0x4)
 		"""
-		response = self.bpod_protocol.reset_serial_messages()
+		response = self.message_api.reset_serial_messages()
 
 		if not response:
 			raise BpodError('Error: Failed to reset serial message library.')
@@ -326,7 +226,7 @@ class Bpod(object):
 		"""
 		Close connection with Bpod
 		"""
-		self.bpod_protocol.disconnect()
+		self.message_api.disconnect()
 
 	#########################################
 	############ PRIVATE METHODS ############
@@ -338,7 +238,7 @@ class Bpod(object):
 
 		if opcode == 1:  # Read events
 			n_current_events = data
-			current_events = self.bpod_protocol.read_current_events(n_current_events)
+			current_events = self.message_api.read_current_events(n_current_events)
 			transition_event_found = False
 			for event in current_events:
 				if event == 255:

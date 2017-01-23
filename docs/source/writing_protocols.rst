@@ -13,7 +13,9 @@ Protocol example explained
 
 First, initialize Bpod and provide serial connection info.
 
-::
+.. code-block:: python
+    :linenos:
+    :lineno-start: 1
 
     my_bpod = Bpod().start(settings.SERIAL_PORT)  # Start bpod
 
@@ -26,7 +28,9 @@ First, initialize Bpod and provide serial connection info.
 
 You can run several trials for each Bpod execution. In this example, we will use 5 trials. Each trial can be of type1 (rewarded left) or type2 (rewarded right).
 
-::
+.. code-block:: python
+    :linenos:
+    :lineno-start: 2
 
     nTrials = 5
     trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
@@ -45,14 +49,11 @@ You can run several trials for each Bpod execution. In this example, we will use
             rightAction = 'Reward'
             rewardValve = 3
 
-        (...)
-
-
 Now, inside the loop, we will create and configure a state machine for each trial.
 
-::
-
-        (...)
+.. code-block:: python
+    :linenos:
+    :lineno-start: 18
 
         sma = StateMachine(my_bpod.hardware)
 
@@ -82,9 +83,6 @@ Now, inside the loop, we will create and configure a state machine for each tria
             state_change_conditions={'Tup': 'exit'},
             output_actions=[('LED', 1), ('LED', 2), ('LED', 3)])  # Signal incorrect choice
 
-        (...)
-
-
 .. seealso::
 
     :py:class:`pybpodapi.model.state_machine.state_machine.StateMachine`
@@ -93,16 +91,16 @@ Now, inside the loop, we will create and configure a state machine for each tria
 
 After configuring the state machine, we send it to the Bpod device by calling the method *send_state_machine*. We are then ready to run the next trial, by calling the *run_state_machine* method.
 On run completion, we can print the data that was returned and stored on the *raw_events* variable.
-::
+
+.. code-block:: python
+    :linenos:
+    :lineno-start: 45
 
         my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 
         raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
 
         print("Raw events: ", raw_events)  # Print events to console
-
-        (...)
-
 
 .. seealso::
 
@@ -112,15 +110,14 @@ On run completion, we can print the data that was returned and stored on the *ra
 
 We can then process the trial events by executing the *add_trial_events* method.
 
-::
+.. code-block:: python
+    :linenos:
+    :lineno-start: 50
 
         my_bpod.add_trial_events()  # Add trial events to myBpod.data struct, formatted for human readability
 
         print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
         print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
-
-        (...)
-
 
 .. seealso::
 
@@ -129,12 +126,11 @@ We can then process the trial events by executing the *add_trial_events* method.
 
 Finally, after the loop finishes, we can disconnect from Bpod.
 
-::
-
-    (...)
+.. code-block:: python
+    :linenos:
+    :lineno-start: 54
 
     my_bpod.disconnect()  # Disconnect Bpod
-
 
 .. seealso::
 

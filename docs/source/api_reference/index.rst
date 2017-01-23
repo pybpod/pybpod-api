@@ -12,6 +12,6 @@ API Reference
 
 **Principal Classes (and modules)**
 
-.. image:: /_images/main_classes.png
+.. image:: /_images/pybpodapi_main_classes.svg
    :scale: 100 %
 

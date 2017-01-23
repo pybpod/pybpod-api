@@ -15,7 +15,7 @@ import random
 import settings
 
 from pybpodapi.model.bpod import Bpod
-from pybpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.state_machine import StateMachine
 
 logger = logging.getLogger("pybodapi-examples")
 

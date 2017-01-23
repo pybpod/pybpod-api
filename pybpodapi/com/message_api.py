@@ -162,7 +162,7 @@ class MessageAPI(object):
 		logger.debug("Sending state machine: %s", Message)
 		logger.debug("Data to send: %s", ThirtyTwoBitMessage)
 
-		self._arcom.write_uint8([ord(SendMessageHeader.NEW_STATE_MATRIX)] + Message)
+		self._arcom.write_uint8_array([ord(SendMessageHeader.NEW_STATE_MATRIX)] + Message)
 
 		self._arcom.write_uint32_array(ThirtyTwoBitMessage)
 
