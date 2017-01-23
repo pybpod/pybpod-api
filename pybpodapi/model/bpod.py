@@ -144,15 +144,7 @@ class Bpod(object):
 				opcode, data = self.message_api.read_opcode_message()
 				self.__process_opcode(sma, opcode, data, state_change_indexes, current_state)
 
-		sma.raw_data.trial_start_timestamp.append(
-			self.message_api.read_trial_start_timestamp_ms())  # start timestamp of first trial
-		timestamps = self.message_api.read_timestamps()
-
-		sma.raw_data.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
-		logger.debug("state_change_indexes: %s", state_change_indexes)
-		for i in range(len(state_change_indexes)):
-			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
-			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
+		self.__update_timestamps(sma, state_change_indexes)
 
 		return sma.raw_data
 
@@ -272,6 +264,25 @@ class Bpod(object):
 								transition_event_found = True
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
+
+	def __update_timestamps(self, sma, state_change_indexes):
+		"""
+		Read timestamps from Bpod and update state machine info
+
+		:param StateMachine sma:
+		:param list state_change_indexes:
+		"""
+		sma.raw_data.trial_start_timestamp.append(
+			self.message_api.read_trial_start_timestamp_ms())  # start timestamp of first trial
+
+		timestamps = self.message_api.read_timestamps()
+
+		sma.raw_data.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
+
+		logger.debug("state_change_indexes: %s", state_change_indexes)
+		for i in range(len(state_change_indexes)):
+			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
+			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
 
 
 class BpodError(Exception):
