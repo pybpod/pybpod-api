@@ -16,6 +16,7 @@ class StateMachine(object):
 	"""
 	State Machine for Bpod
 	"""
+
 	def __init__(self, hardware):
 		"""
 
@@ -87,8 +88,10 @@ class StateMachine(object):
 				self.conditions.matrix[state_name_idx].append((event_code, destination_state_number))
 			elif event_code >= self.channels.events_positions.globalCounter:
 				self.global_counters.matrix[state_name_idx].append((event_code, destination_state_number))
-			elif event_code >= self.channels.events_positions.globalTimer:
-				self.globalTimers.matrix[state_name_idx].append((event_code, destination_state_number))
+			elif event_code >= self.channels.events_positions.globalTimerEnd:
+				self.globalTimers.end_matrix[state_name_idx].append((event_code, destination_state_number))
+			elif event_code >= self.channels.events_positions.globalTimerStart:
+				self.globalTimers.start_matrix[state_name_idx].append((event_code, destination_state_number))
 			else:
 				self.input_matrix[state_name_idx].append((event_code, destination_state_number))
 
@@ -117,15 +120,35 @@ class StateMachine(object):
 
 		self.total_states_added += 1
 
-	def set_global_timer(self, timer_number, timer_duration):
+	def set_global_timer_legacy(self, timer_number, timer_duration):
 		"""
-		Set global timer
+		Set global timer (legacy version)
 
 		:param timerNumber:
 		:param timerDuration:
 		:return:
 		"""
 		self.global_timers.timers[timer_number - 1] = timer_duration
+
+	def set_global_timer(self, timer_ID, timer_duration, on_set_delay, channel, on_message=1, off_message=0):
+		"""
+		Set global timer
+		:param int timer_ID:
+		:param int timer_duration: timer duration in ???seconds???
+		:param float on_set_delay:
+		:param str channel: channel/port name Ex: 'PWM2'
+		:param int on_message:
+		"""
+		try:
+			timer_channel_idx = self.outputChannelNames.index(channel)  # type: int
+		except:
+			raise SMAError('Error: ' + channel + ' is an invalid output channel name.')
+
+		self.global_timers.timers[timer_ID - 1] = timer_duration
+		self.global_timers.on_set_delays[timer_ID - 1] = on_set_delay
+		self.global_timers.channels[timer_ID - 1] = timer_channel_idx
+		self.global_timers.on_messages[timer_ID - 1] = on_message
+		self.global_timers.off_messages[timer_ID - 1] = off_message
 
 	def set_global_counter(self, counter_number, counter_event, threshold):
 		"""
