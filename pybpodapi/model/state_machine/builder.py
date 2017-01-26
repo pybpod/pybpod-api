@@ -27,24 +27,40 @@ class Builder(StateMachine):
 			for j in range(self.total_states_added):
 				if self.state_timer_matrix[j] == undeclaredStateNumber:
 					self.state_timer_matrix[j] = thisStateNumber
+
+				# input matrix
 				inputTransitions = self.input_matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
 				self.input_matrix[j] = inputTransitions
-				inputTransitions = self.global_timers.matrix[j]
+
+				# start matrix
+				inputTransitions = self.global_timers.start_matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
-				self.global_timers.matrix[j] = inputTransitions
+				self.global_timers.start_matrix[j] = inputTransitions
+
+				# end matrix
+				inputTransitions = self.global_timers.end_matrix[j]
+				for k in range(0, len(inputTransitions)):
+					thisTransition = inputTransitions[k]
+					if thisTransition[1] == undeclaredStateNumber:
+						inputTransitions[k] = (thisTransition[0], thisStateNumber)
+				self.global_timers.end_matrix[j] = inputTransitions
+
+				# global counters
 				inputTransitions = self.global_counters.matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
 					if thisTransition[1] == undeclaredStateNumber:
 						inputTransitions[k] = (thisTransition[0], thisStateNumber)
 				self.global_counters.matrix[j] = inputTransitions
+
+				# conditions
 				inputTransitions = self.conditions.matrix[j]
 				for k in range(0, len(inputTransitions)):
 					thisTransition = inputTransitions[k]
@@ -64,13 +80,16 @@ class Builder(StateMachine):
 		:return:
 		"""
 		message = [len(self.state_names), ]
-		for i in range(self.total_states_added):  # Send state timer transitions (for all states)
+
+		# Send state timer transitions (for all states)
+		for i in range(self.total_states_added):
 			if math.isnan(self.state_timer_matrix[i]):
 				message += (self.total_states_added,)
 			else:
 				message += (self.state_timer_matrix[i],)
-		for i in range(
-				self.total_states_added):  # Send event-triggered transitions (where they are different from default)
+
+		# Send event-triggered transitions (where they are different from default)
+		for i in range(self.total_states_added):
 			currentStateTransitions = self.input_matrix[i]
 			nTransitions = len(currentStateTransitions)
 			message += (nTransitions,)
@@ -82,7 +101,9 @@ class Builder(StateMachine):
 					message += (self.total_states_added,)
 				else:
 					message += (destinationState,)
-		for i in range(self.total_states_added):  # Send hardware states (where they are different from default)
+
+		# Send hardware states (where they are different from default)
+		for i in range(self.total_states_added):
 			currentHardwareState = self.output_matrix[i]
 			nDifferences = len(currentHardwareState)
 			message += (nDifferences,)
@@ -90,21 +111,37 @@ class Builder(StateMachine):
 				thisHardwareConfig = currentHardwareState[j]
 				message += (thisHardwareConfig[0],)
 				message += (thisHardwareConfig[1],)
-		for i in range(
-				self.total_states_added):  # Send global timer triggered transitions (where they are different from default)
-			currentStateTransitions = self.global_timers.matrix[i]
+
+		# Send global timer-start triggered transitions (where they are different from default)
+		for i in range(self.total_states_added):
+			currentStateTransitions = self.global_timers.start_matrix[i]
 			nTransitions = len(currentStateTransitions)
 			message += (nTransitions,)
 			for j in range(nTransitions):
 				thisTransition = currentStateTransitions[j]
-				message += (thisTransition[0] - self.channels.events_positions.globalTimer,)
+				message += (thisTransition[0] - self.channels.events_positions.globalTimerStart,)
 				destinationState = thisTransition[1]
 				if math.isnan(destinationState):
 					message += (self.total_states_added,)
 				else:
 					message += (destinationState,)
-		for i in range(
-				self.total_states_added):  # Send global counter triggered transitions (where they are different from default)
+
+		# Send global timer-end triggered transitions (where they are different from default)
+		for i in range(self.total_states_added):
+			currentStateTransitions = self.global_timers.end_matrix[i]
+			nTransitions = len(currentStateTransitions)
+			message += (nTransitions,)
+			for j in range(nTransitions):
+				thisTransition = currentStateTransitions[j]
+				message += (thisTransition[0] - self.channels.events_positions.globalTimerEnd,)
+				destinationState = thisTransition[1]
+				if math.isnan(destinationState):
+					message += (self.total_states_added,)
+				else:
+					message += (destinationState,)
+
+		# Send global counter triggered transitions (where they are different from default)
+		for i in range(self.total_states_added):
 			currentStateTransitions = self.global_counters.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			message += (nTransitions,)
@@ -116,8 +153,9 @@ class Builder(StateMachine):
 					message += (self.total_states_added,)
 				else:
 					message += (destinationState,)
-		for i in range(
-				self.total_states_added):  # Send condition triggered transitions (where they are different from default)
+
+		# Send condition triggered transitions (where they are different from default)
+		for i in range(self.total_states_added):
 			currentStateTransitions = self.conditions.matrix[i]
 			nTransitions = len(currentStateTransitions)
 			message += (nTransitions,)
@@ -129,6 +167,13 @@ class Builder(StateMachine):
 					message += (self.total_states_added,)
 				else:
 					message += (destinationState,)
+
+		for i in range(self.hardware.n_global_timers):
+			message += (self.global_timers.channels[i],)
+		for i in range(self.hardware.n_global_timers):
+			message += (self.global_timers.on_messages[i],)
+		for i in range(self.hardware.n_global_timers):
+			message += (self.global_timers.off_messages[i],)
 		for i in range(self.hardware.n_global_counters):
 			message += (self.global_counters.attached_events[i],)
 		for i in range(self.hardware.n_conditions):
@@ -148,10 +193,12 @@ class Builder(StateMachine):
 		"""
 
 		thirty_two_bit_message = [i * self.hardware.cycle_frequency for i in self.state_timers] + \
-		                      [i * self.hardware.cycle_frequency for i in self.global_timers.timers] + \
-		                      self.global_counters.thresholds
-		
+		                         [i * self.hardware.cycle_frequency for i in self.global_timers.timers] + \
+		                         [i * self.hardware.cycle_frequency for i in self.global_timers.on_set_delays] + \
+		                         self.global_counters.thresholds
+
 		return thirty_two_bit_message
+
 
 class StateMachineBuilderError(Exception):
 	pass

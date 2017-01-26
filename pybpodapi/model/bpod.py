@@ -18,6 +18,11 @@ from pybpodapi.model.state_machine.raw_data import RawData
 logger = logging.getLogger(__name__)
 
 
+class Status():
+	def __init__(self):
+		self.new_sma_sent = False  # type: bool
+
+
 class Bpod(object):
 	"""
 	Bpod is the main entity.
@@ -51,6 +56,14 @@ class Bpod(object):
 	def message_api(self, value):
 		self._message_api = value  # type: MessageAPI
 
+	@property
+	def status(self):
+		return self._status  # type: Status
+
+	@status.setter
+	def status(self, value):
+		self._status = value  # type: Status
+
 	#########################################
 	############ PUBLIC METHODS #############
 	#########################################
@@ -73,6 +86,7 @@ class Bpod(object):
 		self.hardware = Hardware()  # type: Hardware
 		self.session = Session()  # type: Session
 		self.message_api = MessageAPI()  # type: MessageAPI
+		self.status = Status()  # type: Status
 
 		self.message_api.connect(serial_port, baudrate)
 
@@ -114,10 +128,9 @@ class Bpod(object):
 
 		message32 = sma.build_message_32_bits()
 
-		response = self.message_api.send_state_machine(message, message32)
+		self.status.new_sma_sent = True
 
-		if not response:
-			raise BpodError('Error: Failed to send state machine.')
+		self.message_api.send_state_machine(message, message32)
 
 	def run_state_machine(self, sma):
 		"""
@@ -137,6 +150,10 @@ class Bpod(object):
 		current_state = 0
 
 		self.message_api.run_state_machine()
+		if self.status.new_sma_sent:
+			if not self.message_api.state_machine_installation_status():
+				raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
+			self.status.new_sma_sent = False
 
 		sma.is_running = True
 		while sma.is_running:
@@ -237,6 +254,8 @@ class Bpod(object):
 					sma.is_running = False
 				else:
 					raw_events.events.append(event)
+
+					# input matrix
 					if not transition_event_found:
 						for transition in sma.input_matrix[current_state]:
 							if transition[0] == event:
@@ -245,6 +264,8 @@ class Bpod(object):
 									raw_events.states.append(current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
+
+					# state timer matrix
 					if not transition_event_found:
 						this_state_timer_transition = sma.state_timer_matrix[current_state]
 						if event == sma.channels.events_positions.Tup:
@@ -254,14 +275,27 @@ class Bpod(object):
 									raw_events.states.append(current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
+
+					# global timers start matrix
 					if not transition_event_found:
-						for transition in sma.global_timers.matrix[current_state]:
+						for transition in sma.global_timers.start_matrix[current_state]:
 							if transition[0] == event:
 								current_state = transition[1]
 								if not math.isnan(current_state):
 									raw_events.states.append(current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
+
+					# global timers end matrix
+					if not transition_event_found:
+						for transition in sma.global_timers.end_matrix[current_state]:
+							if transition[0] == event:
+								current_state = transition[1]
+								if not math.isnan(current_state):
+									raw_events.states.append(current_state)
+									state_change_indexes.append(len(raw_events.events) - 1)
+								transition_event_found = True
+
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
 

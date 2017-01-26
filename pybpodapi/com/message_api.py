@@ -156,7 +156,6 @@ class MessageAPI(object):
 
 		:param list(int) Message: TODO
 		:param list(int) ThirtyTwoBitMessage: TODO
-		:rtype: bool
 		"""
 
 		logger.debug("Sending state machine: %s", Message)
@@ -166,12 +165,6 @@ class MessageAPI(object):
 
 		self._arcom.write_uint32_array(ThirtyTwoBitMessage)
 
-		response = self._arcom.read_uint8()  # type: int
-
-		logger.debug("Response: %s", response)
-
-		return True if response == ReceiveMessageHeader.NEW_STATE_MATRIX_OK else False
-
 	def run_state_machine(self):
 		"""
 		Request to run state machine now
@@ -179,6 +172,19 @@ class MessageAPI(object):
 		logger.debug("Requesting state machine run (%s)", SendMessageHeader.RUN_STATE_MACHINE)
 
 		self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
+
+
+	def state_machine_installation_status(self):
+		"""
+		Confirm if new state machine was correctly installed
+
+		:rtype: bool
+		"""
+		response = self._arcom.read_uint8()  # type: int
+
+		logger.debug("Read state machine installation status: %s", response)
+
+		return True if response == ReceiveMessageHeader.STATE_MACHINE_INSTALLATION_STATUS else False
 
 	def data_available(self):
 		"""

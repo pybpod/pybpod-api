@@ -65,8 +65,8 @@ class ReceiveMessageHeader(object):
 	#: Success code from SYNC_CHANNEL_MODE command
 	SYNC_CHANNEL_MODE_OK = 1
 
-	#: Success code from NEW_STATE_MATRIX command
-	NEW_STATE_MATRIX_OK = 1
+	#: Success code from RUN_STATE_MACHINE command
+	STATE_MACHINE_INSTALLATION_STATUS = 1
 
 	#: Success code from LOAD_SERIAL_MESSAGE command
 	LOAD_SERIAL_MESSAGE_OK = 1

@@ -5,9 +5,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ChannelType(object):
 	INPUT = 1
 	OUTPUT = 2
+
 
 class ChannelName(object):
 	PWM = 'PWM'
@@ -18,7 +20,25 @@ class ChannelName(object):
 
 
 class EventsPositions(object):
-	pass
+	"""
+
+	"""
+	def __init__(self):
+		self.Event_USB = 0  # type: int
+		self.Event_Port = 0  # type: int
+		self.Event_BNC = 0  # type: int
+		self.EventWire = 0  # type: int
+		self.globalTimerStart = 0  # type: int
+		self.globalTimerEnd = 0  # type: int
+		self.globalCounter = 0  # type: int
+		self.condition = 0  # type: int
+		self.jump = 0  # type: int
+		self.Tup = 0  # type: int
+		self.output_USB = 0  # type: int
+		self.output_SPI = 0  # type: int
+		self.output_BNC = 0  # type: int
+		self.output_Wire = 0  # type: int
+		self.output_PWM = 0  # type: int
 
 
 class Channels(object):
@@ -84,24 +104,34 @@ class Channels(object):
 				Pos += 1
 				self.event_names += (self.input_channel_names[-1] + 'Out',)
 				Pos += 1
-		self.events_positions.globalTimer = Pos;
+
+		self.events_positions.globalTimerStart = Pos;
+		for i in range(hardware.n_global_timers):
+			self.event_names += ('GlobalTimer' + str(i + 1) + '_Start',)
+			Pos += 1
+
+		self.events_positions.globalTimerEnd = Pos;
 		for i in range(hardware.n_global_timers):
 			self.event_names += ('GlobalTimer' + str(i + 1) + '_End',)
 			Pos += 1
+
 		self.events_positions.globalCounter = Pos;
 		for i in range(hardware.n_global_counters):
 			self.event_names += ('GlobalCounter' + str(i + 1) + '_End',)
 			Pos += 1
+
 		self.events_positions.condition = Pos;
 		for i in range(hardware.n_conditions):
 			self.event_names += ('Condition' + str(i + 1),)
 			Pos += 1
+
 		self.events_positions.jump = Pos;
 		for i in range(hardware.n_uart_channels):
 			self.event_names += ('Serial' + str(i + 1) + 'Jump',)
 			Pos += 1
 		self.event_names += ('SoftJump',)
 		Pos += 1
+
 		self.event_names += ('Tup',)
 		self.events_positions.Tup = Pos;
 		Pos += 1
