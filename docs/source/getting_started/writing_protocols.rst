@@ -140,4 +140,4 @@ Finally, after the loop finishes, we can disconnect from Bpod.
 Try the example
 ===============
 
-You can try the full example by installing and running this library (:ref:`getting-started-label`).
+You can try the full example by :ref:`installing <installing-label>` and :ref:`running <running-label>` this library.

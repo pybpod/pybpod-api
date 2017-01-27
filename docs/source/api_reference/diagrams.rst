@@ -1,18 +1,10 @@
-#############
-API Reference
-#############
+********
+Diagrams
+********
 
-**Modules Hierarchy**
-
-.. toctree::
-   :maxdepth: 2
-   :titlesonly:
-
-   pybpodapi/index
-
-===============================
+=============================
 Classes Diagram (and modules)
-===============================
+=============================
 
 .. image:: /_images/pybpodapi_main_classes.svg
    :scale: 100 %

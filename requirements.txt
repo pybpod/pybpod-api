@@ -4,4 +4,4 @@
 # external libraries
 pyserial>=3.1.1
 https://bitbucket.org/fchampalimaud/logging-bootstrap/get/master.zip
-
+numpy
