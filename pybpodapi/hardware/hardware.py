@@ -22,24 +22,32 @@ class Hardware(object):
 
 	@property
 	def firmware_version(self):
-		return self._firmware_version
+		return self._firmware_version # type: int
 
 	@firmware_version.setter
 	def firmware_version(self, value):
-		self._firmware_version = value
+		self._firmware_version = value # type: int
 
 		if self._firmware_version < 7:
-			self.bpod_version = 5
+			self.bpod_version = "0.5.x"
 		else:
-			self.bpod_version = 7
+			self.bpod_version = "0.7.x"
+
+	@property
+	def machine_type(self):
+		return self._machine_type # type: int
+
+	@machine_type.setter
+	def machine_type(self, value):
+		self._machine_type = value # type: int
 
 	@property
 	def bpod_version(self):
-		return self._bpod_version
+		return self._bpod_version # type: str
 
 	@bpod_version.setter
 	def bpod_version(self, value):
-		self._bpod_version = value
+		self._bpod_version = value # type: str
 
 	@property
 	def cycle_period(self):

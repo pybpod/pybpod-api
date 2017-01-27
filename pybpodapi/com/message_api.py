@@ -60,20 +60,22 @@ class MessageAPI(object):
 
 	def firmware_version(self):
 		"""
-		Request firmware version from Bpod
+		Request firmware and machine type from Bpod
 
-		:return: firmware version number
-		:rtype: int
+		:return: firmware and machine type versions
+		:rtype: int, int
 		"""
 		logger.debug("Requesting firmware version (%s)", SendMessageHeader.FIRMWARE_VERSION)
 
 		self._arcom.write_char(SendMessageHeader.FIRMWARE_VERSION)
 
-		response = self._arcom.read_uint32()  # type: int
+		fw_version = self._arcom.read_uint16()  # type: int
+		machine_type = self._arcom.read_uint16()  # type: int
 
-		logger.debug("Firmware version: %s", response)
+		logger.debug("Firmware version: %s", fw_version)
+		logger.debug("Machine type: %s", machine_type)
 
-		return response
+		return fw_version, machine_type
 
 	def hardware_description(self, hardware_info):
 		"""

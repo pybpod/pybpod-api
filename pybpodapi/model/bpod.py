@@ -4,6 +4,7 @@
 import logging
 import math
 
+from pybpodapi import BPOD_FIRMWARE_VERSION
 from pybpodapi.com.message_api import MessageAPI
 from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 from pybpodapi.com.serial_message_container import SerialMessageContainer
@@ -64,6 +65,12 @@ class Bpod(object):
 	def status(self, value):
 		self._status = value  # type: Status
 
+	def __init__(self):
+		self.hardware = Hardware()  # type: Hardware
+		self.session = Session()  # type: Session
+		self.message_api = MessageAPI()  # type: MessageAPI
+		self.status = Status()  # type: Status
+
 	#########################################
 	############ PUBLIC METHODS #############
 	#########################################
@@ -83,18 +90,13 @@ class Bpod(object):
 		:return type: Bpod
 		"""
 
-		self.hardware = Hardware()  # type: Hardware
-		self.session = Session()  # type: Session
-		self.message_api = MessageAPI()  # type: MessageAPI
-		self.status = Status()  # type: Status
-
 		self.message_api.connect(serial_port, baudrate)
 
 		if not self.message_api.handshake():
 			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
-		self.hardware.firmware_version = self.message_api.firmware_version()
-		if self.hardware.firmware_version < 8:
+		self.hardware.firmware_version, self.hardware.machine_type = self.message_api.firmware_version()
+		if self.hardware.firmware_version < int(BPOD_FIRMWARE_VERSION):
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
 
 		hw_info = HardwareInfoContainer()
