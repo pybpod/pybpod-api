@@ -120,14 +120,14 @@ class StateMachine(object):
 
 		self.total_states_added += 1
 
-	def set_global_timer_legacy(self, timer_number=None, timer_duration=None):
+	def set_global_timer_legacy(self, timer_ID=None, timer_duration=None):
 		"""
 		Set global timer (legacy version)
 
-		:param int timer_number:
+		:param int timer_ID:
 		:param float timer_duration: timer duration in seconds
 		"""
-		self.global_timers.timers[timer_number - 1] = timer_duration
+		self.global_timers.timers[timer_ID - 1] = timer_duration
 
 	def set_global_timer(self, timer_ID, timer_duration, on_set_delay, channel, on_message=1, off_message=0):
 		"""

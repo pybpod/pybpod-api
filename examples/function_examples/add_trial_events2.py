@@ -28,6 +28,7 @@ def run():
 	my_bpod = Bpod().start(settings.SERIAL_PORT)  # Start bpod
 
 	nTrials = 5
+	graceTime = 5
 	trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
 
 	for i in range(nTrials):  # Main loop
@@ -47,29 +48,48 @@ def run():
 
 		sma = StateMachine(my_bpod.hardware)
 
+		sma.set_global_timer_legacy(timer_ID=1, timer_duration=graceTime)  # Set timeout
+
 		sma.add_state(
 			state_name='WaitForPort2Poke',
 			state_timer=1,
 			state_change_conditions={'Port2In': 'FlashStimulus'},
 			output_actions=[('PWM2', 255)])
+
 		sma.add_state(
 			state_name='FlashStimulus',
 			state_timer=0.1,
 			state_change_conditions={'Tup': 'WaitForResponse'},
-			output_actions=[(stimulus, 255)])
+			output_actions=[(stimulus, 255, 'GlobalTimerTrig', 1)])
+
 		sma.add_state(
 			state_name='WaitForResponse',
 			state_timer=1,
-			state_change_conditions={'Port1In': leftAction, 'Port3In': rightAction},
+			state_change_conditions={'Port1In': leftAction, 'Port3In': rightAction, 'Port2In': 'Warning',
+			                         'GlobalTimer1_End': 'MiniPunish'},
 			output_actions=[])
+
+		sma.add_state(
+			state_name='Warning',
+			state_timer=0.1,
+			state_change_conditions={'Tup': 'WaitForResponse', 'GlobalTimer1_End': 'MiniPunish'},
+			output_actions=[('LED', 1), ('LED', 2), ('LED', 3)])  # Reward correct choice
+
 		sma.add_state(
 			state_name='Reward',
 			state_timer=0.1,
 			state_change_conditions={'Tup': 'exit'},
 			output_actions=[('Valve', rewardValve)])  # Reward correct choice
+
 		sma.add_state(
 			state_name='Punish',
 			state_timer=3,
+			state_change_conditions={'Tup': 'exit'},
+			output_actions=[('LED', 1), ('LED', 2), ('LED', 3)])  # Signal incorrect choice
+
+		sma.add_state(
+			state_name='MiniPunish',
+			state_timer=1,
 			state_change_conditions={'Tup': 'exit'},
 			output_actions=[('LED', 1), ('LED', 2), ('LED', 3)])  # Signal incorrect choice
 
