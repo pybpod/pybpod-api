@@ -89,9 +89,9 @@ class StateMachine(object):
 			elif event_code >= self.channels.events_positions.globalCounter:
 				self.global_counters.matrix[state_name_idx].append((event_code, destination_state_number))
 			elif event_code >= self.channels.events_positions.globalTimerEnd:
-				self.globalTimers.end_matrix[state_name_idx].append((event_code, destination_state_number))
+				self.global_timers.end_matrix[state_name_idx].append((event_code, destination_state_number))
 			elif event_code >= self.channels.events_positions.globalTimerStart:
-				self.globalTimers.start_matrix[state_name_idx].append((event_code, destination_state_number))
+				self.global_timers.start_matrix[state_name_idx].append((event_code, destination_state_number))
 			else:
 				self.input_matrix[state_name_idx].append((event_code, destination_state_number))
 
@@ -120,13 +120,12 @@ class StateMachine(object):
 
 		self.total_states_added += 1
 
-	def set_global_timer_legacy(self, timer_number, timer_duration):
+	def set_global_timer_legacy(self, timer_number=None, timer_duration=None):
 		"""
 		Set global timer (legacy version)
 
-		:param timerNumber:
-		:param timerDuration:
-		:return:
+		:param int timer_number:
+		:param float timer_duration: timer duration in seconds
 		"""
 		self.global_timers.timers[timer_number - 1] = timer_duration
 
@@ -134,7 +133,7 @@ class StateMachine(object):
 		"""
 		Set global timer
 		:param int timer_ID:
-		:param int timer_duration: timer duration in ???seconds???
+		:param float timer_duration: timer duration in seconds
 		:param float on_set_delay:
 		:param str channel: channel/port name Ex: 'PWM2'
 		:param int on_message:
