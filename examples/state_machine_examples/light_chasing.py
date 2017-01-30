@@ -1,61 +1,84 @@
-'''
-----------------------------------------------------------------------------
+# !/usr/bin/python3
+# -*- coding: utf-8 -*-
 
-This file is part of the Sanworks Bpod repository
-Copyright (C) 2016 Sanworks LLC, Sound Beach, New York, USA
+"""
+Light Chasing example
 
-----------------------------------------------------------------------------
+Follow light on 3 pokes
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 3.
+"""
 
-This program is distributed  WITHOUT ANY WARRANTY and without even the
-implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
+import logging
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+import examples.settings as settings
 
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__)[:-22], "Modules")) # Add Bpod system files to Python path
+from pybpodapi.model.bpod import Bpod
+from pybpodapi.model.state_machine import StateMachine
 
-# Initializing Bpod
-from BpodClass import BpodObject # Import BpodObject
-from StateMachineAssembler import stateMachine # Import state machine assembler
+logger = logging.getLogger("examples")
 
-myBpod = BpodObject('COM13') # Create a new instance of a Bpod object on serial port COM13
 
-sma = stateMachine(myBpod) # Create a new state machine (events + outputs tailored for myBpod)
-sma.addState('Name', 'Port1Active1', # Add a state
-             'Timer', 0,
-             'StateChangeConditions', ('Port1In', 'Port2Active1'),
-             'OutputActions', ('PWM1', 255))
-sma.addState('Name', 'Port2Active1',
-             'Timer', 0,
-             'StateChangeConditions', ('Port2In', 'Port3Active1'),
-             'OutputActions', ('PWM2', 255))
-sma.addState('Name', 'Port3Active1',
-             'Timer', 0,
-             'StateChangeConditions', ('Port3In', 'Port1Active2'),
-             'OutputActions', ('PWM3', 255))
-sma.addState('Name', 'Port1Active2',
-             'Timer', 0,
-             'StateChangeConditions', ('Port1In', 'Port2Active2'),
-             'OutputActions', ('PWM1', 255))
-sma.addState('Name', 'Port2Active2',
-             'Timer', 0,
-             'StateChangeConditions', ('Port2In', 'Port3Active2'),
-             'OutputActions', ('PWM2', 255))
-sma.addState('Name', 'Port3Active2',
-             'Timer', 0,
-             'StateChangeConditions', ('Port3In', 'exit'),
-             'OutputActions', ('PWM3', 255))
+def run():
+	"""
+	Run this protocol now
+	"""
 
-myBpod.sendStateMachine(sma) # Send state machine description to Bpod device
-RawEvents = myBpod.runStateMachine() # Run state machine and return events
-print RawEvents.__dict__ # Print events to console
+	my_bpod = Bpod().start(settings.SERIAL_PORT)
 
-# Disconnect Bpod
-myBpod.disconnect() # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.
+	sma = StateMachine(my_bpod.hardware)
+
+	sma.add_state(
+		state_name='Port1Active1',  # Add a state
+		state_timer=0,
+		state_change_conditions={'Port1In': 'Port2Active1'},
+		output_actions=[('PWM1', 255)])
+
+	sma.add_state(
+		state_name='Port2Active1',
+		state_timer=0,
+		state_change_conditions={'Port2In': 'Port3Active1'},
+		output_actions=[('PWM2', 255)])
+
+	sma.add_state(
+		state_name='Port3Active1',
+		state_timer=0,
+		state_change_conditions={'Port3In': 'Port1Active2'},
+		output_actions=[('PWM3', 255)])
+
+	sma.add_state(
+		state_name='Port1Active2',
+		state_timer=0,
+		state_change_conditions={'Port1In': 'Port2Active2'},
+		output_actions=[('PWM1', 255)])
+
+	sma.add_state(
+		state_name='Port2Active2',
+		state_timer=0,
+		state_change_conditions={'Port2In': 'Port3Active2'},
+		output_actions=[('PWM2', 255)])
+
+	sma.add_state(
+		state_name='Port3Active2',
+		state_timer=0,
+		state_change_conditions={'Port3In': 'exit'},
+		output_actions=[('PWM3', 255)])
+
+	my_bpod.send_state_machine(sma)
+
+	raw_events = my_bpod.run_state_machine(sma)
+
+	logger.info("Raw events: %s", raw_events)
+
+	my_bpod.disconnect()
+
+
+if __name__ == '__main__':
+	import loggingbootstrap
+
+	# setup different loggers for example script and api
+	loggingbootstrap.create_double_logger("pybpodapi", settings.API_LOG_LEVEL, 'pybpodapi-examples.log',
+	                                      settings.API_LOG_LEVEL)
+	loggingbootstrap.create_double_logger("examples", settings.EXAMPLE_SCRIPT_LOG_LEVEL, 'pybpodapi-examples.log',
+	                                      settings.EXAMPLE_SCRIPT_LOG_LEVEL)
+
+	run()

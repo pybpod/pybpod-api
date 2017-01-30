@@ -1,49 +1,66 @@
-'''
-----------------------------------------------------------------------------
+# !/usr/bin/python3
+# -*- coding: utf-8 -*-
 
-This file is part of the Sanworks Bpod repository
-Copyright (C) 2016 Sanworks LLC, Sound Beach, New York, USA
+"""
+Example adapted from Josh Sanders' original version on Sanworks Bpod repository
+"""
 
-----------------------------------------------------------------------------
+import logging
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 3.
+import examples.settings as settings
 
-This program is distributed  WITHOUT ANY WARRANTY and without even the
-implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
+from pybpodapi.model.bpod import Bpod
+from pybpodapi.model.state_machine import StateMachine
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+logger = logging.getLogger("examples")
 
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__)[:-22], "Modules")) # Add Bpod system files to Python path
 
-# Initializing Bpod
-from BpodClass import BpodObject # Import BpodObject
-from StateMachineAssembler import stateMachine # Import state machine assembler
+def run():
+	"""
+	Run this protocol now
+	"""
 
-myBpod = BpodObject('COM13') # Create a new instance of a Bpod object on serial port COM13
-sma = stateMachine(myBpod) # Create a new state machine (events + outputs tailored for myBpod)
-# Set global timer 1 for 3 seconds, following a 1.5 second onset delay after trigger. Link to channel BNC2.
-sma.setGlobalTimer('TimerID', 1, 'Duration', 3, 'OnsetDelay', 1.5, 'Channel', 'BNC2')
-sma.addState('Name', 'TimerTrig', # Trigger global timer
-    'Timer', 0,
-    'StateChangeConditions', ('Tup', 'Port1Lit'),
-    'OutputActions', ('GlobalTimerTrig', 1))
-sma.addState('Name', 'Port1Lit', # Infinite loop (with next state). Only a global timer can save us.
-    'Timer', .25,
-    'StateChangeConditions', ('Tup', 'Port3Lit', 'GlobalTimer1_End', 'exit'),
-    'OutputActions', ('PWM1', 255))
-sma.addState('Name', 'Port3Lit',
-    'Timer', .25,
-    'StateChangeConditions', ('Tup', 'Port1Lit', 'GlobalTimer1_End', 'exit'),
-    'OutputActions', ('PWM3', 255))
-myBpod.sendStateMachine(sma) # Send state machine description to Bpod device
-RawEvents = myBpod.runStateMachine() # Run state machine and return events
-print RawEvents.__dict__ # Print events to console
+	my_bpod = Bpod().start(settings.SERIAL_PORT)
 
-# Disconnect Bpod
-myBpod.disconnect() # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.
+	sma = StateMachine(my_bpod.hardware)
+
+	# Set global timer 1 for 3 seconds, following a 1.5 second onset delay after trigger. Link to channel BNC2.
+	sma.set_global_timer(timer_ID=1, timer_duration=3, on_set_delay=1.5, channel='BNC2')
+
+	sma.add_state(
+		state_name='TimerTrig',  # Trigger global timer
+		state_timer=0,
+		state_change_conditions={'Tup': 'Port1Lit'},
+		output_actions=[('GlobalTimerTrig', 1)])
+
+	sma.add_state(
+		state_name='Port1Lit',  # Infinite loop (with next state). Only a global timer can save us.
+		state_timer=.25,
+		state_change_conditions={'Tup': 'Port3Lit', 'GlobalTimer1_End': 'exit'},
+		output_actions=[('PWM1', 255)])
+
+	sma.add_state(
+		state_name='Port3Lit',
+		state_timer=.25,
+		state_change_conditions={'Tup': 'Port1Lit', 'GlobalTimer1_End': 'exit'},
+		output_actions=[('PWM3', 255)])
+
+	my_bpod.send_state_machine(sma)
+
+	raw_events = my_bpod.run_state_machine(sma)
+
+	logger.info("Raw events: %s", raw_events)
+
+	my_bpod.disconnect()
+
+
+if __name__ == '__main__':
+	import loggingbootstrap
+
+	# setup different loggers for example script and api
+	loggingbootstrap.create_double_logger("pybpodapi", settings.API_LOG_LEVEL, 'pybpodapi-examples.log',
+	                                      settings.API_LOG_LEVEL)
+	loggingbootstrap.create_double_logger("examples", settings.EXAMPLE_SCRIPT_LOG_LEVEL, 'pybpodapi-examples.log',
+	                                      settings.EXAMPLE_SCRIPT_LOG_LEVEL)
+
+	run()

@@ -139,7 +139,7 @@ class StateMachine(object):
 		:param int on_message:
 		"""
 		try:
-			timer_channel_idx = self.outputChannelNames.index(channel)  # type: int
+			timer_channel_idx = self.channels.output_channel_names.index(channel)  # type: int
 		except:
 			raise SMAError('Error: ' + channel + ' is an invalid output channel name.')
 
