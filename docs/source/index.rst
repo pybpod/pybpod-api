@@ -53,6 +53,7 @@ Python is one of the most popular programming languages today `[1] <https://pypl
    getting_started/running
    getting_started/writing_protocols
    getting_started/exporting
+   getting_started/manual_interaction
 
 .. toctree::
    :hidden:

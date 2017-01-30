@@ -7,15 +7,37 @@ logger = logging.getLogger(__name__)
 
 
 class ChannelType(object):
+	"""
+	Define if channel type is input or output.
+	These values must be set according to Bpod firmware specification.
+	"""
+
+	#: Input channel
 	INPUT = 1
+
+	#: Output channel
 	OUTPUT = 2
 
 
 class ChannelName(object):
+	"""
+	Available channel names.
+	These values must be set according to Bpod firmware specification.
+	"""
+
+	#: Analog channel with PWM support (e.g. Led)
 	PWM = 'PWM'
+
+	#: Analog channel for connecting a valve
 	VALVE = 'Valve'
+
+	#: BNC channel
 	BNC = 'BNC'
+
+	#: Wire channel
 	WIRE = 'Wire'
+
+	#: Serial channel
 	SERIAL = 'Serial'
 
 
@@ -23,6 +45,7 @@ class EventsPositions(object):
 	"""
 
 	"""
+
 	def __init__(self):
 		self.Event_USB = 0  # type: int
 		self.Event_Port = 0  # type: int

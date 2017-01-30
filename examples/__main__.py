@@ -36,8 +36,8 @@ def print_menu_info():
 
 def config_menu():
 	print('\nRunning pybpod-api version: {0}'.format(pybpodapi.__version__))
-	print('\nBpod version: {0}'.format(pybpodapi.BPOD_VERSION))
-	print('Firmware version: {0}\n'.format(pybpodapi.BPOD_FIRMWARE_VERSION))
+	print('\nBpod supported version: {0}'.format(pybpodapi.BPOD_VERSION))
+	print('Firmware supported version: {0}\n'.format(pybpodapi.BPOD_FIRMWARE_VERSION))
 	selection = None
 	while True:
 		try:

@@ -74,6 +74,8 @@ def run():
 
 		my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 
+		logger.info("Waiting for poke. Reward: %s", 'left' if thisTrialType == 1 else 'right')
+
 		raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
 
 		# print("Raw events: ", raw_events)  # Print events to console
@@ -86,7 +88,13 @@ def run():
 	my_bpod.disconnect()  # Disconnect Bpod
 
 
-
 if __name__ == '__main__':
-	run()
+	import loggingbootstrap
 
+	# setup different loggers for example script and api
+	loggingbootstrap.create_double_logger("pybpodapi", settings.API_LOG_LEVEL, 'pybpodapi-examples.log',
+	                                      settings.API_LOG_LEVEL)
+	loggingbootstrap.create_double_logger("examples", settings.EXAMPLE_SCRIPT_LOG_LEVEL, 'pybpodapi-examples.log',
+	                                      settings.EXAMPLE_SCRIPT_LOG_LEVEL)
+
+	run()

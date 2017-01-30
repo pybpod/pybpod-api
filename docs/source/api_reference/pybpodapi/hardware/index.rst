@@ -9,3 +9,4 @@
    :titlesonly:
 
    hardware
+   channels
