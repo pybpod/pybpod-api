@@ -6,6 +6,8 @@ Light Chasing example
 
 Follow light on 3 pokes
 
+Connect noseports to ports 1-3.
+
 """
 
 import logging

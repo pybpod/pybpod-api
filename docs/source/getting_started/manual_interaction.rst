@@ -1,3 +1,5 @@
+.. _manual-label:
+
 **********************
 Manual control of Bpod
 **********************
