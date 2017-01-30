@@ -49,10 +49,10 @@ class StateMachine(object):
 		"""
 		Add new state
 
-		:param name:
-		:param timer:
-		:param state_change_conditions:
-		:param output_actions:
+		:param str name: name of the state
+		:param float timer: timer in seconds
+		:param dict state_change_conditions:
+		:param tuple output_actions:
 		"""
 
 		# TODO: WHY DO WE NEED THIS IF-ELSE?
@@ -150,16 +150,15 @@ class StateMachine(object):
 		self.global_timers.on_messages[timer_ID - 1] = on_message
 		self.global_timers.off_messages[timer_ID - 1] = off_message
 
-	def set_global_counter(self, counter_number, counter_event, threshold):
+	def set_global_counter(self, counter_number=None, target_event=None, threshold=None):
 		"""
 		Set global counter
 
-		:param counterNumber:
-		:param counterEvent:
-		:param threshold:
-		:return:
+		:param int counter_number:
+		:param str target_event:
+		:param int threshold:
 		"""
-		event_code = self.channels.event_names.index(counter_event)
+		event_code = self.channels.event_names.index(target_event)
 		self.global_counters.attached_events[counter_number - 1] = event_code
 		self.global_counters.thresholds[counter_number - 1] = threshold
 
@@ -167,10 +166,9 @@ class StateMachine(object):
 		"""
 		Set condition
 
-		:param conditionNumber:
-		:param conditionChannel:
-		:param channelValue:
-		:return:
+		:param int condition_number:
+		:param str condition_channel:
+		:param int channel_value:
 		"""
 		channel_code = self.channels.input_channel_names.index(condition_channel)
 		self.conditions.channels[condition_number - 1] = channel_code

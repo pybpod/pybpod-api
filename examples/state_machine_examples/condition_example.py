@@ -46,13 +46,13 @@ def run():
 
 	logger.info("Conditions matrix: %s", sma.conditions.matrix)
 
-	my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
+	my_bpod.send_state_machine(sma)
 
-	raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
+	raw_events = my_bpod.run_state_machine(sma)
 
 	logger.info("Raw events: %s", raw_events)
 
-	my_bpod.disconnect()  # Disconnect Bpod
+	my_bpod.disconnect()
 
 
 if __name__ == '__main__':
