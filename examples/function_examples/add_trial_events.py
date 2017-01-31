@@ -9,15 +9,12 @@ Connect noseports to ports 1-3.
 Example adapted from Josh Sanders' original version on Sanworks Bpod repository
 """
 
-import logging
 import random
 
 import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
-
-logger = logging.getLogger("examples")
 
 
 def run():
@@ -31,7 +28,7 @@ def run():
 	trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
 
 	for i in range(nTrials):  # Main loop
-		logger.info('Trial: %s', i + 1)
+		print('Trial: ', i + 1)
 
 		thisTrialType = random.choice(trialTypes)  # Randomly choose trial type
 		if thisTrialType == 1:
@@ -75,11 +72,11 @@ def run():
 
 		my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 
-		logger.info("Waiting for poke. Reward: %s", 'left' if thisTrialType == 1 else 'right')
+		print("Waiting for poke. Reward: ", 'left' if thisTrialType == 1 else 'right')
 
 		raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
 
-		logger.info("Raw events: %s", raw_events)
+		print("Raw events: ", raw_events)
 
 		my_bpod.add_trial_events()
 
@@ -90,12 +87,4 @@ def run():
 
 
 if __name__ == '__main__':
-	import loggingbootstrap
-
-	# setup different loggers for example script and api
-	loggingbootstrap.create_double_logger("pybpodapi", settings.API_LOG_LEVEL, 'pybpodapi-examples.log',
-	                                      settings.API_LOG_LEVEL)
-	loggingbootstrap.create_double_logger("examples", settings.EXAMPLE_SCRIPT_LOG_LEVEL, 'pybpodapi-examples.log',
-	                                      settings.EXAMPLE_SCRIPT_LOG_LEVEL)
-
-	run()
+	settings.run_this_protocol(run)
