@@ -45,6 +45,8 @@ class StateMachine(object):
 
 		self.raw_data = RawData()
 
+		self.is_running = False
+
 	def add_state(self, state_name, state_timer, state_change_conditions={}, output_actions=()):
 		"""
 		Add new state

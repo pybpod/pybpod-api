@@ -1,1 +1,1 @@
-from pybpodapi.model.state_machine.builder import Builder as StateMachine
+from pybpodapi.model.state_machine.runner import Runner as StateMachine

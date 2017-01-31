@@ -149,8 +149,6 @@ class Bpod(object):
 
 		state_change_indexes = []
 
-		current_state = 0
-
 		self.message_api.run_state_machine()
 		if self.status.new_sma_sent:
 			if not self.message_api.state_machine_installation_status():
@@ -161,7 +159,7 @@ class Bpod(object):
 		while sma.is_running:
 			if self.message_api.data_available():
 				opcode, data = self.message_api.read_opcode_message()
-				self.__process_opcode(sma, opcode, data, state_change_indexes, current_state)
+				self.__process_opcode(sma, opcode, data, state_change_indexes)
 
 		self.__update_timestamps(sma, state_change_indexes)
 
@@ -243,7 +241,7 @@ class Bpod(object):
 	############ PRIVATE METHODS ############
 	#########################################
 
-	def __process_opcode(self, sma, opcode, data, state_change_indexes, current_state):
+	def __process_opcode(self, sma, opcode, data, state_change_indexes):
 
 		raw_events = sma.raw_data  # legacy fix
 
@@ -259,44 +257,52 @@ class Bpod(object):
 
 					# input matrix
 					if not transition_event_found:
-						for transition in sma.input_matrix[current_state]:
+						logger.debug("transition event not found")
+						logger.debug("Current state: %s", sma.current_state)
+						for transition in sma.input_matrix[sma.current_state]:
+							logger.debug("Transition: %s", transition)
 							if transition[0] == event:
-								current_state = transition[1]
-								if not math.isnan(current_state):
-									raw_events.states.append(current_state)
+								sma.current_state = transition[1]
+								if not math.isnan(sma.current_state):
+									logger.debug("adding states input matrix")
+									raw_events.states.append(sma.current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
 
 					# state timer matrix
 					if not transition_event_found:
-						this_state_timer_transition = sma.state_timer_matrix[current_state]
+						this_state_timer_transition = sma.state_timer_matrix[sma.current_state]
 						if event == sma.channels.events_positions.Tup:
-							if not (this_state_timer_transition == current_state):
-								current_state = this_state_timer_transition
-								if not math.isnan(current_state):
-									raw_events.states.append(current_state)
+							if not (this_state_timer_transition == sma.current_state):
+								sma.current_state = this_state_timer_transition
+								if not math.isnan(sma.current_state):
+									logger.debug("adding states state timer matrix")
+									raw_events.states.append(sma.current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
 
 					# global timers start matrix
 					if not transition_event_found:
-						for transition in sma.global_timers.start_matrix[current_state]:
+						for transition in sma.global_timers.start_matrix[sma.current_state]:
 							if transition[0] == event:
-								current_state = transition[1]
-								if not math.isnan(current_state):
-									raw_events.states.append(current_state)
+								sma.current_state = transition[1]
+								if not math.isnan(sma.current_state):
+									logger.debug("adding states global timers start matrix")
+									raw_events.states.append(sma.current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
 
 					# global timers end matrix
 					if not transition_event_found:
-						for transition in sma.global_timers.end_matrix[current_state]:
+						for transition in sma.global_timers.end_matrix[sma.current_state]:
 							if transition[0] == event:
-								current_state = transition[1]
-								if not math.isnan(current_state):
-									raw_events.states.append(current_state)
+								sma.current_state = transition[1]
+								if not math.isnan(sma.current_state):
+									logger.debug("adding states global timers end matrix")
+									raw_events.states.append(sma.current_state)
 									state_change_indexes.append(len(raw_events.events) - 1)
 								transition_event_found = True
+				logger.debug(raw_events.states)
 
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
