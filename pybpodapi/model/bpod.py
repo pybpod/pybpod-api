@@ -324,7 +324,7 @@ class Bpod(object):
 		logger.debug("state_change_indexes: %s", state_change_indexes)
 		for i in range(len(state_change_indexes)):
 			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
-			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
+		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
 
 
 class BpodError(Exception):
