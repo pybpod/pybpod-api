@@ -14,14 +14,10 @@ and a GlobalTimer1_End event occurs (handled by exiting the state machine).
 Example adapted from Josh Sanders' original version on Sanworks Bpod repository
 """
 
-import logging
-
 import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
-
-logger = logging.getLogger("examples")
 
 
 def run():
@@ -70,18 +66,10 @@ def run():
 
 	raw_events = my_bpod.run_state_machine(sma)
 
-	logger.info("Raw events: %s", raw_events)
+	print(raw_events)
 
 	my_bpod.disconnect()
 
 
 if __name__ == '__main__':
-	import loggingbootstrap
-
-	# setup different loggers for example script and api
-	loggingbootstrap.create_double_logger("pybpodapi", settings.API_LOG_LEVEL, 'pybpodapi-examples.log',
-	                                      settings.API_LOG_LEVEL)
-	loggingbootstrap.create_double_logger("examples", settings.EXAMPLE_SCRIPT_LOG_LEVEL, 'pybpodapi-examples.log',
-	                                      settings.EXAMPLE_SCRIPT_LOG_LEVEL)
-
-	run()
+	settings.run_this_protocol(run)

@@ -4,20 +4,16 @@
 """
 Light Chasing example
 
-Follow light on 3 pokes
+Follow light on 2 pokes
 
-Connect noseports to ports 1-3.
+Connect noseports to ports 1-2.
 
 """
-
-import logging
 
 import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
-
-logger = logging.getLogger("examples")
 
 
 def run():
@@ -41,7 +37,6 @@ def run():
 		state_change_conditions={'Port2In': 'Port1Active2'},
 		output_actions=[('PWM2', 255)])
 
-
 	sma.add_state(
 		state_name='Port1Active2',
 		state_timer=0,
@@ -54,23 +49,14 @@ def run():
 		state_change_conditions={'Port2In': 'exit'},
 		output_actions=[('PWM2', 255)])
 
-
 	my_bpod.send_state_machine(sma)
 
 	raw_events = my_bpod.run_state_machine(sma)
 
-	logger.info("Raw events: %s", raw_events)
+	print(raw_events)
 
 	my_bpod.disconnect()
 
 
 if __name__ == '__main__':
-	import loggingbootstrap
-
-	# setup different loggers for example script and api
-	loggingbootstrap.create_double_logger("pybpodapi", settings.API_LOG_LEVEL, 'pybpodapi-examples.log',
-	                                      settings.API_LOG_LEVEL)
-	loggingbootstrap.create_double_logger("examples", settings.EXAMPLE_SCRIPT_LOG_LEVEL, 'pybpodapi-examples.log',
-	                                      settings.EXAMPLE_SCRIPT_LOG_LEVEL)
-
-	run()
+	settings.run_this_protocol(run)
