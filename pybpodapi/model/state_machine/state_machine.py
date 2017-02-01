@@ -155,9 +155,9 @@ class StateMachine(object):
 		"""
 		Set global counter
 
-		:param int counter_number:
-		:param str target_event:
-		:param int threshold:
+		:param int counter_number: counter id
+		:param str target_event: port where to listen for event to count
+		:param int threshold: number of times that should be count until trigger timer
 		"""
 		event_code = self.channels.event_names.index(target_event)
 		self.global_counters.attached_events[counter_number - 1] = event_code

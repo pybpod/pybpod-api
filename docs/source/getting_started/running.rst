@@ -142,8 +142,8 @@ Example on how to use serial capabilities of Bpod.
 
    python3 -m examples.function_examples.serial_message
 
-Global timers and counters examples
------------------------------------
+Global timers examples
+----------------------
 Several examples demonstrating how to interact with Bpod timers.
 
 ::
@@ -151,6 +151,16 @@ Several examples demonstrating how to interact with Bpod timers.
    python3 -m examples.state_machine_examples.global_timer_example
    python3 -m examples.state_machine_examples.global_timer_example_digital
    python3 -m examples.state_machine_examples.global_timer_start_and_end_events
+
+
+Global counter example
+----------------------
+After poke2 (PWM2) LED turns off, one will have an infinite loop between LED of poke1 (PWM1) and LED of poke3 (PWM1).
+
+To interrupt the infinite loop one have to interrupt poke1 or poke3 a number of times equal to threshold (in this case is 5 times).
+
+::
+
    python3 -m examples.state_machine_examples.global_counter_example
 
 Setting a condition example

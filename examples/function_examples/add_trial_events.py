@@ -80,8 +80,8 @@ def run():
 
 		my_bpod.add_trial_events()
 
-	# print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
-	# print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
+		print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
+		print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
 
 	my_bpod.disconnect()  # Disconnect Bpod
 

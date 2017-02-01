@@ -3,6 +3,11 @@
 
 """
 Example adapted from Josh Sanders' original version on Sanworks Bpod repository
+
+After poke2 (PWM2) LED turns off, one will have an infinite loop between LED of poke1 (PWM1) and LED of poke3 (PWM1).
+
+To interrupt the infinite loop one have to interrupt poke1 or poke3 a number of times equal to threshold (in this case is 5 times).
+
 """
 
 import examples.settings as settings
