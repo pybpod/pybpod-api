@@ -1,0 +1,3 @@
+v.0.3.3 (2017/02/01)
+
+Fixes 2 bugs related to states timestamps 
