@@ -81,8 +81,8 @@ Simple example of adding a state to the state machine and run it. A timer is use
 
    python3 -m examples.state_machine_examples.one_state
 
-Light chasing example
----------------------
+Light chasing example (3 pokes)
+-------------------------------
 
 Simulation of a light chasing scenario. Follow the light on 3 pokes.
 
@@ -91,6 +91,17 @@ Connect noseports to ports 1-3.
 ::
 
    python3 -m examples.state_machine_examples.light_chasing
+
+Light chasing example (2 pokes)
+-------------------------------
+
+Simulation of a light chasing scenario. Follow the light on 2 pokes.
+
+Connect noseports to ports 1-2.
+
+::
+
+   python3 -m examples.state_machine_examples.light_chasing_2_pokes
 
 Add trial events
 ----------------
