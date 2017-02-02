@@ -18,6 +18,8 @@ What is pybpod-api?
 ===================
 **pybpod-api** is a Python library that enables communication with the latest `Bpod device <https://sanworks.io/shop/viewproduct?productID=1011>`_ version. You can use it directly as a CLI (Command Line Interface) or use your favorite GUI to interact with it.
 
+This library is maintained by a team of SW developers at the `Champalimaud Foundation <http://research.fchampalimaud.org>`_. Please find more information on section :ref:`Project Info <project-info-label>`.
+
 What is Bpod?
 -------------
 
@@ -39,6 +41,9 @@ Why a Python port?
 ------------------
 Python is one of the most popular programming languages today `[1] <https://pypl.github.io/PYPL.html>`_. This is special true for the science research community because it is an open language, easy to learn, with a strong support community and with a lot of libraries available.
 
+Questions?
+==========
+If you have any questions or want to report a problem with this library please fill a issue `here <https://bitbucket.org/fchampalimaud/pybpod-api/issues>`_.
 
 .. high level toc tree
 

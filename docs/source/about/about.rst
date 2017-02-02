@@ -1,3 +1,5 @@
+.. _project-info-label:
+
 ************
 Project Info
 ************
@@ -32,6 +34,11 @@ The current and past members of the **pybpod-api** team.
 * `@cajomferro <https://github.com/cajomferro/>`_ Carlos Mão de Ferro
 * `@JBauto <https://github.com/JBauto>`_ João Baúto
 * `@UmSenhorQualquer <https://github.com/UmSenhorQualquer/>`_ Ricardo Ribeiro
+
+Questions?
+==========
+If you have any questions or want to report a problem with this library please fill a issue `here <https://bitbucket.org/fchampalimaud/pybpod-api/issues>`_.
+
 
 .. Changes log
 .. -----------
