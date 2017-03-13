@@ -163,6 +163,8 @@ class Bpod(object):
 
 		self.__update_timestamps(sma, state_change_indexes)
 
+		self._publish_data(sma.raw_data)
+
 		return sma.raw_data
 
 	def add_trial_events(self):
@@ -173,6 +175,7 @@ class Bpod(object):
 		"""
 
 		self.session.add_trial_events()
+		self._publish_data(self.session.current_trial())
 
 	def manual_override(self, channel_type, channel_name, channel_number, value):
 		"""
@@ -325,6 +328,9 @@ class Bpod(object):
 		for i in range(len(state_change_indexes)):
 			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
 		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
+
+	def _publish_data(self, data):
+		pass
 
 
 class BpodError(Exception):
