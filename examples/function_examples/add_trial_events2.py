@@ -94,14 +94,11 @@ def run():
 
 		print("Waiting for poke. Reward: ", 'left' if thisTrialType == 1 else 'right')
 
-		raw_events = my_bpod.run_state_machine(sma)  # Run state machine and return events
+		my_bpod.run_state_machine(sma)  # Run state machine and return events
 
-		print("Raw events: ", raw_events)
+		print("Raw events: ", sma.raw_data)
 
-		my_bpod.add_trial_events()
-
-		print('States: {0}'.format(my_bpod.session.trials[i].states_timestamps))
-		print('Events: {0}'.format(my_bpod.session.trials[i].events_timestamps))
+		print("Current trial: ", my_bpod.session.current_trial())
 
 	my_bpod.disconnect()  # Disconnect Bpod
 

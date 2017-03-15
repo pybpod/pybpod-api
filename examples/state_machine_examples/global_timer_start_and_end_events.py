@@ -64,9 +64,9 @@ def run():
 
 	my_bpod.send_state_machine(sma)
 
-	raw_events = my_bpod.run_state_machine(sma)
+	my_bpod.run_state_machine(sma)
 
-	print(raw_events)
+	print(sma.raw_data)
 
 	my_bpod.disconnect()
 
