@@ -81,7 +81,7 @@ class Session(object):
 				thisEventTimestamps.append(sma_data.event_timestamps[i])
 			current_trial.events_timestamps[thisEventName] = thisEventTimestamps
 
-		logger.info("Trial info: %s", str(current_trial))
+		logger.debug("Trial info: %s", str(current_trial))
 
 	def current_trial(self):
 		return self.trials[-1]

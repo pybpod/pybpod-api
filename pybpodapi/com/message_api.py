@@ -30,15 +30,16 @@ class MessageAPI(object):
 	def __init__(self):
 		self._arcom = None  # type: ArCOM
 
-	def connect(self, serial_port, baudrate=115200):
+	def connect(self, serial_port, baudrate=115200, timeout=1):
 		"""
 		Connect to Bpod using serial connection
 
 		:param str serial_port: serial port to connect
 		:param int baudrate: baudrate for serial connection
+		:param float timeout: timeout which controls the behavior of read()
 		"""
 		logger.debug("Connecting on port: %s", serial_port)
-		self._arcom = ArCOM().open(serial_port, baudrate)
+		self._arcom = ArCOM().open(serial_port, baudrate, timeout)
 
 	def handshake(self):
 		"""
@@ -220,7 +221,7 @@ class MessageAPI(object):
 		"""
 		response = self._arcom.read_uint32()  # type: int
 
-		logger.debug("Received start trial timestam in seconds: %s", response)
+		logger.debug("Received start trial timestamp in seconds: %s", response)
 
 		trial_start_timestamp = float(response) / 1000
 

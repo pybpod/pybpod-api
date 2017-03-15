@@ -27,14 +27,14 @@ class ArCOM(object):
 	ArCOM is an interface to simplify data transactions between Arduino and Python.
 	"""
 
-	def open(self, serialPortName, baudRate):
+	def open(self, serial_port, baudrate=115200, timeout=1):
 		"""
 		Open serial connection
 		:param serialPortName:
 		:param baudRate:
 		:return:
 		"""
-		self.serial_object = serial.Serial(serialPortName, baudRate, timeout=1)
+		self.serial_object = serial.Serial(serial_port, baudrate=baudrate, timeout=timeout)
 
 		return self
 

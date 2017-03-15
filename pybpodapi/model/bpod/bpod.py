@@ -3,6 +3,7 @@
 
 import logging
 import math
+import time
 
 from pybpodapi import BPOD_FIRMWARE_VERSION
 from pybpodapi.com.message_api import MessageAPI
@@ -28,6 +29,9 @@ class Bpod(object):
 	"""
 	Bpod is the main entity.
 	"""
+
+	#MAX_TRIES = 5  # maximum number of tries when sending serial command
+	WAIT_BEFORE_NEXT_TRIAL = 1 # in seconds
 
 	#########################################
 	############## PROPERTIES ###############
@@ -90,6 +94,8 @@ class Bpod(object):
 		:return type: Bpod
 		"""
 
+		logger.info("Starting Bpod")
+
 		self.message_api.connect(serial_port, baudrate)
 
 		if not self.message_api.handshake():
@@ -112,8 +118,6 @@ class Bpod(object):
 		                                                  sync_mode=sync_mode):
 			raise BpodError('Error: Failed to configure syncronization.')
 
-		logger.info("Bpod successfully started!")
-
 		return self
 
 	def send_state_machine(self, sma):
@@ -123,6 +127,8 @@ class Bpod(object):
 		:param sma: initialized state machine
 		:type sma: StateMachine
 		"""
+
+		logger.info("Sending state machine")
 
 		sma.update_state_numbers()
 
@@ -147,13 +153,31 @@ class Bpod(object):
 
 		self.session.add_trial(sma)
 
+		logger.info("Running state machine, trial %s", len(self.session.trials))
+
 		state_change_indexes = []
+
+		# n_tries = 0
+		# check_status = False
+		# if self.status.new_sma_sent:
+		# 	while (not check_status and n_tries < self.MAX_TRIES):
+		# 		if n_tries > 0:
+		# 			logger.debug("Running state machine failed. Retrying...")
+		# 		self.message_api.run_state_machine()
+		# 		if self.message_api.state_machine_installation_status():
+		# 			check_status = True
+		# 		n_tries += 1
+		#
+		# 	if n_tries == self.MAX_TRIES:
+		# 		raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
+		# 	self.status.new_sma_sent = False
 
 		self.message_api.run_state_machine()
 		if self.status.new_sma_sent:
 			if not self.message_api.state_machine_installation_status():
 				raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
 			self.status.new_sma_sent = False
+
 
 		sma.is_running = True
 		while sma.is_running:
@@ -163,11 +187,15 @@ class Bpod(object):
 
 		self.__update_timestamps(sma, state_change_indexes)
 
-		self._publish_data(sma.raw_data)
+		self.__add_trial_events()
 
-		return sma.raw_data
+		logger.info("Publishing Bpod trial")
 
-	def add_trial_events(self):
+		self._publish_data(self.session.current_trial())
+
+		time.sleep(self.WAIT_BEFORE_NEXT_TRIAL) # wait a few before next trial is run
+
+	def __add_trial_events(self):
 		"""
 
 		:param StateMachine sma: state machine associated with this trial
@@ -175,7 +203,6 @@ class Bpod(object):
 		"""
 
 		self.session.add_trial_events()
-		self._publish_data(self.session.current_trial())
 
 	def manual_override(self, channel_type, channel_name, channel_number, value):
 		"""
@@ -329,7 +356,12 @@ class Bpod(object):
 			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
 		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
 
-	def _publish_data(self, data):
+	def _publish_data(self, trial):
+		"""
+
+		:param Trial trial:
+		:return:
+		"""
 		pass
 
 
