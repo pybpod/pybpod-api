@@ -9,5 +9,8 @@ __maintainer__ = ['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro']
 __email__ = ['joshua21@gmail.com', 'cajomferro@gmail.com', 'ricardojvr@gmail.com']
 __status__ = "Development"
 
-BPOD_VERSION = "0.7.5"
-BPOD_FIRMWARE_VERSION = "9"
+
+from pysettings import conf;
+
+conf += 'pybpodapi.settings'
+

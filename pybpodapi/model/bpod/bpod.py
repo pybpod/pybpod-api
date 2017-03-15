@@ -5,7 +5,8 @@ import logging
 import math
 import time
 
-from pybpodapi import BPOD_FIRMWARE_VERSION
+from pysettings import conf as bpod_settings
+
 from pybpodapi.com.message_api import MessageAPI
 from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 from pybpodapi.com.serial_message_container import SerialMessageContainer
@@ -31,7 +32,6 @@ class Bpod(object):
 	"""
 
 	#MAX_TRIES = 5  # maximum number of tries when sending serial command
-	WAIT_BEFORE_NEXT_TRIAL = 1 # in seconds
 
 	#########################################
 	############## PROPERTIES ###############
@@ -102,7 +102,7 @@ class Bpod(object):
 			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
 		self.hardware.firmware_version, self.hardware.machine_type = self.message_api.firmware_version()
-		if self.hardware.firmware_version < int(BPOD_FIRMWARE_VERSION):
+		if self.hardware.firmware_version < int(bpod_settings.BPOD_FIRMWARE_VERSION):
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
 
 		hw_info = HardwareInfoContainer()
@@ -193,7 +193,7 @@ class Bpod(object):
 
 		self._publish_data(self.session.current_trial())
 
-		time.sleep(self.WAIT_BEFORE_NEXT_TRIAL) # wait a few before next trial is run
+		time.sleep(bpod_settings.WAIT_BEFORE_NEXT_TRIAL) # wait a few before next trial is run
 
 	def __add_trial_events(self):
 		"""
