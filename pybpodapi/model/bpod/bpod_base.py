@@ -31,7 +31,7 @@ class Bpod(object):
 	Bpod is the main entity.
 	"""
 
-	#MAX_TRIES = 5  # maximum number of tries when sending serial command
+	# MAX_TRIES = 5  # maximum number of tries when sending serial command
 
 	#########################################
 	############## PROPERTIES ###############
@@ -79,7 +79,7 @@ class Bpod(object):
 	############ PUBLIC METHODS #############
 	#########################################
 
-	def start(self, serial_port, baudrate=115200, sync_channel=255, sync_mode=1):
+	def start(self, serial_port, workspace_path, baudrate=115200, sync_channel=255, sync_mode=1):
 		"""
 		Starts Bpod.
 
@@ -178,7 +178,6 @@ class Bpod(object):
 				raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
 			self.status.new_sma_sent = False
 
-
 		sma.is_running = True
 		while sma.is_running:
 			if self.message_api.data_available():
@@ -193,7 +192,7 @@ class Bpod(object):
 
 		self._publish_data(self.session.current_trial())
 
-		time.sleep(bpod_settings.WAIT_BEFORE_NEXT_TRIAL) # wait a few before next trial is run
+		time.sleep(bpod_settings.WAIT_BEFORE_NEXT_TRIAL)  # wait a few before next trial is run
 
 	def __add_trial_events(self):
 		"""
@@ -261,7 +260,7 @@ class Bpod(object):
 		if not response:
 			raise BpodError('Error: Failed to reset serial message library.')
 
-	def disconnect(self):
+	def stop(self):
 		"""
 		Close connection with Bpod
 		"""

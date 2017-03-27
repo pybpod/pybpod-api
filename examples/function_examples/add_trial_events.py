@@ -22,9 +22,9 @@ def run():
 	Run this protocol now
 	"""
 
-	my_bpod = Bpod().start(settings.SERIAL_PORT)  # Start bpod
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "add_trial_events")  # Start bpod
 
-	nTrials = 5
+	nTrials = 1
 	trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
 
 	for i in range(nTrials):  # Main loop
@@ -80,7 +80,7 @@ def run():
 
 		print("Current trial: ", my_bpod.session.current_trial())
 
-	my_bpod.disconnect()  # Disconnect Bpod
+	my_bpod.stop()  # Disconnect Bpod
 
 
 if __name__ == '__main__':

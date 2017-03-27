@@ -1,2 +1,2 @@
-from pybpodapi.model.bpod.bpod import Bpod
+from pybpodapi.model.bpod.bpod_io import BpodIO as Bpod
 
