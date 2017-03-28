@@ -1,1 +1,2 @@
 from pybpodapi.plugins.session_data_csv_exporter import SessionDataCSVExporter as CSVExporter
+from pybpodapi.plugins.session_data_json_exporter import SessionDataJSONExporter as JSONExporter

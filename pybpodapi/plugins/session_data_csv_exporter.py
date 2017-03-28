@@ -25,7 +25,7 @@ class SessionDataCSVExporter(object):
 		with open(self.path, "w"):
 			pass
 
-	def save_trial(self, trial):
+	def save_trial(self, trial, trial_number):
 		"""
 
 		:param Trial trial:
@@ -35,18 +35,21 @@ class SessionDataCSVExporter(object):
 		with open(self.path, "a+", newline='') as csvfile:
 			csv_writer = csv.writer(csvfile, delimiter=',')
 
-			csv_writer.writerow(["Trial number", 1])
-			csv_writer.writerow(["States"])
+			csv_writer.writerow(["Trial number", trial_number])
+			csv_writer.writerow([])
+			csv_writer.writerow(["State name", "Start", "End"])
 
-			states_names = trial.states_timestamps.keys()
-			for state_name in states_names:
-				csv_writer.writerow([state_name])
-				csv_writer.writerow(trial.states_timestamps[state_name])
+			for state in trial.states:
+				for state_dur in state.timestamps:
+					csv_writer.writerow([state.name, state_dur.start, state_dur.end])
 
-			# csv_writer.writerow("states")
+			csv_writer.writerow([])
+			csv_writer.writerow(["Event name", "Start", "End"])
 
-			#			csvfile.write(str(trial))
-			#			fd.write('\n')
+			for event in trial.events:
+				csv_writer.writerow([event.name] + event.timestamps)
+
+			csv_writer.writerow([])
 
 	def add_session_metadata(self, session):
 		"""
@@ -56,5 +59,7 @@ class SessionDataCSVExporter(object):
 		"""
 		with open(self.path, "a+") as csvfile:
 			csv_writer = csv.writer(csvfile, delimiter=',')
+
+			csv_writer.writerow([])
 
 			csv_writer.writerow(["Trial start timestamp", session.current_trial().bpod_start_timestamp])

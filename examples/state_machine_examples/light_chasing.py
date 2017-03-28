@@ -21,7 +21,7 @@ def run():
 	Run this protocol now
 	"""
 
-	my_bpod = Bpod().start(settings.SERIAL_PORT)
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "light_chasing")
 
 	sma = StateMachine(my_bpod.hardware)
 
@@ -67,7 +67,7 @@ def run():
 
 	print(sma.raw_data)
 
-	my_bpod.disconnect()
+	my_bpod.stop()
 
 
 if __name__ == '__main__':

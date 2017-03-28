@@ -79,7 +79,7 @@ class Bpod(object):
 	############ PUBLIC METHODS #############
 	#########################################
 
-	def start(self, serial_port, workspace_path, baudrate=115200, sync_channel=255, sync_mode=1):
+	def start(self, serial_port, workspace_path, protocol_name, baudrate=115200, sync_channel=255, sync_mode=1):
 		"""
 		Starts Bpod.
 
@@ -343,8 +343,7 @@ class Bpod(object):
 		:param StateMachine sma:
 		:param list state_change_indexes:
 		"""
-		sma.raw_data.trial_start_timestamp.append(
-			self.message_api.read_trial_start_timestamp_ms())  # start timestamp of first trial
+		sma.raw_data.trial_start_timestamp = self.message_api.read_trial_start_timestamp_ms()  # start timestamp of first trial
 
 		timestamps = self.message_api.read_timestamps()
 

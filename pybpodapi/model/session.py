@@ -6,6 +6,7 @@ from datetime import datetime
 
 from pybpodapi.model.state_machine import StateMachine
 from pybpodapi.model.trial import Trial
+from pybpodapi.model.event import Event
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ class Session(object):
 	"""
 
 	"""
+
 	def __init__(self):
 		self.trials = []  # type: list[Trial]
 		self.firmware_version = None  # type: int
@@ -65,12 +67,18 @@ class Session(object):
 			thisStateName = sma.state_names[uniqueStates[i]]
 			current_trial.states_timestamps[thisStateName] = uniqueStateDataMatrices[i]
 
+			for state_dur in uniqueStateDataMatrices[i]:
+				current_trial.add_state_duration(thisStateName, state_dur[0], state_dur[1])
+
 		logger.debug("State names: %s", sma.state_names)
 		logger.debug("nPossibleStates: %s", sma.total_states_added)
 		for i in range(sma.total_states_added):
 			thisStateName = sma.state_names[i]
 			if not visitedStates[i]:
 				current_trial.states_timestamps[thisStateName] = [(float('NaN'), float('NaN'))]
+				current_trial.add_state_duration(thisStateName, float('NaN'), float('NaN'))
+
+		logger.debug("Trial states: %s", [str(state) for state in current_trial.states])
 
 		for i in range(len(sma_data.events)):
 			thisEvent = sma_data.events[i]
@@ -80,6 +88,9 @@ class Session(object):
 			for i in thisEventIndexes:
 				thisEventTimestamps.append(sma_data.event_timestamps[i])
 			current_trial.events_timestamps[thisEventName] = thisEventTimestamps
+			current_trial.add_state_change(thisEventName, thisEventTimestamps)
+
+		logger.debug("Trial events: %s", [str(event) for event in current_trial.events])
 
 		logger.debug("Trial info: %s", str(current_trial))
 

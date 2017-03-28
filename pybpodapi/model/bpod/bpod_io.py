@@ -6,6 +6,7 @@ import logging
 from pybpodapi.model.bpod.bpod_base import Bpod as BpodBase
 
 from pybpodapi.plugins import CSVExporter
+from pybpodapi.plugins import JSONExporter
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,14 @@ class BpodIO(BpodBase):
 		self._csv_exporter = value  # type: CSVExporter
 
 	@property
+	def json_exporter(self):
+		return self._json_exporter  # type: JSONExporter
+
+	@json_exporter.setter
+	def json_exporter(self, value):
+		self._json_exporter = value  # type: JSONExporter
+
+	@property
 	def workspace_path(self):
 		return self._workspace_path  # type: str
 
@@ -47,7 +56,7 @@ class BpodIO(BpodBase):
 		BpodBase.__init__(self)
 
 	def start(self, serial_port, workspace_path, protocol_name, baudrate=115200, sync_channel=255, sync_mode=1):
-		BpodBase.start(self, serial_port, workspace_path, baudrate, sync_channel, sync_mode)
+		BpodBase.start(self, serial_port, workspace_path, protocol_name, baudrate, sync_channel, sync_mode)
 
 		self.workspace_path = workspace_path
 
@@ -56,6 +65,7 @@ class BpodIO(BpodBase):
 		# logger.debug("Workspace path: %s", self.workspace_path)
 
 		self.csv_exporter = CSVExporter(self.workspace_path, protocol_name)
+		self.json_exporter = JSONExporter(self.workspace_path, protocol_name)
 
 		return self
 
@@ -65,7 +75,8 @@ class BpodIO(BpodBase):
 		:param Trial trial:
 		:return:
 		"""
-		self.csv_exporter.save_trial(trial)
+		self.csv_exporter.save_trial(trial, len(self.session.trials))
+		self.json_exporter.save_trial(trial, len(self.session.trials))
 
 	def stop(self):
 		"""
@@ -73,4 +84,5 @@ class BpodIO(BpodBase):
 		"""
 		BpodBase.stop(self)
 
-		self.csv_exporter.add_session_metadata(self.session)
+		if len(self.session.trials):
+			self.csv_exporter.add_session_metadata(self.session)
