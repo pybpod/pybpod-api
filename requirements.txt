@@ -1,7 +1,0 @@
-# DO NOT CHANGE THIS FILE
-# run like this: pip3 install -r requirements.txt --upgrade
-
-# external libraries
-pyserial>=3.1.1
-https://bitbucket.org/fchampalimaud/logging-bootstrap/get/master.zip
-numpy
