@@ -16,3 +16,4 @@ Implementation
 .. autoclass:: pybpodapi.model.session.Session
     :members:
     :private-members:
+

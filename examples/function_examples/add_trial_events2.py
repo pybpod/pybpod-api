@@ -22,7 +22,7 @@ def run():
 	Run this protocol now
 	"""
 
-	my_bpod = Bpod().start(settings.SERIAL_PORT)  # Start bpod
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "add_trial_events2")
 
 	nTrials = 5
 	graceTime = 5
@@ -94,13 +94,13 @@ def run():
 
 		print("Waiting for poke. Reward: ", 'left' if thisTrialType == 1 else 'right')
 
-		my_bpod.run_state_machine(sma)  # Run state machine and return events
+		my_bpod.run_state_machine(sma)  # Run state machine
 
-		print("Raw events: ", sma.raw_data)
+		print("Raw data: ", sma.raw_data)
 
-		print("Current trial: ", my_bpod.session.current_trial())
+		print("Current trial full data: ", my_bpod.session.current_trial())  # including raw events
 
-	my_bpod.disconnect()  # Disconnect Bpod
+	my_bpod.stop()  # Disconnect Bpod
 
 
 if __name__ == '__main__':

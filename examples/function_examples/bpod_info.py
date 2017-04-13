@@ -12,9 +12,9 @@ import examples.settings as settings
 
 
 def run():
-	my_bpod = Bpod().start(settings.SERIAL_PORT)
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "bpod_info")
 
-	my_bpod.disconnect()
+	my_bpod.stop()
 
 	print("Bpod version: ", my_bpod.hardware.bpod_version)
 	print("Bpod firmware version: ", my_bpod.hardware.firmware_version)

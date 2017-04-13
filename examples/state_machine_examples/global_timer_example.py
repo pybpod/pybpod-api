@@ -16,7 +16,7 @@ def run():
 	Run this protocol now
 	"""
 
-	my_bpod = Bpod().start(settings.SERIAL_PORT)
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "global_timer_example")
 
 	sma = StateMachine(my_bpod.hardware)
 
@@ -43,11 +43,11 @@ def run():
 
 	my_bpod.send_state_machine(sma)
 
-	raw_events = my_bpod.run_state_machine(sma)
+	my_bpod.run_state_machine(sma)
 
-	print(raw_events)
+	print(sma.raw_data)
 
-	my_bpod.disconnect()
+	my_bpod.stop()
 
 
 if __name__ == '__main__':

@@ -15,8 +15,9 @@ from examples.state_machine_examples import global_counter_example
 from examples.state_machine_examples import global_timer_example
 from examples.state_machine_examples import global_timer_example_digital
 from examples.state_machine_examples import global_timer_start_and_end_events
-from examples.state_machine_examples import light_chasing
 from examples.state_machine_examples import light_chasing_2_pokes
+from examples.state_machine_examples import light_chasing
+from examples.state_machine_examples import light_chasing_loop
 from examples.state_machine_examples import one_state
 from examples.state_machine_examples import uart_triggered_state_change
 import pybpodapi
@@ -40,8 +41,9 @@ def print_menu_info():
 	print("Available examples:")
 	print("{idx}. Obtain Bpod info".format(idx=next_idx(reset=True)))
 	print("{idx}. One state".format(idx=next_idx()))
-	print("{idx}. Light chasing (3 pokes)".format(idx=next_idx()))
 	print("{idx}. Light chasing (2 pokes)".format(idx=next_idx()))
+	print("{idx}. Light chasing (3 pokes)".format(idx=next_idx()))
+	print("{idx}. Light chasing (3 pokes loop with timer)".format(idx=next_idx()))
 	print("{idx}. Add trial events".format(idx=next_idx()))
 	print("{idx}. Add trial events 2".format(idx=next_idx()))
 	print("{idx}. Manual override".format(idx=next_idx()))
@@ -57,8 +59,8 @@ def print_menu_info():
 
 def config_menu():
 	print('\nRunning pybpod-api version: {0}'.format(pybpodapi.__version__))
-	print('\nBpod supported version: {0}'.format(pybpodapi.BPOD_VERSION))
-	print('Firmware supported version: {0}\n'.format(pybpodapi.BPOD_FIRMWARE_VERSION))
+	print('\nBpod supported version: {0}'.format(pybpodapi.settings.BPOD_VERSION))
+	print('Firmware supported version: {0}\n'.format(pybpodapi.settings.BPOD_FIRMWARE_VERSION))
 	selection = None
 	while True:
 		try:
@@ -72,11 +74,14 @@ def config_menu():
 				print("State machine with a single state")
 				one_state.run()
 			elif selection == next_idx():
+				print("Running light chasing (2 pokes) example")
+				light_chasing_2_pokes.run()
+			elif selection == next_idx():
 				print("Running light chasing (3 pokes) example")
 				light_chasing.run()
 			elif selection == next_idx():
-				print("Running light chasing (2 pokes) example")
-				light_chasing_2_pokes.run()
+				print("Running light chasing (3 pokes loop with timer) example")
+				light_chasing_loop.run()
 			elif selection == next_idx():
 				print("Running add trial events example")
 				add_trial_events.run()

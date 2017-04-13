@@ -15,25 +15,25 @@ import examples.settings as settings
 
 
 def run():
-	myBpod = Bpod().start(settings.SERIAL_PORT)  # Start Bpod
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "serial_messages")  # Start Bpod
 
 	print("Send byte 65 on UART port 1 - by default, this is ASCII 'A'")
-	myBpod.manual_override(ChannelType.OUTPUT, ChannelName.SERIAL, 1, 65)
+	my_bpod.manual_override(ChannelType.OUTPUT, ChannelName.SERIAL, 1, 65)
 	time.sleep(1)  # Wait 1s
 
 	print("Set byte 65 ('A') on UART port 1 to trigger a 3-byte message: 'BCD'")
-	myBpod.load_serial_message(1, 65, [66, 67, 68])
+	my_bpod.load_serial_message(1, 65, [66, 67, 68])
 	# Now, the same command has a different result
-	myBpod.manual_override(ChannelType.OUTPUT, ChannelName.SERIAL, channel_number=1, value=65)
+	my_bpod.manual_override(ChannelType.OUTPUT, ChannelName.SERIAL, channel_number=1, value=65)
 	time.sleep(1)  # Wait 1s
 
 	print("Reset the serial message library. Bytes will now pass through again.")
-	myBpod.reset_serial_messages()
+	my_bpod.reset_serial_messages()
 	# Back to 'A'
-	myBpod.manual_override(ChannelType.OUTPUT, ChannelName.SERIAL, channel_number=1, value=65)
+	my_bpod.manual_override(ChannelType.OUTPUT, ChannelName.SERIAL, channel_number=1, value=65)
 
-	# Disconnect Bpod
-	myBpod.disconnect()  # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.
+	# Stop Bpod
+	my_bpod.stop()  # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.
 
 
 if __name__ == '__main__':

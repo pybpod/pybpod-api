@@ -41,3 +41,6 @@ uninstall-requirements-dev-*.txt
 **/*.sc
 **/*.spec
 **/*.propsfile
+
+# Node JS (for documentation)
+**/node_modules/*

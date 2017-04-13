@@ -8,7 +8,8 @@
 .. toctree::
    :titlesonly:
 
-   bpod
+   bpod/index
    state_machine/index
    session
+   state
    trial

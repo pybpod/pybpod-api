@@ -1,0 +1,10 @@
+{
+  "name": "sphinx-build-local-server",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-watch": "latest",
+    "child_process": "latest",
+    "connect": "latest",
+	"serve-static": "latest"
+  }
+}

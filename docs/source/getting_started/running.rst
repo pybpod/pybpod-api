@@ -22,6 +22,8 @@ Example of  *'user_settings.py'*  file:
 
     SERIAL_PORT = '/dev/tty.usbmodem1411'
 
+    WORKSPACE_PATH = "~/Desktop/bpod_workspace"
+
 
 
 You can duplicate the *'user_settings.py.template'* and save it as *'user_settings.py'*

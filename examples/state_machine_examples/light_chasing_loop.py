@@ -26,7 +26,7 @@ def run():
 	sma = StateMachine(my_bpod.hardware)
 
 	# Set global timer 1 for 3 seconds
-	sma.set_global_timer_legacy(timer_ID=1, timer_duration=5)
+	sma.set_global_timer_legacy(timer_ID=1, timer_duration=10)
 
 	sma.add_state(
 		state_name='TimerTrig',  # Trigger global timer
