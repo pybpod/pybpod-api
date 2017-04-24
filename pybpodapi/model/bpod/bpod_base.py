@@ -17,6 +17,7 @@ from pybpodapi.model.session import Session
 from pybpodapi.model.state_machine import StateMachine
 from pybpodapi.model.trial import Trial
 from pybpodapi.model.state_machine.raw_data import RawData
+from pybpodapi.model.event_occurrence import EventOccurrence
 
 logger = logging.getLogger(__name__)
 
@@ -270,19 +271,45 @@ class Bpod(object):
 	############ PRIVATE METHODS ############
 	#########################################
 
-	def __process_opcode(self, sma, opcode, data, state_change_indexes):
+	def __add_event_occurrence(self, sma, event_index):
 
-		raw_events = sma.raw_data  # legacy fix
+		# sma.raw_data.events.append(event)
+
+		event_name = self.hardware.channels.get_event_name(event_index)  # type: str
+
+		# type: EventOccurrence
+		event_occurrence = sma.raw_data.add_event_occurrence(event_index=event_index, event_name=event_name)
+
+		self._publish_data(data=event_occurrence)
+
+		logger.debug("Event fired: %s", str(event_occurrence))
+
+	def __process_opcode(self, sma, opcode, data, state_change_indexes):
+		"""
+		Process data from bpod board given an opcode
+		
+		In original bpod, sma.raw_data == raw_events
+		
+		:param sma: state machine object
+		:param int opcode: opcode number 
+		:param data: data from bpod board
+		:param state_change_indexes: 
+		:return: 
+		"""
 
 		if opcode == 1:  # Read events
 			n_current_events = data
 			current_events = self.message_api.read_current_events(n_current_events)
 			transition_event_found = False
+
+			logger.debug("Raw data: %s", sma.raw_data)
+
 			for event in current_events:
+
 				if event == 255:
 					sma.is_running = False
 				else:
-					raw_events.events.append(event)
+					self.__add_event_occurrence(sma, event)
 
 					# input matrix
 					if not transition_event_found:
@@ -294,8 +321,8 @@ class Bpod(object):
 								sma.current_state = transition[1]
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states input matrix")
-									raw_events.states.append(sma.current_state)
-									state_change_indexes.append(len(raw_events.events) - 1)
+									sma.raw_data.states.append(sma.current_state)
+									state_change_indexes.append(len(sma.raw_data.events) - 1)
 								transition_event_found = True
 
 					# state timer matrix
@@ -306,8 +333,8 @@ class Bpod(object):
 								sma.current_state = this_state_timer_transition
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states state timer matrix")
-									raw_events.states.append(sma.current_state)
-									state_change_indexes.append(len(raw_events.events) - 1)
+									sma.raw_data.states.append(sma.current_state)
+									state_change_indexes.append(len(sma.raw_data.events) - 1)
 								transition_event_found = True
 
 					# global timers start matrix
@@ -317,8 +344,8 @@ class Bpod(object):
 								sma.current_state = transition[1]
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states global timers start matrix")
-									raw_events.states.append(sma.current_state)
-									state_change_indexes.append(len(raw_events.events) - 1)
+									sma.raw_data.states.append(sma.current_state)
+									state_change_indexes.append(len(sma.raw_data.events) - 1)
 								transition_event_found = True
 
 					# global timers end matrix
@@ -328,10 +355,10 @@ class Bpod(object):
 								sma.current_state = transition[1]
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states global timers end matrix")
-									raw_events.states.append(sma.current_state)
-									state_change_indexes.append(len(raw_events.events) - 1)
+									sma.raw_data.states.append(sma.current_state)
+									state_change_indexes.append(len(sma.raw_data.events) - 1)
 								transition_event_found = True
-				logger.debug(raw_events.states)
+				logger.debug("States indexes: %s", sma.raw_data.states)
 
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
@@ -343,21 +370,27 @@ class Bpod(object):
 		:param StateMachine sma:
 		:param list state_change_indexes:
 		"""
-		sma.raw_data.trial_start_timestamp = self.message_api.read_trial_start_timestamp_ms()  # start timestamp of first trial
+		sma.raw_data.trial_start_timestamp = self.message_api.read_trial_start_timestamp_seconds()  # start timestamp of first trial
 
 		timestamps = self.message_api.read_timestamps()
 
-		sma.raw_data.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps];
+		sma.raw_data.event_timestamps = [i / float(self.hardware.cycle_frequency) for i in timestamps]
+
+		for event, timestamp in zip(sma.raw_data.events_occurrences, sma.raw_data.event_timestamps):
+			event.timestamp = timestamp
+
+		logger.debug("Events with timestamps: %s", [str(event) for event in sma.raw_data.events_occurrences])
 
 		logger.debug("state_change_indexes: %s", state_change_indexes)
+
 		for i in range(len(state_change_indexes)):
 			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
 		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
 
-	def _publish_data(self, trial):
+	def _publish_data(self, data):
 		"""
 
-		:param Trial trial:
+		:param data:
 		:return:
 		"""
 		pass

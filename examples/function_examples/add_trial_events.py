@@ -24,7 +24,7 @@ def run():
 
 	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "add_trial_events")  # Start bpod
 
-	nTrials = 5
+	nTrials = 1
 	trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
 
 	for i in range(nTrials):  # Main loop

@@ -216,11 +216,34 @@ class Channels(object):
 		self.output_channel_names += ('GlobalCounterReset',)
 		Pos += 1
 
+	def __print_events(self):
+		"""
+		Print all events in the format "| {0} {event_name} | {1} {event_name} | {...} {event_name} | {n} {event_name} |"
+		:return: 
+		"""
+		print_events = ""
+		for idx, event in enumerate(self.event_names):
+			print_events += "| {0}: {1} ".format(idx, event)
+		return print_events
+
+	def get_event_name(self, event_idx):
+		"""
+		
+		:param event_idx: 
+		:return: 
+		"""
+		try:
+			event_name = self.event_names[event_idx]
+		except IndexError:
+			event_name = 'unknown event name'
+
+		return event_name
+
 	def __str__(self):
 		return "SMA Channels\n" \
 		       "Event names: {event_names}\n" \
 		       "Input channel names: {input_channel_names}\n" \
 		       "Output channel names: {output_channel_names}\n" \
-		       "".format(event_names=self.event_names,
+		       "".format(event_names=self.__print_events(),
 		                 input_channel_names=self.input_channel_names,
 		                 output_channel_names=self.output_channel_names)

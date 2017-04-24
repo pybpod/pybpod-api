@@ -5,7 +5,6 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/docs" />
-      <excludeFolder url="file://$MODULE_DIR$/examples" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6.1 virtualenv at ~/.pyenv/versions/generic-editor-pycharm-py3.6.1" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

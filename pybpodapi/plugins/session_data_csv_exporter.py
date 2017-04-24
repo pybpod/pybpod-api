@@ -46,8 +46,8 @@ class SessionDataCSVExporter(object):
 			csv_writer.writerow([])
 			csv_writer.writerow(["Event name", "Start", "End"])
 
-			for event in trial.events:
-				csv_writer.writerow([event.name] + event.timestamps)
+			for event in trial.events_occurrences:
+				csv_writer.writerow([event.name] + trial.get_timestamps_by_event_name(event.name))
 
 			csv_writer.writerow([])
 

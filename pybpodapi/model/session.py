@@ -6,7 +6,6 @@ from datetime import datetime
 
 from pybpodapi.model.state_machine import StateMachine
 from pybpodapi.model.trial import Trial
-from pybpodapi.model.event import Event
 
 logger = logging.getLogger(__name__)
 
@@ -80,17 +79,11 @@ class Session(object):
 
 		logger.debug("Trial states: %s", [str(state) for state in current_trial.states])
 
-		for i in range(len(sma_data.events)):
-			thisEvent = sma_data.events[i]
-			thisEventName = sma.channels.event_names[thisEvent]
-			thisEventIndexes = [j for j, k in enumerate(sma_data.events) if k == thisEvent]
-			thisEventTimestamps = []
-			for i in thisEventIndexes:
-				thisEventTimestamps.append(sma_data.event_timestamps[i])
-			current_trial.events_timestamps[thisEventName] = thisEventTimestamps
-			current_trial.add_state_change(thisEventName, thisEventTimestamps)
+		# save events occurrences on trial and make available a dictionary with all information
+		current_trial.events_occurrences = sma.raw_data.events_occurrences  # type: list
+		current_trial.events_timestamps = sma.raw_data.get_all_timestamps_by_event()  # type: dict
 
-		logger.debug("Trial events: %s", [str(event) for event in current_trial.events])
+		logger.debug("Trial events: %s", [str(event) for event in current_trial.events_occurrences])
 
 		logger.debug("Trial info: %s", str(current_trial))
 

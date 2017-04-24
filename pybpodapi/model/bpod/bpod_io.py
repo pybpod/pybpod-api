@@ -4,6 +4,7 @@
 import logging
 
 from pybpodapi.model.bpod.bpod_base import Bpod as BpodBase
+from pybpodapi.model.trial import Trial
 
 from pybpodapi.plugins import CSVExporter
 from pybpodapi.plugins import JSONExporter
@@ -69,14 +70,15 @@ class BpodIO(BpodBase):
 
 		return self
 
-	def _publish_data(self, trial):
+	def _publish_data(self, data):
 		"""
 
 		:param Trial trial:
 		:return:
 		"""
-		self.csv_exporter.save_trial(trial, len(self.session.trials))
-		self.json_exporter.save_trial(trial, len(self.session.trials))
+		if isinstance(data, Trial):
+			self.csv_exporter.save_trial(data, len(self.session.trials))
+			self.json_exporter.save_trial(data, len(self.session.trials))
 
 	def stop(self):
 		"""

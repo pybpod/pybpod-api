@@ -87,34 +87,34 @@ class MessageAPI(object):
 		logger.debug("Requesting hardware description (%s)...", SendMessageHeader.HARDWARE_DESCRIPTION)
 		self._arcom.write_char(SendMessageHeader.HARDWARE_DESCRIPTION)
 
-		hardware_info.max_states = self._arcom.read_uint16() # type: int
+		hardware_info.max_states = self._arcom.read_uint16()  # type: int
 		logger.debug("Read max states: %s", hardware_info.max_states)
 
-		hardware_info.cycle_period = self._arcom.read_uint16() # type: int
+		hardware_info.cycle_period = self._arcom.read_uint16()  # type: int
 		logger.debug("Read cycle period: %s", hardware_info.cycle_period)
 
-		hardware_info.n_events_per_serial_channel = self._arcom.read_uint8() # type: int
+		hardware_info.n_events_per_serial_channel = self._arcom.read_uint8()  # type: int
 		logger.debug("Read number of events per serial channel: %s", hardware_info.n_events_per_serial_channel)
 
-		hardware_info.n_global_timers = self._arcom.read_uint8() # type: int
+		hardware_info.n_global_timers = self._arcom.read_uint8()  # type: int
 		logger.debug("Read number of global timers: %s", hardware_info.n_global_timers)
 
-		hardware_info.n_global_counters = self._arcom.read_uint8() # type: int
+		hardware_info.n_global_counters = self._arcom.read_uint8()  # type: int
 		logger.debug("Read number of global counters: %s", hardware_info.n_global_counters)
 
-		hardware_info.n_conditions = self._arcom.read_uint8() # type: int
+		hardware_info.n_conditions = self._arcom.read_uint8()  # type: int
 		logger.debug("Read number of conditions: %s", hardware_info.n_conditions)
 
-		hardware_info.n_inputs = self._arcom.read_uint8() # type: int
+		hardware_info.n_inputs = self._arcom.read_uint8()  # type: int
 		logger.debug("Read number of inputs: %s", hardware_info.n_inputs)
 
-		hardware_info.inputs = self._arcom.read_char_array(array_len=hardware_info.n_inputs) # type: list(str)
+		hardware_info.inputs = self._arcom.read_char_array(array_len=hardware_info.n_inputs)  # type: list(str)
 		logger.debug("Read inputs: %s", hardware_info.inputs)
 
-		hardware_info.n_outputs = self._arcom.read_uint8() # type: int
+		hardware_info.n_outputs = self._arcom.read_uint8()  # type: int
 		logger.debug("Read number of outputs: %s", hardware_info.n_outputs)
 
-		hardware_info.outputs = self._arcom.read_char_array(array_len=hardware_info.n_outputs) # type: list(str)
+		hardware_info.outputs = self._arcom.read_char_array(array_len=hardware_info.n_outputs)  # type: list(str)
 		logger.debug("Read outputs: %s", hardware_info.outputs)
 
 	def enable_ports(self, inputs_enabled):
@@ -176,7 +176,6 @@ class MessageAPI(object):
 
 		self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
 
-
 	def state_machine_installation_status(self):
 		"""
 		Confirm if new state machine was correctly installed
@@ -212,16 +211,16 @@ class MessageAPI(object):
 
 		return opcode, data
 
-	def read_trial_start_timestamp_ms(self):
+	def read_trial_start_timestamp_seconds(self):
 		"""
-		A new incoming timestamp message is available. Read trial start timestamp in seconds and convert to milliseconds.
+		A new incoming timestamp message is available. Read trial start timestamp in millseconds and convert to seconds.
 
 		:return: trial start timestamp in milliseconds
 		:rtype: float
 		"""
 		response = self._arcom.read_uint32()  # type: int
 
-		logger.debug("Received start trial timestamp in seconds: %s", response)
+		logger.debug("Received start trial timestamp in millseconds: %s", response)
 
 		trial_start_timestamp = float(response) / 1000
 
@@ -235,7 +234,7 @@ class MessageAPI(object):
 		:return: timestamps array
 		:rtype: list(float)
 		"""
-		n_timestamps = self._arcom.read_uint16() # type: int
+		n_timestamps = self._arcom.read_uint16()  # type: int
 
 		timestamps = self._arcom.read_uint32_array(array_len=n_timestamps)
 

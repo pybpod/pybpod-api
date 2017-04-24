@@ -21,7 +21,7 @@ class State(object):
 
 	def add_state_dur(self, start, end):
 		"""
-		Store a new state occurence given start and end timestamps
+		Store a new state occurrence given start and end timestamps
 		:param float start: start timestamp of state duration
 		:param float end: end timestamp of state duration
 		"""
