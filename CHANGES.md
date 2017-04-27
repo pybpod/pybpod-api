@@ -1,3 +1,6 @@
+## v.1.3.0.beta
+VERSION IN DEVELOPMENT
+
 ## v.1.2.0
 Simplifies event collection and processing
 Collect and publish live event occurrences
