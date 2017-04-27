@@ -1,6 +1,0 @@
-v.0.3.3 (2017/02/01)
-
-Fixes a bug that would count states timestamps incorrectly
-Fixes bug that would prevent correct presentation of states in the end print
-Adds a new example for light chasing (2 pokes)
-All examples get simplified, without using logger and with manual running hidden on a shared function
