@@ -13,7 +13,7 @@
    com/index
 
 =============================
-Classes Diagram (and modules)
+Class Diagrams (and modules)
 =============================
 
 .. image:: /_images/pybpodapi_main_classes.svg
