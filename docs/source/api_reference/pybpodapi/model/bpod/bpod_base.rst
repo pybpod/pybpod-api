@@ -7,15 +7,9 @@
 .. module:: bpod_base
    :synopsis: Bpod base module
 
-Overview
---------
-
-TODO
-
 Implementation
 --------------
 
-
-.. autoclass:: pybpodapi.model.bpod.bpod_base.Bpod
+.. autoclass:: pybpodapi.model.bpod.bpod_base.BpodBase
     :members:
     :private-members:

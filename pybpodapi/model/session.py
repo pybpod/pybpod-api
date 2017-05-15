@@ -88,4 +88,9 @@ class Session(object):
 		logger.debug("Trial info: %s", str(current_trial))
 
 	def current_trial(self):
+		"""
+		Get current trial
+		
+		:rtype: Trial 
+		"""
 		return self.trials[-1]

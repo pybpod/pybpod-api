@@ -1,20 +1,14 @@
-*************************************
-:mod:`state_machine`--- State Machine
-*************************************
+***********************************************
+:mod:`state_machine_base`--- State Machine Base
+***********************************************
 
-.. module:: state_machine
+.. module:: state_machine_base
    :synopsis: modules related to state machine
-
-Overview
-========
-
-TODO
 
 Implementation
 ==============
 
-
-.. automodule:: pybpodapi.model.state_machine.state_machine
+.. automodule:: pybpodapi.model.state_machine.state_machine_base
     :members:
     :private-members:
 

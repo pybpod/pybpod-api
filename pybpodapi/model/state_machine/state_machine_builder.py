@@ -4,18 +4,18 @@
 import logging
 import math
 
-from pybpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.state_machine.state_machine_base import StateMachineBase
 
 logger = logging.getLogger(__name__)
 
 
-class Builder(StateMachine):
+class StateMachineBuilder(StateMachineBase):
 	"""
 	Extend state machine with builder logic
 	"""
 
 	def __init__(self, hardware):
-		StateMachine.__init__(self, hardware)
+		StateMachineBase.__init__(self, hardware)
 
 	def update_state_numbers(self):
 		"""

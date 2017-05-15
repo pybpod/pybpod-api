@@ -5,15 +5,11 @@
 .. module:: runner
    :synopsis: modules related to state machine
 
-Overview
-========
-
-TODO
 
 Implementation
 ==============
 
-.. automodule:: pybpodapi.model.state_machine.runner
+.. automodule:: pybpodapi.model.state_machine.state_machine_runner
     :members:
     :private-members:
 

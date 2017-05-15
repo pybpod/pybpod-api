@@ -5,15 +5,10 @@
 .. module:: builder
    :synopsis: modules related to state machine
 
-Overview
-========
-
-TODO
-
 Implementation
 ==============
 
-.. automodule:: pybpodapi.model.state_machine.builder
+.. automodule:: pybpodapi.model.state_machine.state_machine_builder
     :members:
     :private-members:
 

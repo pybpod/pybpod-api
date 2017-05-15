@@ -11,8 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 class Trial(object):
+	"""
+	:ivar float bpod_start_timestamp: None
+	:ivar dict states_timestamps: {}
+	:ivar dict events_timestamps: {}
+	:ivar StateMachine sma: sma
+	"""
+
 	def __init__(self, sma):
-		self.bpod_start_timestamp = None  # type: float
+
+		self.bpod_start_timestamp = None
 		self.states_timestamps = {}  # {'Reward': [(429496.7295, 429496.7295)], 'WaitForPort2Poke': [(0, 429496.7295)], 'FlashStimulus': [(429496.7295, 429496.7295)], 'WaitForResponse': [(429496.7295, 429496.7295)], 'Punish': [(nan, nan)]}
 		self.events_timestamps = {}  # {'Tup': [429496.7295, 429496.7295], 'Port3In': [429496.7295, 429496.7295], 'Port2In': [429496.7295, 429496.7295], 'Port2Out': [429496.7295, 429496.7295], 'Port3Out': [429496.7295], 'Port1Out': [429496.7295]}
 		self.sma = sma  # type: StateMachine
@@ -21,11 +29,11 @@ class Trial(object):
 
 	def add_state_duration(self, state_name, start, end):
 		"""
-		Add state duration to state
-		:param str state_name:
-		:param float start:
-		:param float end:
-		:return:
+		Add state duration to state. If state doesn't exist, create a new one.
+		
+		:param str state_name: name of the sate
+		:param float start: start timestamp
+		:param float end: end timestamp
 		"""
 		state = [state for state in self.states if state.name == state_name]  # type: list(State)
 
@@ -41,8 +49,8 @@ class Trial(object):
 		"""
 		Get timestamps by event name
 		
-		:param event_name: 
-		:return: 
+		:param event_name: name of the event to get timestamps
+		:rtype: list(float) 
 		"""
 		event_timestamps = []  # type: list(float)
 
@@ -55,7 +63,8 @@ class Trial(object):
 	def get_events_names(self):
 		"""
 		Get events names without repetitions
-		:return: 
+		
+		:rtype: list(str) 
 		"""
 		events_names = []  # type: list(str)
 

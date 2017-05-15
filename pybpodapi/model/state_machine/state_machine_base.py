@@ -12,7 +12,7 @@ from pybpodapi.model.state_machine.raw_data import RawData
 logger = logging.getLogger(__name__)
 
 
-class StateMachine(object):
+class StateMachineBase(object):
 	"""
 	State Machine for Bpod
 	"""
@@ -134,6 +134,7 @@ class StateMachine(object):
 	def set_global_timer(self, timer_ID, timer_duration, on_set_delay, channel, on_message=1, off_message=0):
 		"""
 		Set global timer
+
 		:param int timer_ID:
 		:param float timer_duration: timer duration in seconds
 		:param float on_set_delay:

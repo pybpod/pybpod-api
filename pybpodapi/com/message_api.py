@@ -153,20 +153,20 @@ class MessageAPI(object):
 
 		return True if response == ReceiveMessageHeader.SYNC_CHANNEL_MODE_OK else False
 
-	def send_state_machine(self, Message, ThirtyTwoBitMessage):
+	def send_state_machine(self, message, message32):
 		"""
 		Sends state machine to Bpod
 
-		:param list(int) Message: TODO
+		:param list(int) message: TODO
 		:param list(int) ThirtyTwoBitMessage: TODO
 		"""
 
-		logger.debug("Sending state machine: %s", Message)
-		logger.debug("Data to send: %s", ThirtyTwoBitMessage)
+		logger.debug("Sending state machine: %s", message)
+		logger.debug("Data to send: %s", message32)
 
-		self._arcom.write_uint8_array([ord(SendMessageHeader.NEW_STATE_MATRIX)] + Message)
+		self._arcom.write_uint8_array([ord(SendMessageHeader.NEW_STATE_MATRIX)] + message)
 
-		self._arcom.write_uint32_array(ThirtyTwoBitMessage)
+		self._arcom.write_uint32_array(message32)
 
 	def run_state_machine(self):
 		"""

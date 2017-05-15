@@ -27,7 +27,7 @@ class Status():
 		self.new_sma_sent = False  # type: bool
 
 
-class Bpod(object):
+class BpodBase(object):
 	"""
 	Bpod is the main entity.
 	"""
@@ -158,21 +158,6 @@ class Bpod(object):
 
 		state_change_indexes = []
 
-		# n_tries = 0
-		# check_status = False
-		# if self.status.new_sma_sent:
-		# 	while (not check_status and n_tries < self.MAX_TRIES):
-		# 		if n_tries > 0:
-		# 			logger.debug("Running state machine failed. Retrying...")
-		# 		self.message_api.run_state_machine()
-		# 		if self.message_api.state_machine_installation_status():
-		# 			check_status = True
-		# 		n_tries += 1
-		#
-		# 	if n_tries == self.MAX_TRIES:
-		# 		raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
-		# 	self.status.new_sma_sent = False
-
 		self.message_api.run_state_machine()
 		if self.status.new_sma_sent:
 			if not self.message_api.state_machine_installation_status():
@@ -194,15 +179,6 @@ class Bpod(object):
 		self._publish_data(self.session.current_trial())
 
 		time.sleep(bpod_settings.WAIT_BEFORE_NEXT_TRIAL)  # wait a few before next trial is run
-
-	def __add_trial_events(self):
-		"""
-
-		:param StateMachine sma: state machine associated with this trial
-		:param raw_events:
-		"""
-
-		self.session.add_trial_events()
 
 	def manual_override(self, channel_type, channel_name, channel_number, value):
 		"""
@@ -267,9 +243,29 @@ class Bpod(object):
 		"""
 		self.message_api.disconnect()
 
+	def _publish_data(self, data):
+		"""
+		Publish data from current trial.
+		This method can be overwritten from other projects that use pybpod-api libraries to export data in a customized way.
+
+		.. seealso::
+			:py:meth:`pybpodapi.model.bpod.bpod_io.BpodIO._publish_data`.
+
+
+		:param data: data to be published (data type varies)
+		"""
+		pass
+
 	#########################################
 	############ PRIVATE METHODS ############
 	#########################################
+
+	def __add_trial_events(self):
+		"""
+		Fill current trial with latest information
+		"""
+
+		self.session.add_trial_events()
 
 	def __add_event_occurrence(self, sma, event_index):
 
@@ -386,14 +382,6 @@ class Bpod(object):
 		for i in range(len(state_change_indexes)):
 			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
 		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
-
-	def _publish_data(self, data):
-		"""
-
-		:param data:
-		:return:
-		"""
-		pass
 
 
 class BpodError(Exception):
