@@ -24,7 +24,7 @@ def run():
 
 	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "add_trial_events")  # Start bpod
 
-	nTrials = 1
+	nTrials = 5
 	trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
 
 	for i in range(nTrials):  # Main loop
@@ -76,9 +76,7 @@ def run():
 
 		my_bpod.run_state_machine(sma)  # Run state machine
 
-		print("Raw data: ", sma.raw_data)
-
-		print("Current trial full data: ", my_bpod.session.current_trial()) # including raw events
+		print("Current trial info: ", my_bpod.session.current_trial())
 
 	my_bpod.stop()  # Disconnect Bpod
 

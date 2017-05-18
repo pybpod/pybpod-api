@@ -11,5 +11,7 @@
    bpod/index
    state_machine/index
    session
-   state
    trial
+   state_occurrences
+   event_occurrence
+

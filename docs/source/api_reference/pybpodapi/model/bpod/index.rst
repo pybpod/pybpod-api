@@ -19,4 +19,5 @@ Class Inheritance
 -----------------
 
 .. image:: /_images/pybpodapi_bpod_inheritance.svg
-   :scale: 60 %
+   :width: 50%
+

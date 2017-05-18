@@ -269,8 +269,6 @@ class BpodBase(object):
 
 	def __add_event_occurrence(self, sma, event_index):
 
-		# sma.raw_data.events.append(event)
-
 		event_name = self.hardware.channels.get_event_name(event_index)  # type: str
 
 		# type: EventOccurrence
@@ -298,8 +296,6 @@ class BpodBase(object):
 			current_events = self.message_api.read_current_events(n_current_events)
 			transition_event_found = False
 
-			logger.debug("Raw data: %s", sma.raw_data)
-
 			for event in current_events:
 
 				if event == 255:
@@ -318,7 +314,7 @@ class BpodBase(object):
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states input matrix")
 									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events) - 1)
+									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
 								transition_event_found = True
 
 					# state timer matrix
@@ -330,7 +326,7 @@ class BpodBase(object):
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states state timer matrix")
 									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events) - 1)
+									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
 								transition_event_found = True
 
 					# global timers start matrix
@@ -341,7 +337,7 @@ class BpodBase(object):
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states global timers start matrix")
 									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events) - 1)
+									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
 								transition_event_found = True
 
 					# global timers end matrix
@@ -352,12 +348,14 @@ class BpodBase(object):
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states global timers end matrix")
 									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events) - 1)
+									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
 								transition_event_found = True
 				logger.debug("States indexes: %s", sma.raw_data.states)
 
 		elif opcode == 2:  # Handle soft code
 			logger.info("Soft code: %s", data)
+
+		logger.debug("Raw data: %s", sma.raw_data)
 
 	def __update_timestamps(self, sma, state_change_indexes):
 		"""

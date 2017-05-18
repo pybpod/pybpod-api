@@ -30,7 +30,7 @@ def run():
 
 	my_bpod.run_state_machine(sma)
 
-	print(sma.raw_data)
+	print("Current trial info: ", my_bpod.session.current_trial())
 
 	my_bpod.stop()
 

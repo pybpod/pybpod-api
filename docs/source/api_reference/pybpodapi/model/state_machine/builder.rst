@@ -1,8 +1,8 @@
-***************************************
-:mod:`builder`--- State Machine Builder
-***************************************
+*****************************************************
+:mod:`state_machine_builder`--- State Machine Builder
+*****************************************************
 
-.. module:: builder
+.. module:: state_machine_builder
    :synopsis: modules related to state machine
 
 Implementation

@@ -5,7 +5,7 @@ import logging
 
 from pybpodapi.model.state_machine import StateMachine
 from pybpodapi.model.event_occurrence import EventOccurrence
-from pybpodapi.model.state import State
+from pybpodapi.model.state_occurrences import StateOccurrences
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,8 @@ class Trial(object):
 
 		self.bpod_start_timestamp = None
 		self.states_timestamps = {}  # {'Reward': [(429496.7295, 429496.7295)], 'WaitForPort2Poke': [(0, 429496.7295)], 'FlashStimulus': [(429496.7295, 429496.7295)], 'WaitForResponse': [(429496.7295, 429496.7295)], 'Punish': [(nan, nan)]}
-		self.events_timestamps = {}  # {'Tup': [429496.7295, 429496.7295], 'Port3In': [429496.7295, 429496.7295], 'Port2In': [429496.7295, 429496.7295], 'Port2Out': [429496.7295, 429496.7295], 'Port3Out': [429496.7295], 'Port1Out': [429496.7295]}
 		self.sma = sma  # type: StateMachine
-		self.states = []  # type: list(State)
+		self.states = []  # type: list(StateOccurrences)
 		self.events_occurrences = []  # type: list(EventOccurrence)
 
 	def add_state_duration(self, state_name, start, end):
@@ -35,10 +34,10 @@ class Trial(object):
 		:param float start: start timestamp
 		:param float end: end timestamp
 		"""
-		state = [state for state in self.states if state.name == state_name]  # type: list(State)
+		state = [state for state in self.states if state.name == state_name]  # type: list(StateOccurrences)
 
 		if not state:
-			state = State(state_name)
+			state = StateOccurrences(state_name)
 			self.states.append(state)
 		else:
 			state = state[0]
@@ -79,9 +78,19 @@ class Trial(object):
 		Create a dictionary whose keys are events names and values are corresponding timestamps
 		
 		Example:
-		{'Tup': [429496.7295, 429496.7295], 'Port3In': [429496.7295, 429496.7295], 'Port2In': [429496.7295, 429496.7295], 'Port2Out': [429496.7295, 429496.7295], 'Port3Out': [429496.7295], 'Port1Out': [429496.7295]}
 		
-		:return: 
+		.. code-block:: python
+		
+			{
+				'Tup': [429496.7295, 429496.7295], 
+				'Port3In': [429496.7295, 429496.7295], 
+				'Port2In': [429496.7295, 429496.7295], 
+				'Port2Out': [429496.7295, 429496.7295], 
+				'Port3Out': [429496.7295], 
+				'Port1Out': [429496.7295]
+			}
+		
+		:rtype: dict 
 		"""
 		all_timestamps = {}
 		for event_name in self.get_events_names():
@@ -91,9 +100,8 @@ class Trial(object):
 
 	def export(self):
 		return {'Bpod start timestamp': self.bpod_start_timestamp,
-		        'Raw data': self.sma.raw_data.export(),
 		        'States timestamps': self.states_timestamps,
-		        'Events timestamps': self.events_timestamps}
+		        'Events timestamps': self.get_all_timestamps_by_event()}
 
 	def __str__(self):
 		return str(self.export())

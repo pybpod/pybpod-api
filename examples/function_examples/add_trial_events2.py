@@ -96,9 +96,7 @@ def run():
 
 		my_bpod.run_state_machine(sma)  # Run state machine
 
-		print("Raw data: ", sma.raw_data)
-
-		print("Current trial full data: ", my_bpod.session.current_trial())  # including raw events
+		print("Current trial info: ", my_bpod.session.current_trial())
 
 	my_bpod.stop()  # Disconnect Bpod
 

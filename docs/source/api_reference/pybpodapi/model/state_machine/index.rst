@@ -11,6 +11,7 @@
    state_machine
    builder
    runner
+   raw_data
 
 Overview
 --------
@@ -22,4 +23,4 @@ Class Inheritance
 -----------------
 
 .. image:: /_images/pybpodapi_sma_inheritance.svg
-    :scale: 60 %
+    :width: 50%
