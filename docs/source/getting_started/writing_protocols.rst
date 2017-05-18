@@ -102,9 +102,7 @@ On run completion, we can print the data that was stored on the *raw_data* varia
 
         my_bpod.run_state_machine(sma)  # Run state machine
 
-        print("Raw data: ", sma.raw_data) # Print raw data to console
-
-        print("Current trial full data: ", my_bpod.session.current_trial()) # trial info, including raw events
+        print("Current trial info: ", my_bpod.session.current_trial())
 
 .. seealso::
 
