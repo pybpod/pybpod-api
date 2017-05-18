@@ -4,6 +4,7 @@
 import logging
 import math
 from pybpodapi.hardware.hardware import Hardware
+from pybpodapi.hardware.hardware import Channels
 from pybpodapi.model.state_machine.conditions import Conditions
 from pybpodapi.model.state_machine.global_counters import GlobalCounters
 from pybpodapi.model.state_machine.global_timers import GlobalTimers
@@ -14,21 +15,42 @@ logger = logging.getLogger(__name__)
 
 class StateMachineBase(object):
 	"""
-	State Machine for Bpod
+	Each Bpod trial is programmed as a virtual finite state machine. This ensures precise timing of events - for any state machine you program, state transitions will be completed in less than 250 microseconds - so inefficient coding won't reduce the precision of events in your data.
+	
+	.. warning:: A lot of data structures are kept here for compatibility with original matlab library which are not so python-like. Anyone is welcome to enhance this class but keep in mind that it will affect the whole pybpodapi library.
+	
+	
+	:ivar Hardware hardware: bpod box hardware description associated with this state machine
+	:ivar Channels channels: bpod box channels handling 
+	:ivar list(str) state_names: list that holds state names added to this state machine
+	:ivar list(float) state_timers: list that holds state timers
+	:ivar int total_states_added: holds all states added, even if name is repeated
+	:ivar list(int) state_timer_matrix: TODO:
+	:ivar Conditions conditions: holds conditions
+	:ivar GlobalCounters global_counters: holds global timers
+	:ivar GlobalTimers global_timers: holds global counters
+	:ivar list(tuple(int)) input_matrix: TODO:
+	:ivar list(str) manifest: list of states names that have been added to the state machine
+	:ivar list(str) undeclared: list of states names that have been referenced but not yet added
+	:ivar tuple(str) meta_output_names: TODO:
+	:ivar list(tuple(int)) output_matrix: TODO:
+	:ivar RawData raw_data: temporarily stores trial information (state occurrences, event occurrences, etc.)
+	:ivar bool is_running: whether this state machine is being run on bpod box 
+	
 	"""
 
 	def __init__(self, hardware):
 		"""
 
-		:param Hardware hardware:
+		:param Hardware hardware: hardware description associated with this state machine
 		"""
 		self.hardware = hardware  # type: Hardware
 
-		self.channels = hardware.channels  # TODO: temporary fix, this is not needed
+		self.channels = hardware.channels
 
-		self.state_names = []
-		self.state_timers = [0] * self.hardware.max_states
-		self.total_states_added = 0  # holds all states added, even if name is repeated
+		self.state_names = [] # type: list(str)
+		self.state_timers = [0] * self.hardware.max_states # list(float)
+		self.total_states_added = 0 # type: int
 
 		# state change conditions
 		self.state_timer_matrix = [0] * self.hardware.max_states
@@ -36,8 +58,8 @@ class StateMachineBase(object):
 		self.global_counters = GlobalCounters(self.hardware.max_states, self.hardware.n_global_counters)
 		self.global_timers = GlobalTimers(self.hardware.max_states, self.hardware.n_global_timers)
 		self.input_matrix = [[] for i in range(self.hardware.max_states)]
-		self.manifest = []  # List of states that have been added to the state machine
-		self.undeclared = []  # List of states that have been referenced but not yet added
+		self.manifest = []  # type: list(str)
+		self.undeclared = []  # type:list(str)
 
 		# output actions
 		self.meta_output_names = ('Valve', 'LED')
