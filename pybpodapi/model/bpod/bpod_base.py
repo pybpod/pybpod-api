@@ -22,17 +22,26 @@ from pybpodapi.model.event_occurrence import EventOccurrence
 logger = logging.getLogger(__name__)
 
 
-class Status():
+class Status(object):
+	"""
+	Holds Bpod state machine status
+	
+	:ivar bool new_sma_sent: whether a new state machine was already uploaded to Bpod box
+	"""
+
 	def __init__(self):
 		self.new_sma_sent = False  # type: bool
 
 
 class BpodBase(object):
 	"""
-	Bpod is the main entity.
+	API to interact with Bpod
+	
+	:ivar Session session: Session for this bpod running experiment
+	:ivar Hardware hardware: Hardware object representing Bpod hardware
+	:ivar MessageAPI message_api: Abstracts communication with Bpod box
+	:ivar Status status: whether a new state machine was already uploaded to Bpod box
 	"""
-
-	# MAX_TRIES = 5  # maximum number of tries when sending serial command
 
 	#########################################
 	############## PROPERTIES ###############
@@ -86,13 +95,21 @@ class BpodBase(object):
 
 		Connect to Bpod board through serial port, test handshake, retrieve firmware version,
 		retrieve hardware description, enable input ports and configure channel synchronization.
+		
+		Example: 
+		
+		.. code-block:: python
+		
+			my_bpod = Bpod().start("/dev/tty.usbmodem1293", "/Users/John/Desktop/bpod_workspace", "2afc_protocol")
 
 		:param str serial_port: serial port to connect
-		:param int baudrate: baudrate for serial connection
-		:param int sync_channel: Serial synchronization channel: 255 = no sync, otherwise set to a hardware channel number
-		:param int sync_mode: Serial synchronization mode: 0 = flip logic every trial, 1 = every state
-		:return: reference to Bpod class
-		:return type: Bpod
+		:param str workspace_path: path for bpod output files (no folders will be created)
+		:param str protocol_name: this name will be used for output files
+		:param int baudrate [optional]: baudrate for serial connection
+		:param int sync_channel [optional]: Serial synchronization channel: 255 = no sync, otherwise set to a hardware channel number
+		:param int sync_mode [optional]: Serial synchronization mode: 0 = flip logic every trial, 1 = every state
+		:return: Bpod object created
+		:rtype: pybpodapi.model.bpod
 		"""
 
 		logger.info("Starting Bpod")
@@ -123,10 +140,9 @@ class BpodBase(object):
 
 	def send_state_machine(self, sma):
 		"""
-		Send state machine to Bpod
+		Builds message and sends state machine to Bpod
 
-		:param sma: initialized state machine
-		:type sma: StateMachine
+		:param pybpodapi.model.state_machine sma: initialized state machine
 		"""
 
 		logger.info("Sending state machine")
@@ -144,12 +160,29 @@ class BpodBase(object):
 	def run_state_machine(self, sma):
 		"""
 
-		Run state machine on Bpod now
-
-		:param sma: initialized state machine
-		:type sma: StateMachine
-		:return: state machine raw data
-		:rtype: RawData
+		Adds a new trial to current session and runs state machine on Bpod box.
+		
+		While state machine is running, messages are processed accordingly.
+		
+		When state machine stops, timestamps are updated and trial events are processed.
+		
+		Finally, data is released for registered data consumers / exporters.
+		
+		.. seealso::
+			
+			Add trial: :meth:`pybpodapi.model.session.Session.add_trial`.
+			
+			Send command "run state machine": :meth:`pybpodapi.com.message_api.MessageAPI.run_state_machine`.
+			
+			Process opcode: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._BpodBase__process_opcode`.
+			
+			Update timestamps: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._BpodBase__update_timestamps`.
+			
+			Add trial events: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._BpodBase__add_trial_events`.
+		
+			Publish data: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._publish_data`.
+	
+		:param pybpodapi.mode.state_machine sma: initialized state machine
 		"""
 
 		self.session.add_trial(sma)

@@ -15,7 +15,8 @@ After :ref:`installing <installing-label>` pybpod-api, open a python terminal an
     from pybpodapi.hardware.channels import ChannelName # import available names of channels
 
     # connect to bpod
-    my_bpod = Bpod().start('/dev/tty.usbmodem1461') # CHANGE TO YOUR SERIAL PORT
+
+    my_bpod = Bpod().start('YOUR_SERIAL_PORT_HERE', 'PATH_FOR_OUTPUT_FOLDER', "manual_interaction")  # Start bpod
 
     # set poke led connected on port 1 to maximum intensity
     my_bpod.manual_override(ChannelType.OUTPUT, ChannelName.PWM, channel_number=1, value=255)
