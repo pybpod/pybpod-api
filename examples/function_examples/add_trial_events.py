@@ -15,6 +15,8 @@ import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
+from pybpodapi.hardware.events import EventName
+from pybpodapi.hardware.output_channels import OutputChannel
 
 
 def run():
@@ -32,12 +34,12 @@ def run():
 
 		thisTrialType = random.choice(trialTypes)  # Randomly choose trial type
 		if thisTrialType == 1:
-			stimulus = 'PWM1'  # set stimulus channel for trial type 1
+			stimulus = OutputChannel.PWM1  # set stimulus channel for trial type 1
 			leftAction = 'Reward'
 			rightAction = 'Punish'
 			rewardValve = 1
 		elif thisTrialType == 2:
-			stimulus = 'PWM3'  # set stimulus channel for trial type 1
+			stimulus = OutputChannel.PWM3  # set stimulus channel for trial type 1
 			leftAction = 'Punish'
 			rightAction = 'Reward'
 			rewardValve = 3
@@ -47,28 +49,28 @@ def run():
 		sma.add_state(
 			state_name='WaitForPort2Poke',
 			state_timer=1,
-			state_change_conditions={'Port2In': 'FlashStimulus'},
-			output_actions=[('PWM2', 255)])
+			state_change_conditions={EventName.Port2In: 'FlashStimulus'},
+			output_actions=[(OutputChannel.PWM2, 255)])
 		sma.add_state(
 			state_name='FlashStimulus',
 			state_timer=0.1,
-			state_change_conditions={'Tup': 'WaitForResponse'},
+			state_change_conditions={EventName.Tup: 'WaitForResponse'},
 			output_actions=[(stimulus, 255)])
 		sma.add_state(
 			state_name='WaitForResponse',
 			state_timer=1,
-			state_change_conditions={'Port1In': leftAction, 'Port3In': rightAction},
+			state_change_conditions={EventName.Port1In: leftAction, EventName.Port3In: rightAction},
 			output_actions=[])
 		sma.add_state(
 			state_name='Reward',
 			state_timer=0.1,
-			state_change_conditions={'Tup': 'exit'},
-			output_actions=[('Valve', rewardValve)])  # Reward correct choice
+			state_change_conditions={EventName.Tup: 'exit'},
+			output_actions=[(OutputChannel.Valve, rewardValve)])  # Reward correct choice
 		sma.add_state(
 			state_name='Punish',
 			state_timer=3,
-			state_change_conditions={'Tup': 'exit'},
-			output_actions=[('LED', 1), ('LED', 2), ('LED', 3)])  # Signal incorrect choice
+			state_change_conditions={EventName.Tup: 'exit'},
+			output_actions=[(OutputChannel.LED, 1), (OutputChannel.LED, 2), (OutputChannel.LED, 3)])  # Signal incorrect choice
 
 		my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 

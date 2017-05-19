@@ -9,6 +9,9 @@ from pybpodapi.model.state_machine.conditions import Conditions
 from pybpodapi.model.state_machine.global_counters import GlobalCounters
 from pybpodapi.model.state_machine.global_timers import GlobalTimers
 from pybpodapi.model.state_machine.raw_data import RawData
+from pybpodapi.hardware.events import EventName
+from pybpodapi.hardware.output_channels import OutputChannel
+from pybpodapi.hardware.channels import ChannelName
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +51,9 @@ class StateMachineBase(object):
 
 		self.channels = hardware.channels
 
-		self.state_names = [] # type: list(str)
-		self.state_timers = [0] * self.hardware.max_states # list(float)
-		self.total_states_added = 0 # type: int
+		self.state_names = []  # type: list(str)
+		self.state_timers = [0] * self.hardware.max_states  # list(float)
+		self.total_states_added = 0  # type: int
 
 		# state change conditions
 		self.state_timer_matrix = [0] * self.hardware.max_states
@@ -62,7 +65,6 @@ class StateMachineBase(object):
 		self.undeclared = []  # type:list(str)
 
 		# output actions
-		self.meta_output_names = ('Valve', 'LED')
 		self.output_matrix = [[] for i in range(self.hardware.max_states)]
 
 		self.raw_data = RawData()
@@ -71,12 +73,23 @@ class StateMachineBase(object):
 
 	def add_state(self, state_name, state_timer, state_change_conditions={}, output_actions=()):
 		"""
-		Add new state
+		Adds a state to an existing state matrix. 
 
-		:param str name: name of the state
-		:param float timer: timer in seconds
-		:param dict state_change_conditions:
-		:param tuple output_actions:
+		:param str name: A character string containing the unique name of the state. The state will automatically be assigned a number for internal use and state synchronization via the sync port
+		:param float timer: The state timer value, given in seconds. This value must be zero or positive, and can range between 0-3600s. If set to 0s and linked to a state transition, the state will still take ~100us to execute the state's output actions before the transition completes
+		:param dict state_change_conditions: Dictionary whose keys are names of a valid input event (state change) and values are names of states to enter if the previously listed event occurs (or 'exit' to exit the matrix and return all captured data)
+		:param list(tuple) output_actions: a list of binary tuples where first value should contain the name of a valid output action and the second value should contain the value of the previously listed output action (see output actions for valid values).		 
+		
+		Example:
+		
+		.. code-block:: python
+		
+			sma.add_state(
+				state_name='Port1Lit',
+				state_timer=.25,
+				state_change_conditions={'Tup': 'Port3Lit', 'GlobalTimer1_End': 'exit'},
+				output_actions=[('PWM1', 255)])
+		
 		"""
 
 		# TODO: WHY DO WE NEED THIS IF-ELSE?
@@ -106,32 +119,35 @@ class StateMachineBase(object):
 				else:  # Send to an undeclared state (replaced later with actual state in myBpod.sendStateMachine)
 					self.undeclared.append(event_state_transition)
 					destination_state_number = (len(self.undeclared) - 1) + 10000
-			if event_code == self.channels.events_positions.Tup:
+
+			if EventName.is_state_timer(event_name):
 				self.state_timer_matrix[state_name_idx] = destination_state_number
-			elif event_code >= self.channels.events_positions.condition:
+
+			elif EventName.is_condition(event_name):
 				self.conditions.matrix[state_name_idx].append((event_code, destination_state_number))
-			elif event_code >= self.channels.events_positions.globalCounter:
+
+			elif EventName.is_global_counter(event_name):
 				self.global_counters.matrix[state_name_idx].append((event_code, destination_state_number))
-			elif event_code >= self.channels.events_positions.globalTimerEnd:
+
+			elif EventName.is_global_timer_end(event_name):
 				self.global_timers.end_matrix[state_name_idx].append((event_code, destination_state_number))
-			elif event_code >= self.channels.events_positions.globalTimerStart:
+
+			elif EventName.is_global_timer_start(event_name):
 				self.global_timers.start_matrix[state_name_idx].append((event_code, destination_state_number))
+
 			else:
 				self.input_matrix[state_name_idx].append((event_code, destination_state_number))
 
 		for action in output_actions:
 			action_name = action[0]
 			action_value = action[1]
-			if action_name in self.meta_output_names:
-				meta_action = self.meta_output_names.index(action_name)
-				if meta_action == 0:  # Valve
-					output_code = self.channels.output_channel_names.index('ValveState')
-					output_value = math.pow(2, action_value - 1)
-				elif meta_action == 1:  # LED
-					output_code = self.channels.output_channel_names.index('PWM' + str(action_value))
-					output_value = 255;
-				else:
-					raise SMAError('Error: a meta-action was unhandled.')
+
+			if action_name == OutputChannel.Valve:
+				output_code = self.channels.output_channel_names.index(OutputChannel.ValveState)
+				output_value = math.pow(2, action_value - 1)
+			elif action_name == OutputChannel.LED:
+				output_code = self.channels.output_channel_names.index(ChannelName.PWM + str(action_value))
+				output_value = 255
 			else:
 				try:
 					output_code = self.channels.output_channel_names.index(action_name)
@@ -155,10 +171,10 @@ class StateMachineBase(object):
 
 	def set_global_timer(self, timer_ID, timer_duration, on_set_delay, channel, on_message=1, off_message=0):
 		"""
-		Set global timer
+		Sets the duration of a global timer. Unlike state timers, global timers can be triggered from any state (as an output action), and handled from any state (by causing a state change).
 
-		:param int timer_ID:
-		:param float timer_duration: timer duration in seconds
+		:param int timer_ID: the number of the timer you are setting (an integer, 1-5).
+		:param float timer_duration: the duration of the timer, following timer start (0-3600 seconds)
 		:param float on_set_delay:
 		:param str channel: channel/port name Ex: 'PWM2'
 		:param int on_message:
@@ -176,9 +192,9 @@ class StateMachineBase(object):
 
 	def set_global_counter(self, counter_number=None, target_event=None, threshold=None):
 		"""
-		Set global counter
+		Sets the threshold and monitored event for one of the 5 global counters. Global counters can count instances of events, and handle when the count exceeds a threshold from any state (by triggering a state change).
 
-		:param int counter_number: counter id
+		:param int counter_number: the number of the counter you are setting (an integer, 1-5).
 		:param str target_event: port where to listen for event to count
 		:param int threshold: number of times that should be count until trigger timer
 		"""

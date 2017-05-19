@@ -10,3 +10,7 @@
 
    hardware
    channels
+   event_codes
+   output_action_codes
+   events
+   output_channels

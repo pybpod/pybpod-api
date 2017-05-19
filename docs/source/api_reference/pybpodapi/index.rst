@@ -11,6 +11,7 @@
    model/index
    hardware/index
    com/index
+   plugins/index
 
 =============================
 Class Diagrams (and modules)
