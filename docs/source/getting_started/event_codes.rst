@@ -1,9 +1,12 @@
-**********************
-Bpod input event codes
-**********************
+.. _api_input_event_codes-label:
+
+*****************
+Input event codes
+*****************
 
 Overview
 ========
+Input events are specified via string labels. Although you can manually specify these values, **we strongly advise to use the API available labels instead** (:py:class:`pybpodapi.hardware.events.EventName`).
 
 Port IR sensor events
 ---------------------

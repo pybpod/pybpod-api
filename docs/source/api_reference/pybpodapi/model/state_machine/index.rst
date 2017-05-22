@@ -1,3 +1,5 @@
+.. _api_state_machine-label:
+
 *************************************
 :mod:`state_machine`--- State Machine
 *************************************

@@ -48,6 +48,9 @@ class OutputChannel(object):
 	#: Wire3
 	Wire3 = 'Wire3'
 
+	#: Wire3
+	Wire4 = 'Wire4'
+
 	#: PWM1
 	PWM1 = 'PWM1'
 
