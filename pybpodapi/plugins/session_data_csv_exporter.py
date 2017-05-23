@@ -39,7 +39,7 @@ class SessionDataCSVExporter(object):
 			csv_writer.writerow([])
 			csv_writer.writerow(["State name", "Start", "End"])
 
-			for state in trial.states:
+			for state in trial.states_occurrences:
 				for state_dur in state.timestamps:
 					csv_writer.writerow([state.name, state_dur.start, state_dur.end])
 

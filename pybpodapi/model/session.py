@@ -81,7 +81,7 @@ class Session(object):
 			if not visitedStates[i]:
 				current_trial.add_state_duration(thisStateName, float('NaN'), float('NaN'))
 
-		logger.debug("Trial states: %s", [str(state) for state in current_trial.states])
+		logger.debug("Trial states: %s", [str(state) for state in current_trial.states_occurrences])
 
 		# save events occurrences on trial
 		current_trial.events_occurrences = sma.raw_data.events_occurrences  # type: list

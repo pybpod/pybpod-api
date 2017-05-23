@@ -33,11 +33,11 @@ class Trial(object):
 		:param float start: start timestamp
 		:param float end: end timestamp
 		"""
-		state = [state for state in self.states if state.name == state_name]  # type: list(StateOccurrences)
+		state = [state for state in self.states_occurrences if state.name == state_name]  # type: list(StateOccurrences)
 
 		if not state:
 			state = StateOccurrences(state_name)
-			self.states.append(state)
+			self.states_occurrences.append(state)
 		else:
 			state = state[0]
 
@@ -48,7 +48,6 @@ class Trial(object):
 		Create a dictionary whose keys are state names and values are corresponding timestamps (start and end)
 
 		This is just a convenient method for getting all states occurrences as a dictionary. 
-		If you just want to pretty-print this info, use str(self.states_occurrences) instead.
 
 		Example:
 
@@ -127,7 +126,7 @@ class Trial(object):
 
 	def export(self):
 		return {'Bpod start timestamp': self.bpod_start_timestamp,
-		        'States timestamps': str(self.states_occurrences),
+		        'States timestamps': self.get_all_timestamps_by_state(),
 		        'Events timestamps': self.get_all_timestamps_by_event()}
 
 	def __str__(self):
