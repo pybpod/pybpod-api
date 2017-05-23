@@ -70,7 +70,6 @@ class Session(object):
 
 		for i in range(nUniqueStates):
 			thisStateName = sma.state_names[uniqueStates[i]]
-			current_trial.states_timestamps[thisStateName] = uniqueStateDataMatrices[i]
 
 			for state_dur in uniqueStateDataMatrices[i]:
 				current_trial.add_state_duration(thisStateName, state_dur[0], state_dur[1])
@@ -80,7 +79,6 @@ class Session(object):
 		for i in range(sma.total_states_added):
 			thisStateName = sma.state_names[i]
 			if not visitedStates[i]:
-				current_trial.states_timestamps[thisStateName] = [(float('NaN'), float('NaN'))]
 				current_trial.add_state_duration(thisStateName, float('NaN'), float('NaN'))
 
 		logger.debug("Trial states: %s", [str(state) for state in current_trial.states])

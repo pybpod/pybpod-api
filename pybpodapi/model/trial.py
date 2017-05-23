@@ -13,17 +13,16 @@ logger = logging.getLogger(__name__)
 class Trial(object):
 	"""
 	:ivar float bpod_start_timestamp: None
-	:ivar dict states_timestamps: {}
-	:ivar dict events_timestamps: {}
 	:ivar StateMachine sma: sma
+	:ivar list(StateOccurrences) state_occurrences: list of state occurrences
+	:ivar list(EventOccurrence) events_occurrences: list of event occurrences 
 	"""
 
 	def __init__(self, sma):
 
 		self.bpod_start_timestamp = None
-		self.states_timestamps = {}  # {'Reward': [(429496.7295, 429496.7295)], 'WaitForPort2Poke': [(0, 429496.7295)], 'FlashStimulus': [(429496.7295, 429496.7295)], 'WaitForResponse': [(429496.7295, 429496.7295)], 'Punish': [(nan, nan)]}
 		self.sma = sma  # type: StateMachine
-		self.states = []  # type: list(StateOccurrences)
+		self.states_occurrences = []  # type: list(StateOccurrences)
 		self.events_occurrences = []  # type: list(EventOccurrence)
 
 	def add_state_duration(self, state_name, start, end):
@@ -43,6 +42,34 @@ class Trial(object):
 			state = state[0]
 
 		state.add_state_dur(start, end)
+
+	def get_all_timestamps_by_state(self):
+		"""
+		Create a dictionary whose keys are state names and values are corresponding timestamps (start and end)
+
+		This is just a convenient method for getting all states occurrences as a dictionary. 
+		If you just want to pretty-print this info, use str(self.states_occurrences) instead.
+
+		Example:
+
+		.. code-block:: python
+
+			{
+				'TimerTrig': [(0, 0.0001)],
+				'Reward': [(429496.7295, 429496.7295)],
+				'WaitForPort2Poke': [(0, 429496.7295)], 
+				'FlashStimulus': [(429496.7295, 429496.7295)],
+				'WaitForResponse': [(429496.7295, 429496.7295)],
+				'Punish': [(nan, nan)]}
+			}
+
+		:rtype: dict 
+		"""
+		all_timestamps = {}
+		for state in self.states_occurrences:
+			all_timestamps[state.name] = [(state_dur.start, state_dur.end) for state_dur in state.timestamps]
+
+		return all_timestamps
 
 	def get_timestamps_by_event_name(self, event_name):
 		"""
@@ -100,7 +127,7 @@ class Trial(object):
 
 	def export(self):
 		return {'Bpod start timestamp': self.bpod_start_timestamp,
-		        'States timestamps': self.states_timestamps,
+		        'States timestamps': str(self.states_occurrences),
 		        'Events timestamps': self.get_all_timestamps_by_event()}
 
 	def __str__(self):
