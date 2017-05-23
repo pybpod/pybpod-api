@@ -9,7 +9,8 @@ import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
-
+from pybpodapi.hardware.events import EventName
+from pybpodapi.hardware.output_channels import OutputChannel
 
 def run():
 	"""
@@ -23,14 +24,14 @@ def run():
 	sma.add_state(
 		state_name='Port1Light',
 		state_timer=0,
-		state_change_conditions={'Serial2_3': 'Port2Light'},  # Go to Port2Light when byte 0x3 arrives on UART port 2
-		output_actions=[('PWM1', 255)])
+		state_change_conditions={EventName.Serial2_3: 'Port2Light'},  # Go to Port2Light when byte 0x3 arrives on UART port 2
+		output_actions=[(OutputChannel.PWM1, 255)])
 
 	sma.add_state(
 		state_name='Port2Light',
 		state_timer=0,
-		state_change_conditions={'Tup': 'exit'},
-		output_actions=[('PWM2', 255)])
+		state_change_conditions={EventName.Tup: 'exit'},
+		output_actions=[(OutputChannel.PWM2, 255)])
 
 	my_bpod.send_state_machine(sma)
 

@@ -9,7 +9,8 @@ import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
-
+from pybpodapi.hardware.events import EventName
+from pybpodapi.hardware.output_channels import OutputChannel
 
 def run():
 	"""
@@ -25,26 +26,26 @@ def run():
 	sma.add_state(
 		state_name='Port1Light',
 		state_timer=1,
-		state_change_conditions={'Tup': 'Port2Light'},
-		output_actions=[('PWM1', 255)])
+		state_change_conditions={EventName.Tup: 'Port2Light'},
+		output_actions=[(OutputChannel.PWM1, 255)])
 
 	sma.add_state(
 		state_name='Port2Light',
 		state_timer=1,
-		state_change_conditions={'Tup': 'Port3Light', 'Condition1': 'Port3Light'},
-		output_actions=[('PWM2', 255)])
+		state_change_conditions={EventName.Tup: 'Port3Light', EventName.Condition1: 'Port3Light'},
+		output_actions=[(OutputChannel.PWM2, 255)])
 
 	sma.add_state(
 		state_name='Port3Light',
 		state_timer=1,
-		state_change_conditions={'Tup': 'exit'},
-		output_actions=[('PWM3', 255)])
+		state_change_conditions={EventName.Tup: 'exit'},
+		output_actions=[(OutputChannel.PWM3, 255)])
 
 	my_bpod.send_state_machine(sma)
 
 	my_bpod.run_state_machine(sma)
 
-	print("Current trial info: ", my_bpod.session.current_trial())
+	print("Current trial info: {0}".format(my_bpod.session.current_trial()))
 
 	my_bpod.stop()
 

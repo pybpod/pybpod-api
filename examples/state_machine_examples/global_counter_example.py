@@ -14,6 +14,8 @@ import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
+from pybpodapi.hardware.events import EventName
+from pybpodapi.hardware.output_channels import OutputChannel
 
 
 def run():
@@ -30,32 +32,32 @@ def run():
 	sma.add_state(
 		state_name='InitialDelay',
 		state_timer=2,
-		state_change_conditions={'Tup': 'ResetGlobalCounter1'},
-		output_actions=[('PWM2', 255)])
+		state_change_conditions={EventName.Tup: 'ResetGlobalCounter1'},
+		output_actions=[(OutputChannel.PWM2, 255)])
 
 	sma.add_state(
 		state_name='ResetGlobalCounter1',
 		state_timer=0,
-		state_change_conditions={'Tup': 'Port1Lit'},
-		output_actions=[('GlobalCounterReset', 1)])
+		state_change_conditions={EventName.Tup: 'Port1Lit'},
+		output_actions=[(OutputChannel.GlobalCounterReset, 1)])
 
 	sma.add_state(
 		state_name='Port1Lit',  # Infinite loop (with next state). Only a global counter can save us.
 		state_timer=.25,
-		state_change_conditions={'Tup': 'Port3Lit', 'GlobalCounter1_End': 'exit'},
-		output_actions=[('PWM1', 255)])
+		state_change_conditions={EventName.Tup: 'Port3Lit', 'GlobalCounter1_End': 'exit'},
+		output_actions=[(OutputChannel.PWM1, 255)])
 
 	sma.add_state(
 		state_name='Port3Lit',
 		state_timer=.25,
-		state_change_conditions={'Tup': 'Port1Lit', 'GlobalCounter1_End': 'exit'},
-		output_actions=[('PWM3', 255)])
+		state_change_conditions={EventName.Tup: 'Port1Lit', 'GlobalCounter1_End': 'exit'},
+		output_actions=[(OutputChannel.PWM3, 255)])
 
 	my_bpod.send_state_machine(sma)
 
 	my_bpod.run_state_machine(sma)
 
-	print("Current trial info: ", my_bpod.session.current_trial())
+	print("Current trial info: {0}".format(my_bpod.session.current_trial()))
 
 	my_bpod.stop()
 
