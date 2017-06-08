@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from pybpodapi.model.event_occurrence import EventOccurrence
+from pybpodapi.model.softcode_occurrence import SoftCodeOccurrence
 
 
 class RawData(object):
@@ -21,17 +22,19 @@ class RawData(object):
 	def __init__(self):
 		self.states = [0]
 		self.state_timestamps = [0]
+		self.event_timestamps = []  # see also BpodBase.__update_timestamps
 		self.trial_start_timestamp = None  # type: float
 		self.events_occurrences = []  # type: list(EventOccurrence)
+		self.softcode_occurrences = []  # type: list(SoftCodeOccurrence)
 
 	def add_event_occurrence(self, event_index, event_name, timestamp=None):
 		"""
 		Event has happened, save occurrence. Creates a new EventOccurrence object and stores it in the events list.
-		
+
 		:param int event_index: index of the event
 		:param str event_name: name of the event
 		:param float timestamp: optional for now because bpod doesn't send it
-		
+
 		:rtype: EventOccurrence
 		"""
 		event = EventOccurrence(event_name, event_index, timestamp)
@@ -39,6 +42,21 @@ class RawData(object):
 		self.events_occurrences.append(event)
 
 		return event
+
+	def add_softcode_occurrence(self, softcode_number, timestamp=None):
+		"""
+		SoftCode detected by Bpod's.
+
+		:param int softcode_number: id of the softcode
+		:param float timestamp: optional for now because bpod doesn't send it
+
+		:rtype: SoftCodeOccurrence
+		"""
+		softcode = SoftCodeOccurrence(softcode_number, timestamp)
+
+		self.softcode_occurrences.append(softcode)
+
+		return softcode
 
 	def export(self):
 		return {'Trial start timestamp': self.trial_start_timestamp,

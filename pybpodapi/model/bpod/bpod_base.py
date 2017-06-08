@@ -18,6 +18,7 @@ from pybpodapi.model.state_machine import StateMachine
 from pybpodapi.model.trial import Trial
 from pybpodapi.model.state_machine.raw_data import RawData
 from pybpodapi.model.event_occurrence import EventOccurrence
+from pybpodapi.model.softcode_occurrence import SoftCodeOccurrence
 
 logger = logging.getLogger(__name__)
 
@@ -289,6 +290,14 @@ class BpodBase(object):
 		"""
 		pass
 
+	def softcode_handler_function(self, data):
+		"""
+		Users can override this function directly on the protocol to handle a softcode from Bpod
+
+		:param int data: soft code number
+		"""
+		pass
+
 	#########################################
 	############ PRIVATE METHODS ############
 	#########################################
@@ -304,24 +313,36 @@ class BpodBase(object):
 
 		event_name = self.hardware.channels.get_event_name(event_index)  # type: str
 
+		# TODO: Timestamp implementation on Bpod firmware
 		# type: EventOccurrence
-		event_occurrence = sma.raw_data.add_event_occurrence(event_index=event_index, event_name=event_name)
+		event_occurrence = sma.raw_data.add_event_occurrence(event_index=event_index, event_name=event_name,
+		                                                     timestamp=None)
 
 		self._publish_data(data=event_occurrence)
 
 		logger.debug("Event fired: %s", str(event_occurrence))
 
+	def __add_softcode_occurrence(self, sma, data):
+
+		# TODO: Timestamp implementation on Bpod firmware
+		# type: SoftCodeOccurrence
+		softcode_occurrence = sma.raw_data.add_softcode_occurrence(softcode_number=data, timestamp=None)
+
+		self._publish_data(data=softcode_occurrence)
+
+		logger.debug("Softcode received: %s", str(softcode_occurrence))
+
 	def __process_opcode(self, sma, opcode, data, state_change_indexes):
 		"""
 		Process data from bpod board given an opcode
-		
+
 		In original bpod, sma.raw_data == raw_events
-		
+
 		:param sma: state machine object
-		:param int opcode: opcode number 
+		:param int opcode: opcode number
 		:param data: data from bpod board
-		:param state_change_indexes: 
-		:return: 
+		:param state_change_indexes:
+		:return:
 		"""
 
 		if opcode == 1:  # Read events
@@ -386,7 +407,8 @@ class BpodBase(object):
 				logger.debug("States indexes: %s", sma.raw_data.states)
 
 		elif opcode == 2:  # Handle soft code
-			logger.info("Soft code: %s", data)
+			self.softcode_handler_function(data)
+			self.__add_softcode_occurrence(data)
 
 		logger.debug("Raw data: %s", sma.raw_data)
 
