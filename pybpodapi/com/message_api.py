@@ -176,6 +176,10 @@ class MessageAPI(object):
 
 		self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
 
+		logger.debug("Flushing")
+
+		self._arcom.serial_object.flush()
+
 	def state_machine_installation_status(self):
 		"""
 		Confirm if new state machine was correctly installed

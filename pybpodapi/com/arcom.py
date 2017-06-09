@@ -79,8 +79,12 @@ class ArCOM(object):
 		return message_bytes.decode("utf-8")
 
 	def read_uint8(self):
-		message_bytes = self.serial_object.read(ArduinoTypes.UINT8.size)
-		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT8.size, message_bytes)
+		while True:
+			if self.serial_object.in_waiting > 0:
+				message_bytes = self.serial_object.read(ArduinoTypes.UINT8.size)
+				break
+
+		logger.debug("Read %s bytes: %s", len(message_bytes), message_bytes)
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 
