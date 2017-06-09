@@ -212,8 +212,6 @@ class BpodBase(object):
 
 		self._publish_data(self.session.current_trial())
 
-		time.sleep(bpod_settings.WAIT_BEFORE_NEXT_TRIAL)  # wait a few before next trial is run
-
 	def manual_override(self, channel_type, channel_name, channel_number, value):
 		"""
 		Manually override a Bpod channel
