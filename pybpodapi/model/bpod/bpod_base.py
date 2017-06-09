@@ -408,7 +408,7 @@ class BpodBase(object):
 
 		elif opcode == 2:  # Handle soft code
 			self.softcode_handler_function(data)
-			self.__add_softcode_occurrence(data)
+			self.__add_softcode_occurrence(sma, data)
 
 		logger.debug("Raw data: %s", sma.raw_data)
 

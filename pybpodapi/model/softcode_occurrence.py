@@ -19,5 +19,5 @@ class SoftCodeOccurrence(object):
 		self.timestamp = timestamp  # type: float
 
 	def __str__(self):
-		return "SoftCode={softcode_number} | Timestamp={timestamp}".format(name=self.softcode_number,
+		return "SoftCode={softcode_number} | Timestamp={timestamp}".format(softcode_number=self.softcode_number,
 		                                                                   timestamp=self.timestamp)
