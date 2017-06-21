@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Testing timer intervals between trials
+Testing timer intervals between consecutive trials
 
 @authors: Rachid Azizi, Carlos Mão de Ferro, Ricardo Ribeiro
 """
-
-import random
 
 import examples.settings as settings
 
@@ -19,11 +17,11 @@ from functools import reduce
 
 import time
 
-my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "test_timer")
-
 
 def run():
-	nTrials = 30
+	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "trials_time")
+
+	nTrials = 1000
 
 	global_timer = time.time()
 	time1 = time.time()
@@ -32,7 +30,7 @@ def run():
 	timestamps = []
 
 	for i in range(nTrials):
-		print('Trial: {0}'.format(i + 1))
+		print('{0}'.format(i + 1))
 
 		sma = StateMachine(my_bpod.hardware)
 
@@ -64,34 +62,26 @@ def run():
 
 		# time.sleep(0.1)
 
-		#print("\nTime before send: {0}".format(time.time() - time1))
+		# print("\nTime before send: {0}".format(time.time() - time1))
 		my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
-		#print("\nTime after send: {0}".format(time.time() - time1))
+		# print("\nTime after send: {0}".format(time.time() - time1))
 
-		#print("\nTime before run: {0}".format(time.time() - time1))
+		# print("\nTime before run: {0}".format(time.time() - time1))
 		my_bpod.run_state_machine(sma)  # Run state machine
-		#print("\nTime after run: {0}".format(time.time() - time1))
+		# print("\nTime after run: {0}".format(time.time() - time1))
 
 
 		timestamps.append(time.time() - time1)
-		#print("\nTotal trial time: {0}".format(time.time() - time1))
+		# print("\nTotal trial time: {0}".format(time.time() - time1))
 
-		#print("\nGlobal timer: {0}".format(time.time() - global_timer))
+		# print("\nGlobal timer: {0}".format(time.time() - global_timer))
 
 		time1 = time.time()
 
 	print("Trial lenght mean: {0}".format(reduce(lambda x, y: x + y, timestamps) / len(timestamps)))
 
+	my_bpod.stop()
+
 
 if __name__ == '__main__':
 	settings.run_this_protocol(run)
-	# BPOD_INSTANCE = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "test_timer")
-	#
-	# protocol_path = "/Users/carlos/Dropbox/Projects/champalimaud-projects/pycontrol/pycontrol-examples/test_bpod/tasks/test_timer.py.py"
-	#
-	# print(protocol_path)
-	#
-	# ldict = locals()
-	# exec(open(protocol_path).read(), globals(), ldict)
-	# mybpod = ldict['my_bpod']
-	# BPOD_INSTANCE.stop()

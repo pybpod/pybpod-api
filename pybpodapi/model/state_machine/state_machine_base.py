@@ -108,6 +108,7 @@ class StateMachineBase(object):
 		for event_name, event_state_transition in state_change_conditions.items():
 			try:
 				event_code = self.channels.event_names.index(event_name)
+				logger.debug("Event code: %s", event_code)
 			except:
 				raise SMAError('Error creating state: ' + state_name + '. ' + event_name + ' is an invalid event name.')
 

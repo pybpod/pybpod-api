@@ -127,7 +127,9 @@ class MessageAPI(object):
 		logger.debug("Requesting ports enabling (%s)", SendMessageHeader.ENABLE_PORTS)
 		logger.debug("Inputs enabled (%s): %s", len(inputs_enabled), inputs_enabled)
 
-		self._arcom.write_uint8_array([ord(SendMessageHeader.ENABLE_PORTS)] + inputs_enabled)
+		bytes2send = self._arcom.get_uint8_array([ord(SendMessageHeader.ENABLE_PORTS)] + inputs_enabled)
+
+		self._arcom.write_array(bytes2send)
 
 		response = self._arcom.read_uint8()  # type: int
 
@@ -145,7 +147,9 @@ class MessageAPI(object):
 		"""
 		logger.debug("Requesting sync channel and mode (%s)", SendMessageHeader.SYNC_CHANNEL_MODE)
 
-		self._arcom.write_uint8_array([ord(SendMessageHeader.SYNC_CHANNEL_MODE), sync_channel, sync_mode])
+		bytes2send = self._arcom.get_uint8_array([ord(SendMessageHeader.SYNC_CHANNEL_MODE), sync_channel, sync_mode])
+
+		self._arcom.write_array(bytes2send)
 
 		response = self._arcom.read_uint8()  # type: int
 
@@ -164,9 +168,10 @@ class MessageAPI(object):
 		logger.debug("Sending state machine: %s", message)
 		logger.debug("Data to send: %s", message32)
 
-		self._arcom.write_uint8_array([ord(SendMessageHeader.NEW_STATE_MATRIX)] + message)
+		bytes2send = self._arcom.get_uint8_array(
+			[ord(SendMessageHeader.NEW_STATE_MATRIX)] + message) + self._arcom.get_uint32_array(message32)
 
-		self._arcom.write_uint32_array(message32)
+		self._arcom.write_array(bytes2send)
 
 	def run_state_machine(self):
 		"""
@@ -175,10 +180,6 @@ class MessageAPI(object):
 		logger.debug("Requesting state machine run (%s)", SendMessageHeader.RUN_STATE_MACHINE)
 
 		self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
-
-		logger.debug("Flushing")
-
-		self._arcom.serial_object.flush()
 
 	def state_machine_installation_status(self):
 		"""
@@ -270,7 +271,10 @@ class MessageAPI(object):
 		"""
 		logger.debug("Requesting load serial message (%s)", SendMessageHeader.LOAD_SERIAL_MESSAGE)
 		logger.debug("Message: %s", message_container)
-		self._arcom.write_uint8_array([ord(SendMessageHeader.LOAD_SERIAL_MESSAGE)] + message_container)
+
+		bytes2send = self._arcom.get_uint8_array([ord(SendMessageHeader.LOAD_SERIAL_MESSAGE)] + message_container)
+
+		self._arcom.write_array(bytes2send)
 
 		response = self._arcom.read_uint8()  # type: int
 
@@ -301,7 +305,10 @@ class MessageAPI(object):
 		:param int channel_number: number of Bpod port
 		:param int value: value to be written
 		"""
-		self._arcom.write_uint8_array([ord(SendMessageHeader.OVERRIDE_DIGITAL_HW_STATE), channel_number, value])
+
+		bytes2send = self._arcom.get_uint8_array(
+			[ord(SendMessageHeader.OVERRIDE_DIGITAL_HW_STATE), channel_number, value])
+		self._arcom.write_array(bytes2send)
 
 	def send_byte_to_hardware_serial(self, channel_number, value):
 		"""
@@ -310,7 +317,7 @@ class MessageAPI(object):
 		:param int channel_number:
 		:param int value: value to be written
 		"""
-		self._arcom.write_uint8_array([ord(SendMessageHeader.SEND_TO_HW_SERIAL), channel_number, value])
+		self._arcom.get_uint8_array([ord(SendMessageHeader.SEND_TO_HW_SERIAL), channel_number, value])
 
 	def disconnect(self):
 		"""

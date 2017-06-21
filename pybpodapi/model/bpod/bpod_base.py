@@ -23,17 +23,6 @@ from pybpodapi.model.softcode_occurrence import SoftCodeOccurrence
 logger = logging.getLogger(__name__)
 
 
-class Status(object):
-	"""
-	Holds Bpod state machine status
-	
-	:ivar bool new_sma_sent: whether a new state machine was already uploaded to Bpod box
-	"""
-
-	def __init__(self):
-		self.new_sma_sent = False  # type: bool
-
-
 class BpodBase(object):
 	"""
 	API to interact with Bpod
@@ -41,8 +30,10 @@ class BpodBase(object):
 	:ivar Session session: Session for this bpod running experiment
 	:ivar Hardware hardware: Hardware object representing Bpod hardware
 	:ivar MessageAPI message_api: Abstracts communication with Bpod box
-	:ivar Status status: whether a new state machine was already uploaded to Bpod box
+	:ivar bool new_sma_sent: whether a new state machine was already uploaded to Bpod box
 	"""
+
+	CHECK_STATE_MACHINE_COUNTER = 0
 
 	#########################################
 	############## PROPERTIES ###############
@@ -73,24 +64,24 @@ class BpodBase(object):
 		self._message_api = value  # type: MessageAPI
 
 	@property
-	def status(self):
-		return self._status  # type: Status
+	def new_sma_sent(self):
+		return self._new_sma_sent  # type: new_sma_sent
 
-	@status.setter
-	def status(self, value):
-		self._status = value  # type: Status
+	@new_sma_sent.setter
+	def new_sma_sent(self, value):
+		self._new_sma_sent = value  # type: bool
 
 	def __init__(self):
 		self.hardware = Hardware()  # type: Hardware
 		self.session = Session()  # type: Session
 		self.message_api = MessageAPI()  # type: MessageAPI
-		self.status = Status()  # type: Status
+		self.new_sma_sent = False  # type: bool
 
 	#########################################
 	############ PUBLIC METHODS #############
 	#########################################
 
-	def start(self, serial_port, workspace_path, protocol_name, baudrate=115200, sync_channel=255, sync_mode=1):
+	def start(self, serial_port, workspace_path, protocol_name, baudrate=1312500, sync_channel=255, sync_mode=1):
 		"""
 		Starts Bpod.
 
@@ -121,7 +112,7 @@ class BpodBase(object):
 			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
 		self.hardware.firmware_version, self.hardware.machine_type = self.message_api.firmware_version()
-		if self.hardware.firmware_version < int(bpod_settings.BPOD_FIRMWARE_VERSION):
+		if self.hardware.firmware_version < int(bpod_settings.TARGET_BPOD_FIRMWARE_VERSION):
 			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
 
 		hw_info = HardwareInfoContainer()
@@ -154,9 +145,9 @@ class BpodBase(object):
 
 		message32 = sma.build_message_32_bits()
 
-		self.status.new_sma_sent = True
-
 		self.message_api.send_state_machine(message, message32)
+
+		self.new_sma_sent = True
 
 	def run_state_machine(self, sma):
 		"""
@@ -192,11 +183,18 @@ class BpodBase(object):
 
 		state_change_indexes = []
 
+		# self.message_api.run_state_machine()
+		# if self.status.new_sma_sent:
+		# 	if not self.message_api.state_machine_installation_status():
+		# 		raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
+		# 	self.status.new_sma_sent = False
+
 		self.message_api.run_state_machine()
-		if self.status.new_sma_sent:
-			if not self.message_api.state_machine_installation_status():
-				raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
-			self.status.new_sma_sent = False
+		if self.new_sma_sent:
+			if self.message_api.state_machine_installation_status():
+				self.new_sma_sent = False
+			else:
+				raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.', self)
 
 		sma.is_running = True
 		while sma.is_running:
