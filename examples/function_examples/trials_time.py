@@ -24,7 +24,6 @@ def run():
 	nTrials = 1000
 
 	global_timer = time.time()
-	time1 = time.time()
 	TS = 0.1  # time in each state
 
 	timestamps = []
@@ -60,23 +59,19 @@ def run():
 			state_change_conditions={EventName.Tup: 'exit'},
 			output_actions=[(OutputChannel.Valve, 1)])
 
-		# time.sleep(0.1)
-
-		# print("\nTime before send: {0}".format(time.time() - time1))
 		my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
-		# print("\nTime after send: {0}".format(time.time() - time1))
 
-		# print("\nTime before run: {0}".format(time.time() - time1))
+		time_before_run = time.time()
+		print("Time before run: {0}".format(time_before_run))
+
 		my_bpod.run_state_machine(sma)  # Run state machine
-		# print("\nTime after run: {0}".format(time.time() - time1))
 
+		time_after_run = time.time()
+		diff = time_after_run - time_before_run
+		print("Time after run: {0}".format(time_after_run))
+		print("Diff = {0}".format(diff))
+		timestamps.append(diff)
 
-		timestamps.append(time.time() - time1)
-		# print("\nTotal trial time: {0}".format(time.time() - time1))
-
-		# print("\nGlobal timer: {0}".format(time.time() - global_timer))
-
-		time1 = time.time()
 
 	print("Trial lenght mean: {0}".format(reduce(lambda x, y: x + y, timestamps) / len(timestamps)))
 
