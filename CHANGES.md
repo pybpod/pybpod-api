@@ -1,5 +1,12 @@
-## v.1.3.0.beta
-VERSION IN DEVELOPMENT
+## v.1.3.0 (2017/06/21)
+Fixes Issue #9 - Cannot run several consecutive trials without a timer between them
+Adds support for Bpod firmware version 13 (0.7.9) but keeps version 9 as default (need support from Josh)
+Fixes soft codes implementation
+Adds example for soft codes
+Using constants for input events, input channels and output channels
+Renames states for states_occurrences
+Improves documentation
+Simplifies the API by hiding the concept of RawData to the user and exposing only the concept of Trial
 
 ## v.1.2.0
 Simplifies event collection and processing
