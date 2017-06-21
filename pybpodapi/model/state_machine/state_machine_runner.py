@@ -4,24 +4,25 @@
 import logging
 import math
 
-from pybpodapi.model.state_machine.builder import Builder
+from pybpodapi.model.state_machine.state_machine_builder import StateMachineBuilder
 
 logger = logging.getLogger(__name__)
 
 
-class Runner(Builder):
+class StateMachineRunner(StateMachineBuilder):
 	"""
-	Extend state machine with running logic
+	Extends state machine with running logic
+	
+	:ivar bool is_running: Whether this state machine is being run on bpod hardware
+	:ivar int current_state: Holds state machine current state while running
 	"""
 
 	def __init__(self, hardware):
-		Builder.__init__(self, hardware)
+		StateMachineBuilder.__init__(self, hardware)
 
-		#: Whether this state machine is being run on bpod hardware
-		self.is_running = False # type: bool
+		self.is_running = False  # type: bool
 
-		#: Holds state machine current state while running
-		self.current_state = 0 # type: int
+		self.current_state = 0  # type: int
 
 	#########################################
 	############## PROPERTIES ###############

@@ -9,6 +9,7 @@ import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
+from pybpodapi.hardware.events import EventName
 
 
 def run():
@@ -23,14 +24,14 @@ def run():
 	sma.add_state(
 		state_name='myState',
 		state_timer=1,
-		state_change_conditions={'Tup': 'exit'},
+		state_change_conditions={EventName.Tup: 'exit'},
 		output_actions=[])
 
 	my_bpod.send_state_machine(sma)
 
 	my_bpod.run_state_machine(sma)
 
-	print(sma.raw_data)
+	print("Current trial info: {0}".format(my_bpod.session.current_trial()))
 
 	my_bpod.stop()
 

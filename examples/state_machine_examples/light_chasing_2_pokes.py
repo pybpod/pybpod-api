@@ -14,6 +14,8 @@ import examples.settings as settings
 
 from pybpodapi.model.bpod import Bpod
 from pybpodapi.model.state_machine import StateMachine
+from pybpodapi.hardware.events import EventName
+from pybpodapi.hardware.output_channels import OutputChannel
 
 
 def run():
@@ -28,32 +30,32 @@ def run():
 	sma.add_state(
 		state_name='Port1Active1',  # Add a state
 		state_timer=0,
-		state_change_conditions={'Port1In': 'Port2Active1'},
-		output_actions=[('PWM1', 255)])
+		state_change_conditions={EventName.Port1In: 'Port2Active1'},
+		output_actions=[(OutputChannel.PWM1, 255)])
 
 	sma.add_state(
 		state_name='Port2Active1',
 		state_timer=0,
-		state_change_conditions={'Port2In': 'Port1Active2'},
-		output_actions=[('PWM2', 255)])
+		state_change_conditions={EventName.Port2In: 'Port1Active2'},
+		output_actions=[(OutputChannel.PWM2, 255)])
 
 	sma.add_state(
 		state_name='Port1Active2',
 		state_timer=0,
-		state_change_conditions={'Port1In': 'Port2Active2'},
-		output_actions=[('PWM1', 255)])
+		state_change_conditions={EventName.Port1In: 'Port2Active2'},
+		output_actions=[(OutputChannel.PWM1, 255)])
 
 	sma.add_state(
 		state_name='Port2Active2',
 		state_timer=0,
-		state_change_conditions={'Port2In': 'exit'},
-		output_actions=[('PWM2', 255)])
+		state_change_conditions={EventName.Port2In: 'exit'},
+		output_actions=[(OutputChannel.PWM2, 255)])
 
 	my_bpod.send_state_machine(sma)
 
 	my_bpod.run_state_machine(sma)
 
-	print(sma.raw_data)
+	print("Current trial info: {0}".format(my_bpod.session.current_trial()))
 
 	my_bpod.stop()
 

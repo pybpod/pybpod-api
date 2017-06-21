@@ -24,8 +24,8 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath('../../pybpodapi'))
-sys.path.append(os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../../pybpodapi'))
+sys.path.insert(0, os.path.abspath('../../'))
 
 import pybpodapi
 
@@ -206,4 +206,4 @@ epub_exclude_files = ['search.html']
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/3/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None)}

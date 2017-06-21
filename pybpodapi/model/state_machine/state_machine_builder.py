@@ -4,18 +4,20 @@
 import logging
 import math
 
-from pybpodapi.model.state_machine.state_machine import StateMachine
+from pybpodapi.model.state_machine.state_machine_base import StateMachineBase
 
 logger = logging.getLogger(__name__)
 
 
-class Builder(StateMachine):
+class StateMachineBuilder(StateMachineBase):
 	"""
 	Extend state machine with builder logic
+	
+	.. warning:: A lot of data structures are kept here for compatibility with original matlab library which are not so python-like. Anyone is welcome to enhance this class but keep in mind that it will affect the whole pybpodapi library.
 	"""
 
 	def __init__(self, hardware):
-		StateMachine.__init__(self, hardware)
+		StateMachineBase.__init__(self, hardware)
 
 	def update_state_numbers(self):
 		"""
@@ -76,8 +78,9 @@ class Builder(StateMachine):
 
 	def build_message(self):
 		"""
-
-		:return:
+		Builds state machine to send to Bpod box
+		
+		:rtype: list(int)
 		"""
 		message = [len(self.state_names), ]
 
@@ -187,9 +190,9 @@ class Builder(StateMachine):
 
 	def build_message_32_bits(self):
 		"""
-
-		:return:
-		:rtype: list
+		Builds a 32 bit message to send to Bpod box
+		
+		:rtype: list(float)
 		"""
 
 		thirty_two_bit_message = [i * self.hardware.cycle_frequency for i in self.state_timers] + \

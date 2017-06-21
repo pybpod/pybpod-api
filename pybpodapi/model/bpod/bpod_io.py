@@ -3,7 +3,7 @@
 
 import logging
 
-from pybpodapi.model.bpod.bpod_base import Bpod as BpodBase
+from pybpodapi.model.bpod.bpod_base import BpodBase
 from pybpodapi.model.trial import Trial
 
 from pybpodapi.plugins import CSVExporter
@@ -72,9 +72,14 @@ class BpodIO(BpodBase):
 
 	def _publish_data(self, data):
 		"""
+		Publish data from current trial as CSV and JSON.
+		This method can be overwritten from other projects that use pybpod-api libraries to export data in a customized way.
 
-		:param Trial trial:
-		:return:
+		.. seealso::
+			:py:meth:`pybpodapi.model.bpod.bpod_base.BpodBase._publish_data`.
+
+
+		:param data: data to be published (data type varies)
 		"""
 		if isinstance(data, Trial):
 			self.csv_exporter.save_trial(data, len(self.session.trials))

@@ -6,105 +6,63 @@ import logging
 logger = logging.getLogger(__name__)
 
 from pybpodapi.model.event_occurrence import EventOccurrence
+from pybpodapi.model.softcode_occurrence import SoftCodeOccurrence
 
 
 class RawData(object):
+	"""
+	Stores states and events while trial is running.
+	
+	:ivar list(int) states: a list of states occurrences indexes
+	:ivar list(int) states_timestamps: list of states occurrences timestamps (tuple with start and end)
+	:ivar float trial_start_timestamp: trial start timestamp (only updated on trial end)
+	:ivar list(EventOccurrence) events_occurrences: list of events occurrences
+	"""
+
 	def __init__(self):
-		self.events = []  # type: list(int)
-		self.event_timestamps = []
 		self.states = [0]
 		self.state_timestamps = [0]
+		self.event_timestamps = []  # see also BpodBase.__update_timestamps
 		self.trial_start_timestamp = None  # type: float
-		self.trials = []
 		self.events_occurrences = []  # type: list(EventOccurrence)
-
-	def export(self):
-		return {'States': self.states,
-		        'TrialStartTimestamp': self.trial_start_timestamp,
-		        'EventTimestamps': self.event_timestamps,
-		        'Events': self.events,
-		        'StateTimestamps': self.state_timestamps}
-
-	def add_state(self, state_name, start, end):
-		"""
-		Add state duration to state
-		:param str state_name:
-		:param float start:
-		:param float end:
-		:return:
-		"""
-		state = [state for state in self.states if state.name == state_name]  # type: list(State)
-
-		if not state:
-			state = State(state_name)
-			self.states.append(state)
-		else:
-			state = state[0]
-
-		state.add_state_dur(start, end)
+		self.softcode_occurrences = []  # type: list(SoftCodeOccurrence)
 
 	def add_event_occurrence(self, event_index, event_name, timestamp=None):
 		"""
-		Event has happened, save occurrence.
-		
-		:param int event_index: 
-		:param str event_name: 
-		:param float timestamp: (optional for now because bpod doesn't send it)
-		
-		:return: event object
-		"""
-		self.events.append(event_index)  # legacy
+		Event has happened, save occurrence. Creates a new EventOccurrence object and stores it in the events list.
 
+		:param int event_index: index of the event
+		:param str event_name: name of the event
+		:param float timestamp: optional for now because bpod doesn't send it
+
+		:rtype: EventOccurrence
+		"""
 		event = EventOccurrence(event_name, event_index, timestamp)
 
 		self.events_occurrences.append(event)
 
 		return event
 
-	# GETTERS
-
-	def get_timestamps_by_event_name(self, event_name):
+	def add_softcode_occurrence(self, softcode_number, timestamp=None):
 		"""
-		Get timestamps by event name
-		
-		:param event_name: 
-		:return: 
+		SoftCode detected by Bpod's.
+
+		:param int softcode_number: id of the softcode
+		:param float timestamp: optional for now because bpod doesn't send it
+
+		:rtype: SoftCodeOccurrence
 		"""
-		event_timestamps = []  # type: list(float)
+		softcode = SoftCodeOccurrence(softcode_number, timestamp)
 
-		for event in self.events_occurrences:
-			if event.name == event_name:
-				event_timestamps.append(event.timestamp)
+		self.softcode_occurrences.append(softcode)
 
-		return event_timestamps
+		return softcode
 
-	def get_events_names(self):
-		"""
-		Get events names without repetitions
-		:return: 
-		"""
-		events_names = []  # type: list(str)
-
-		for event in self.events_occurrences:
-			if event.name not in events_names:
-				events_names.append(event.name)
-
-		return events_names
-
-	def get_all_timestamps_by_event(self):
-		"""
-		Create a dictionary whose keys are events names and values are corresponding timestamps
-		
-		Example:
-		{'Tup': [429496.7295, 429496.7295], 'Port3In': [429496.7295, 429496.7295], 'Port2In': [429496.7295, 429496.7295], 'Port2Out': [429496.7295, 429496.7295], 'Port3Out': [429496.7295], 'Port1Out': [429496.7295]}
-		
-		:return: 
-		"""
-		all_timestamps = {}
-		for event_name in self.get_events_names():
-			all_timestamps[event_name] = self.get_timestamps_by_event_name(event_name)
-
-		return all_timestamps
+	def export(self):
+		return {'Trial start timestamp': self.trial_start_timestamp,
+		        'States': self.states,
+		        'States timestamps': self.state_timestamps,
+		        'Events timestamps': [str(event) for event in self.events_occurrences]}
 
 	def __str__(self):
 		return str(self.export())

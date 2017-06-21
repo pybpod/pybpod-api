@@ -6,22 +6,26 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class State(object):
+class StateOccurrences(object):
 	"""
-	Store timestamps for a specific state of the state machine
+	Store timestamps for a specific state occurrence of the state machine
+	
+	:ivar str name: name of the state
+	:ivar list(StateDuration) timestamps: a list of timestamps (start and end) that corresponds to occurrences of this state
 	"""
 
 	def __init__(self, name):
 		"""
 
-		:param name:
+		:param str name: name of the state
 		"""
 		self.name = name  # type: str
 		self.timestamps = []  # type: list(StateDuration)
 
 	def add_state_dur(self, start, end):
 		"""
-		Store a new state occurrence given start and end timestamps
+		Stores a new state occurrence given start and end timestamps
+
 		:param float start: start timestamp of state duration
 		:param float end: end timestamp of state duration
 		"""
@@ -34,8 +38,12 @@ class State(object):
 
 class StateDuration(object):
 	"""
-	Start end End timestamps for a state 
+	Start and End timestamps for a state
+	
+	:ivar float start: start timestamp of state duration
+	:ivar float end: end timestamp of state duration
 	"""
+
 	def __init__(self, start, end):
 		"""
 

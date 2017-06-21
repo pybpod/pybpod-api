@@ -55,23 +55,17 @@ class ArCOM(object):
 	def write_char(self, value):
 		self.serial_object.write(str.encode(value))
 
-	def write_uint8(self, value):
-		self.serial_object.write(np.array([value], dtype=ArduinoTypes.UINT8.name).tobytes())
+	def write_array(self, array):
+		self.serial_object.write(array)
 
-	def write_uint16(self, value):
-		self.serial_object.write(np.array([value], dtype=ArduinoTypes.UINT16.name).tobytes())
+	def get_uint8_array(self, array):
+		return np.array(array, dtype=ArduinoTypes.UINT8.name).tobytes()
 
-	def write_uint32(self, value):
-		self.serial_object.write(np.array([value], dtype=ArduinoTypes.UINT32.name).tobytes())
+	def get_uint16_array(self, array):
+		return np.array(array, dtype=ArduinoTypes.UINT16.name).tobytes()
 
-	def write_uint8_array(self, array):
-		self.serial_object.write(np.array(array, dtype=ArduinoTypes.UINT8.name).tobytes())
-
-	def write_uint16_array(self, array):
-		self.serial_object.write(np.array(array, dtype=ArduinoTypes.UINT16.name).tobytes())
-
-	def write_uint32_array(self, array):
-		self.serial_object.write(np.array(array, dtype=ArduinoTypes.UINT32.name).tobytes())
+	def get_uint32_array(self, array):
+		return np.array(array, dtype=ArduinoTypes.UINT32.name).tobytes()
 
 	def read_char(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.CHAR.size)
@@ -80,13 +74,13 @@ class ArCOM(object):
 
 	def read_uint8(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.UINT8.size)
-		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT8.size, message_bytes)
+		logger.debug("Read %s bytes: %s", len(message_bytes), message_bytes)
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 
 	def read_uint16(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.UINT16.size)
-		#logger.debug("Read %s bytes: %s", ArduinoTypes.UINT16.size, message_bytes)
+		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT16.size, message_bytes)
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 

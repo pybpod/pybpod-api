@@ -1,6 +1,6 @@
-==============================================
+**********************************************
 :mod:`channels` --- Bpod channel configuration
-==============================================
+**********************************************
 
 .. module:: pybpodapi.hardware.channels
    :synopsis: Bpod channel configuration

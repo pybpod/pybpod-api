@@ -10,3 +10,5 @@
 
    hardware
    channels
+   events
+   output_channels

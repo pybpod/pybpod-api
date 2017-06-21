@@ -79,12 +79,12 @@ class Channels(object):
 		"""
 		Generate event and input channel names
 		"""
-		Pos = 0;
-		nUSB = 0;
-		nUART = 0;
-		nBNCs = 0;
-		nWires = 0;
-		nPorts = 0;
+		Pos = 0
+		nUSB = 0
+		nUART = 0
+		nBNCs = 0
+		nWires = 0
+		nPorts = 0
 		for i in range(len(hardware.inputs)):
 			if hardware.inputs[i] == 'U':
 				nUART += 1
@@ -128,27 +128,27 @@ class Channels(object):
 				self.event_names += (self.input_channel_names[-1] + 'Out',)
 				Pos += 1
 
-		self.events_positions.globalTimerStart = Pos;
+		self.events_positions.globalTimerStart = Pos
 		for i in range(hardware.n_global_timers):
 			self.event_names += ('GlobalTimer' + str(i + 1) + '_Start',)
 			Pos += 1
 
-		self.events_positions.globalTimerEnd = Pos;
+		self.events_positions.globalTimerEnd = Pos
 		for i in range(hardware.n_global_timers):
 			self.event_names += ('GlobalTimer' + str(i + 1) + '_End',)
 			Pos += 1
 
-		self.events_positions.globalCounter = Pos;
+		self.events_positions.globalCounter = Pos
 		for i in range(hardware.n_global_counters):
 			self.event_names += ('GlobalCounter' + str(i + 1) + '_End',)
 			Pos += 1
 
-		self.events_positions.condition = Pos;
+		self.events_positions.condition = Pos
 		for i in range(hardware.n_conditions):
 			self.event_names += ('Condition' + str(i + 1),)
 			Pos += 1
 
-		self.events_positions.jump = Pos;
+		self.events_positions.jump = Pos
 		for i in range(hardware.n_uart_channels):
 			self.event_names += ('Serial' + str(i + 1) + 'Jump',)
 			Pos += 1
@@ -156,20 +156,20 @@ class Channels(object):
 		Pos += 1
 
 		self.event_names += ('Tup',)
-		self.events_positions.Tup = Pos;
+		self.events_positions.Tup = Pos
 		Pos += 1
 
 	def set_up_output_channels(self, hw_outputs):
 		"""
 		Generate output channel names
 		"""
-		Pos = 0;
-		nUSB = 0;
-		nUART = 0;
-		nSPI = 0;
-		nBNCs = 0;
-		nWires = 0;
-		nPorts = 0;
+		Pos = 0
+		nUSB = 0
+		nUART = 0
+		nSPI = 0
+		nBNCs = 0
+		nWires = 0
+		nPorts = 0
 		for i in range(len(hw_outputs)):
 			if hw_outputs[i] == 'U':
 				nUART += 1
@@ -177,34 +177,34 @@ class Channels(object):
 				Pos += 1
 			if hw_outputs[i] == 'X':
 				if nUSB == 0:
-					self.events_positions.output_USB = Pos;
+					self.events_positions.output_USB = Pos
 				nUSB += 1
 				self.output_channel_names += ('SoftCode',)
 				Pos += 1
 			if hw_outputs[i] == 'S':
 				if nSPI == 0:
-					self.events_positions.output_SPI = Pos;
+					self.events_positions.output_SPI = Pos
 				nSPI += 1
 				self.output_channel_names += (
 					'ValveState',)  # Assume an SPI shift register mapping bits of a byte to 8 valves
 				Pos += 1
 			if hw_outputs[i] == 'B':
 				if nBNCs == 0:
-					self.events_positions.output_BNC = Pos;
+					self.events_positions.output_BNC = Pos
 				nBNCs += 1
 				self.output_channel_names += (
 					'BNC' + str(nBNCs),)  # Assume an SPI shift register mapping bits of a byte to 8 valves
 				Pos += 1
 			if hw_outputs[i] == 'W':
 				if nWires == 0:
-					self.events_positions.output_Wire = Pos;
+					self.events_positions.output_Wire = Pos
 				nWires += 1
 				self.output_channel_names += (
 					'Wire' + str(nWires),)  # Assume an SPI shift register mapping bits of a byte to 8 valves
 				Pos += 1
 			if hw_outputs[i] == 'P':
 				if nPorts == 0:
-					self.events_positions.output_PWM = Pos;
+					self.events_positions.output_PWM = Pos
 				nPorts += 1
 				self.output_channel_names += (
 					'PWM' + str(nPorts),)  # Assume an SPI shift register mapping bits of a byte to 8 valves

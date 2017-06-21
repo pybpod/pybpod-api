@@ -12,6 +12,12 @@ logger = logging.getLogger(__name__)
 
 class Session(object):
 	"""
+	Stores information about bpod run, including the list of trials.
+	
+	:ivar list(Trial) trials: a list of trials
+	:ivar int firmware_version: firmware version of Bpod when experiment was run
+	:ivar int bpod_version: version of Bpod hardware when experiment was run
+	:ivar datetime start_timestamp: it stores session start timestamp
 
 	"""
 
@@ -19,13 +25,13 @@ class Session(object):
 		self.trials = []  # type: list[Trial]
 		self.firmware_version = None  # type: int
 		self.bpod_version = None  # type: int
-		self.datetime = datetime.now()  # type: datetime
+		self.start_timestamp = datetime.now()  # type: datetime
 
 	def add_trial(self, sma):
 		"""
 		Add new trial to this session and associate a state machine to it
 
-		:param StateMachine sma: state machine associated with this trial
+		:param pybpodapi.model.state_machine sma: state machine associated with this trial
 		"""
 		new_trial = Trial(sma)
 
@@ -64,7 +70,6 @@ class Session(object):
 
 		for i in range(nUniqueStates):
 			thisStateName = sma.state_names[uniqueStates[i]]
-			current_trial.states_timestamps[thisStateName] = uniqueStateDataMatrices[i]
 
 			for state_dur in uniqueStateDataMatrices[i]:
 				current_trial.add_state_duration(thisStateName, state_dur[0], state_dur[1])
@@ -74,18 +79,21 @@ class Session(object):
 		for i in range(sma.total_states_added):
 			thisStateName = sma.state_names[i]
 			if not visitedStates[i]:
-				current_trial.states_timestamps[thisStateName] = [(float('NaN'), float('NaN'))]
 				current_trial.add_state_duration(thisStateName, float('NaN'), float('NaN'))
 
-		logger.debug("Trial states: %s", [str(state) for state in current_trial.states])
+		logger.debug("Trial states: %s", [str(state) for state in current_trial.states_occurrences])
 
-		# save events occurrences on trial and make available a dictionary with all information
+		# save events occurrences on trial
 		current_trial.events_occurrences = sma.raw_data.events_occurrences  # type: list
-		current_trial.events_timestamps = sma.raw_data.get_all_timestamps_by_event()  # type: dict
 
 		logger.debug("Trial events: %s", [str(event) for event in current_trial.events_occurrences])
 
 		logger.debug("Trial info: %s", str(current_trial))
 
 	def current_trial(self):
+		"""
+		Get current trial
+		
+		:rtype: Trial 
+		"""
 		return self.trials[-1]

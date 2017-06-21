@@ -1,19 +1,15 @@
-*************************************
-:mod:`runner`--- State Machine Runner
-*************************************
+***************************************************
+:mod:`state_machine_runner`--- State Machine Runner
+***************************************************
 
-.. module:: runner
+.. module:: state_machine_runner
    :synopsis: modules related to state machine
 
-Overview
-========
-
-TODO
 
 Implementation
 ==============
 
-.. automodule:: pybpodapi.model.state_machine.runner
+.. automodule:: pybpodapi.model.state_machine.state_machine_runner
     :members:
     :private-members:
 

@@ -1,19 +1,14 @@
-***************************************
-:mod:`builder`--- State Machine Builder
-***************************************
+*****************************************************
+:mod:`state_machine_builder`--- State Machine Builder
+*****************************************************
 
-.. module:: builder
+.. module:: state_machine_builder
    :synopsis: modules related to state machine
-
-Overview
-========
-
-TODO
 
 Implementation
 ==============
 
-.. automodule:: pybpodapi.model.state_machine.builder
+.. automodule:: pybpodapi.model.state_machine.state_machine_builder
     :members:
     :private-members:
 

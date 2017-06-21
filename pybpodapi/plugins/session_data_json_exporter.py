@@ -34,8 +34,6 @@ class SessionDataJSONExporter(object):
 
 		data2save = trial.export()
 
-		print(data2save)
-
 		with open(self.path, "a+") as json_file:
 			json.dump(data2save, json_file, sort_keys=False, indent=4, separators=(',', ':'))
 

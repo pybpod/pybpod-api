@@ -3,6 +3,8 @@
 
 import logging
 
+from pysettings import conf as bpod_settings
+
 from pybpodapi.hardware.channels import Channels
 from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 
@@ -22,32 +24,19 @@ class Hardware(object):
 
 	@property
 	def firmware_version(self):
-		return self._firmware_version # type: int
+		return self._firmware_version  # type: int
 
 	@firmware_version.setter
 	def firmware_version(self, value):
-		self._firmware_version = value # type: int
-
-		if self._firmware_version < 7:
-			self.bpod_version = "0.5.x"
-		else:
-			self.bpod_version = "0.7.x"
+		self._firmware_version = value  # type: int
 
 	@property
 	def machine_type(self):
-		return self._machine_type # type: int
+		return self._machine_type  # type: int
 
 	@machine_type.setter
 	def machine_type(self, value):
-		self._machine_type = value # type: int
-
-	@property
-	def bpod_version(self):
-		return self._bpod_version # type: str
-
-	@bpod_version.setter
-	def bpod_version(self, value):
-		self._bpod_version = value # type: str
+		self._machine_type = value  # type: int
 
 	@property
 	def cycle_period(self):
@@ -93,8 +82,8 @@ class Hardware(object):
 		self.inputs = hw_info_container.inputs
 		self.outputs = hw_info_container.outputs + ['G', 'G', 'G']  # nOutputChannels
 
-		self.sync_channel = hw_info_container.sync_channel # 255 = no sync, otherwise set to a hardware channel number
-		self.sync_mode = hw_info_container.sync_mode # 0 = flip logic every trial, 1 = every state
+		self.sync_channel = hw_info_container.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
+		self.sync_mode = hw_info_container.sync_mode  # 0 = flip logic every trial, 1 = every state
 
 		self.n_uart_channels = len([idx for idx in self.inputs if idx == 'U'])
 

@@ -5,14 +5,8 @@
 .. module:: bpod_io
    :synopsis: Bpod I/O module
 
-Overview
---------
-
-TODO
-
 Implementation
 --------------
-
 
 .. autoclass:: pybpodapi.model.bpod.bpod_io.BpodIO
     :members:
