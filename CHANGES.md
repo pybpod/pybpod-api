@@ -1,6 +1,3 @@
-## v.1.4.0.beta ()
-VERSION IN DEVELOPMENT
-
 ## v.1.3.0 (2017/06/21)
 Fixes Issue #9 - Cannot run several consecutive trials without a timer between them
 Adds support for Bpod firmware version 13 (0.7.9) but keeps version 9 as default (need support from Josh)
