@@ -177,6 +177,13 @@ class StateMachineBuilder(StateMachineBase):
 			message += (self.global_timers.on_messages[i],)
 		for i in range(self.hardware.n_global_timers):
 			message += (self.global_timers.off_messages[i],)
+
+		for i in range(self.hardware.n_global_timers):
+			Message += (self.global_timers.loop_mode[i],)
+		for i in range(self.hardware.n_global_timers):
+			Message += (self.global_timers.send_events[i],)      
+		
+
 		for i in range(self.hardware.n_global_counters):
 			message += (self.global_counters.attached_events[i],)
 		for i in range(self.hardware.n_conditions):
@@ -185,6 +192,7 @@ class StateMachineBuilder(StateMachineBase):
 			message += (self.conditions.values[i],)
 
 		self.state_timers = self.state_timers[:self.total_states_added]
+
 
 		return message
 
@@ -196,9 +204,11 @@ class StateMachineBuilder(StateMachineBase):
 		"""
 
 		thirty_two_bit_message = [i * self.hardware.cycle_frequency for i in self.state_timers] + \
-		                         [i * self.hardware.cycle_frequency for i in self.global_timers.timers] + \
-		                         [i * self.hardware.cycle_frequency for i in self.global_timers.on_set_delays] + \
-		                         self.global_counters.thresholds
+								 [i * self.hardware.cycle_frequency for i in self.global_timers.timers] + \
+								 [i * self.hardware.cycle_frequency for i in self.global_timers.on_set_delays] + \
+								 [i * self.hardware.cycle_frequency for i in self.global_timers.loop_intervals] + \
+								 self.global_counters.thresholds
+
 
 		return thirty_two_bit_message
 

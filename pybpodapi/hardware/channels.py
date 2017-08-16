@@ -75,7 +75,7 @@ class Channels(object):
 		self.output_channel_names = ()
 		self.events_positions = EventsPositions()
 
-	def set_up_input_channels(self, hardware):
+	def setup_input_channels(self, hardware, modules):
 		"""
 		Generate event and input channel names
 		"""
@@ -87,17 +87,34 @@ class Channels(object):
 		nPorts = 0
 		for i in range(len(hardware.inputs)):
 			if hardware.inputs[i] == 'U':
+				
 				nUART += 1
-				self.input_channel_names += ('Serial' + str(nUART),)
-				for j in range(hardware.n_events_per_serial_channel):
-					self.event_names += ('Serial' + str(nUART) + '_' + str(j + 1),)
-					Pos += 1
+              	module = modules[nUART-1]
+				module_name = ''
+                if module.connected:
+                    module_name = module.name
+                    self.input_channel_names += (module_name,)
+                else:
+                    module_name = 'Serial' + str(nUART);
+                    self.input_channel_names += (module_name,)
+
+                n_module_event_names = len(module.event_names)
+                for j in range(module.n_serial_events):
+                    if j < n_module_event_names:
+                        self.event_names  +=(module_name + '_' + module.event_names[j],) 
+                    else:
+
+                        self.event_names  +=(module_name + '_' + str(j+1),)
+                    Pos += 1
+
+
 			elif hardware.inputs[i] == 'X':
 				if nUSB == 0:
 					self.events_positions.Event_USB = Pos
 				nUSB += 1
 				self.input_channel_names += ('USB' + str(nUSB),);
-				for j in range(hardware.n_events_per_serial_channel):
+				loops_n = int(hardware.max_serial_events/(len(modules)+1))
+				for j in range(loops_n):
 					self.event_names += ('SoftCode' + str(j + 1),)
 					Pos += 1
 			elif hardware.inputs[i] == 'P':
@@ -159,7 +176,7 @@ class Channels(object):
 		self.events_positions.Tup = Pos
 		Pos += 1
 
-	def set_up_output_channels(self, hw_outputs):
+	def setup_output_channels(self, hw_outputs):
 		"""
 		Generate output channel names
 		"""

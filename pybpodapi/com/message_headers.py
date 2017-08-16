@@ -49,6 +49,16 @@ class SendMessageHeader(object):
 	#: Request end of connection now
 	DISCONNECT = 'Z'
 
+	#: Get the modules connected to bpod
+	GET_MODULES = 'M'
+
+	#: Set module relay
+	SET_MODULE_RELAY = 'J'
+
+	#: Write to the module
+	WRITE_TO_MODULE = 'T'
+	
+
 class ReceiveMessageHeader(object):
 	"""
 	Define names for message headers received from the Bpod device.
@@ -73,3 +83,9 @@ class ReceiveMessageHeader(object):
 
 	#: Success code from RESET_SERIAL_MESSAGES command
 	RESET_SERIAL_MESSAGES = 1
+
+	#: Module requested event	
+	MODULE_REQUESTED_EVENT = ord('#')
+
+	#: Module events names
+	MODULE_EVENT_NAMES = ord('E')

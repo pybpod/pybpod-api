@@ -47,29 +47,31 @@ class StateMachineBase(object):
 
 		:param Hardware hardware: hardware description associated with this state machine
 		"""
-		self.hardware = hardware  # type: Hardware
+		self.hardware 			= hardware  # type: Hardware
 
-		self.channels = hardware.channels
-
-		self.state_names = []  # type: list(str)
-		self.state_timers = [0] * self.hardware.max_states  # list(float)
+		self.state_names 		= []  # type: list(str)
+		self.state_timers 		= [0] * self.hardware.max_states  # list(float)
 		self.total_states_added = 0  # type: int
 
 		# state change conditions
 		self.state_timer_matrix = [0] * self.hardware.max_states
-		self.conditions = Conditions(self.hardware.max_states, self.hardware.n_conditions)
-		self.global_counters = GlobalCounters(self.hardware.max_states, self.hardware.n_global_counters)
-		self.global_timers = GlobalTimers(self.hardware.max_states, self.hardware.n_global_timers)
-		self.input_matrix = [[] for i in range(self.hardware.max_states)]
-		self.manifest = []  # type: list(str)
-		self.undeclared = []  # type:list(str)
+		self.conditions 		= Conditions(self.hardware.max_states, self.hardware.n_conditions)
+		self.global_counters 	= GlobalCounters(self.hardware.max_states, self.hardware.n_global_counters)
+		self.global_timers 		= GlobalTimers(self.hardware.max_states, self.hardware.n_global_timers)
+		self.input_matrix 		= [[] for i in range(self.hardware.max_states)]
+
+		# List of states that have been added to the state machine
+		self.manifest 			= []  # type: list(str)
+
+		# List of states that have been referenced but not yet added
+		self.undeclared 		= []  # type:list(str)
 
 		# output actions
-		self.output_matrix = [[] for i in range(self.hardware.max_states)]
+		self.output_matrix 		= [[] for i in range(self.hardware.max_states)]
 
-		self.raw_data = RawData()
+		self.raw_data 			= RawData()
 
-		self.is_running = False
+		self.is_running 		= False
 
 	def add_state(self, state_name, state_timer, state_change_conditions={}, output_actions=()):
 		"""
@@ -107,7 +109,7 @@ class StateMachineBase(object):
 
 		for event_name, event_state_transition in state_change_conditions.items():
 			try:
-				event_code = self.channels.event_names.index(event_name)
+				event_code = self.hardware.channels.event_names.index(event_name)
 				logger.debug("Event code: %s", event_code)
 			except:
 				raise SMAError('Error creating state: ' + state_name + '. ' + event_name + ' is an invalid event name.')
@@ -144,14 +146,14 @@ class StateMachineBase(object):
 			action_value = action[1]
 
 			if action_name == OutputChannel.Valve:
-				output_code = self.channels.output_channel_names.index(OutputChannel.ValveState)
+				output_code = self.hardware.channels.output_channel_names.index(OutputChannel.ValveState)
 				output_value = math.pow(2, action_value - 1)
 			elif action_name == OutputChannel.LED:
-				output_code = self.channels.output_channel_names.index(ChannelName.PWM + str(action_value))
+				output_code = self.hardware.channels.output_channel_names.index(ChannelName.PWM + str(action_value))
 				output_value = 255
 			else:
 				try:
-					output_code = self.channels.output_channel_names.index(action_name)
+					output_code = self.hardware.channels.output_channel_names.index(action_name)
 				except:
 					raise SMAError(
 						'Error creating state: ' + state_name + '. ' + action_name + ' is an invalid output name.')
@@ -170,7 +172,8 @@ class StateMachineBase(object):
 		"""
 		self.global_timers.timers[timer_ID - 1] = timer_duration
 
-	def set_global_timer(self, timer_ID, timer_duration, on_set_delay, channel, on_message=1, off_message=0):
+	def set_global_timer(self, timer_id, timer_duration, on_set_delay, 
+		channel, on_message=1, off_message=0, loop_mode=0, loop_intervals=0, send_events=0):
 		"""
 		Sets the duration of a global timer. Unlike state timers, global timers can be triggered from any state (as an output action), and handled from any state (by causing a state change).
 
@@ -181,15 +184,21 @@ class StateMachineBase(object):
 		:param int on_message:
 		"""
 		try:
-			timer_channel_idx = self.channels.output_channel_names.index(channel)  # type: int
+			timer_channel_idx = self.hardware.channels.output_channel_names.index(channel)  # type: int
 		except:
 			raise SMAError('Error: ' + channel + ' is an invalid output channel name.')
 
-		self.global_timers.timers[timer_ID - 1] = timer_duration
-		self.global_timers.on_set_delays[timer_ID - 1] = on_set_delay
-		self.global_timers.channels[timer_ID - 1] = timer_channel_idx
-		self.global_timers.on_messages[timer_ID - 1] = on_message
-		self.global_timers.off_messages[timer_ID - 1] = off_message
+		index = timer_id - 1
+		self.global_timers.timers[index] 		= timer_duration
+		self.global_timers.on_set_delays[index] = on_set_delay
+		self.global_timers.channels[index] 		= timer_channel_idx
+		self.global_timers.on_messages[index] 	= on_message
+		self.global_timers.off_messages[tindex] = off_message
+
+		self.global_timers.loop_mode[tindex] 		= loop_mode
+		self.global_timers.loop_intervals[tindex] 	= loop_intervals
+		self.global_timers.send_events[tindex] 		= send_events
+		
 
 	def set_global_counter(self, counter_number=None, target_event=None, threshold=None):
 		"""
@@ -199,7 +208,7 @@ class StateMachineBase(object):
 		:param str target_event: port where to listen for event to count
 		:param int threshold: number of times that should be count until trigger timer
 		"""
-		event_code = self.channels.event_names.index(target_event)
+		event_code = self.hardware.channels.event_names.index(target_event)
 		self.global_counters.attached_events[counter_number - 1] = event_code
 		self.global_counters.thresholds[counter_number - 1] = threshold
 
@@ -211,7 +220,7 @@ class StateMachineBase(object):
 		:param str condition_channel:
 		:param int channel_value:
 		"""
-		channel_code = self.channels.input_channel_names.index(condition_channel)
+		channel_code = self.hardware.channels.input_channel_names.index(condition_channel)
 		self.conditions.channels[condition_number - 1] = channel_code
 		self.conditions.values[condition_number - 1] = channel_value
 

@@ -15,11 +15,11 @@ class DataType(object):
 
 
 class ArduinoTypes(object):
-	CHAR = DataType('char', 1)
-	UINT8 = DataType('uint8', 1)
-	UINT16 = DataType('uint16', 2)
-	UINT32 = DataType('uint32', 4)
-	FLOAT = DataType('float', 4)
+	CHAR 	= DataType('char', 1)
+	UINT8 	= DataType('uint8', 1)
+	UINT16 	= DataType('uint16', 2)
+	UINT32 	= DataType('uint32', 4)
+	FLOAT 	= DataType('float', 4)
 
 
 class ArCOM(object):

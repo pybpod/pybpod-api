@@ -7,8 +7,8 @@ import time
 
 from pysettings import conf as bpod_settings
 
+from pybpodapi.model.bpod.bpod_error_exception import BpodErrorException
 from pybpodapi.com.message_api import MessageAPI
-from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 from pybpodapi.com.serial_message_container import SerialMessageContainer
 from pybpodapi.hardware.hardware import Hardware
 from pybpodapi.hardware.channels import ChannelType
@@ -19,6 +19,7 @@ from pybpodapi.model.trial import Trial
 from pybpodapi.model.state_machine.raw_data import RawData
 from pybpodapi.model.event_occurrence import EventOccurrence
 from pybpodapi.model.softcode_occurrence import SoftCodeOccurrence
+from pybpodapi.model.bpod_modules.bpod_modules import BpodModules
 
 logger = logging.getLogger(__name__)
 
@@ -35,47 +36,16 @@ class BpodBase(object):
 
 	CHECK_STATE_MACHINE_COUNTER = 0
 
-	#########################################
-	############## PROPERTIES ###############
-	#########################################
-
-	@property
-	def session(self):
-		return self._session  # type: Session
-
-	@session.setter
-	def session(self, value):
-		self._session = value  # type: Session
-
-	@property
-	def hardware(self):
-		return self._hardware  # type: Hardware
-
-	@hardware.setter
-	def hardware(self, value):
-		self._hardware = value  # type: Hardware
-
-	@property
-	def message_api(self):
-		return self._message_api  # type: MessageAPI
-
-	@message_api.setter
-	def message_api(self, value):
-		self._message_api = value  # type: MessageAPI
-
-	@property
-	def new_sma_sent(self):
-		return self._new_sma_sent  # type: new_sma_sent
-
-	@new_sma_sent.setter
-	def new_sma_sent(self, value):
-		self._new_sma_sent = value  # type: bool
-
 	def __init__(self):
-		self.hardware = Hardware()  # type: Hardware
-		self.session = Session()  # type: Session
-		self.message_api = MessageAPI()  # type: MessageAPI
-		self.new_sma_sent = False  # type: bool
+		self.hardware 		= Hardware()  	# type: Hardware
+		self.session 		= Session()  	# type: Session
+		self.message_api 	= MessageAPI()  # type: MessageAPI
+		self.bpod_modules 	= None			# type: BpodModules
+						
+		self.new_sma_sent 	= False  		# type: bool
+
+		
+		#TODO: FALTA PERCEBER O QUE O SETUP FAZ
 
 	#########################################
 	############ PUBLIC METHODS #############
@@ -109,26 +79,49 @@ class BpodBase(object):
 		self.message_api.connect(serial_port, baudrate)
 
 		if not self.message_api.handshake():
-			raise BpodError('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
+			raise BpodErrorException('Error: Bpod failed to confirm connectivity. Please reset Bpod and try again.')
 
-		self.hardware.firmware_version, self.hardware.machine_type = self.message_api.firmware_version()
-		if self.hardware.firmware_version < int(bpod_settings.TARGET_BPOD_FIRMWARE_VERSION):
-			raise BpodError('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
+		#########################################################
+		### check the firmware version ##############################
+		#########################################################
+		firmware_version, machine_type = self.message_api.firmware_version()
+		if firmware_version < int(bpod_settings.TARGET_BPOD_FIRMWARE_VERSION):
+			raise BpodErrorException('Error: Old firmware detected. Please update Bpod 0.7+ firmware and try again.')
 
-		hw_info = HardwareInfoContainer()
-		hw_info.sync_channel = sync_channel
-		hw_info.sync_mode = sync_mode
-		self.message_api.hardware_description(hw_info)
-		self.hardware.set_up(hw_info)
+		if firmware_version > int(bpod_settings.TARGET_BPOD_FIRMWARE_VERSION):
+			raise BpodErrorException('Error: Future firmware detected. Please update the Bpod python software.')
+
+		self.hardware.firmware_version 	= firmware_version
+		self.hardware.machine_type 		= machine_type
+		#########################################################
+		
+		self.hardware.sync_channel = sync_channel   # 255 = no sync, otherwise set to a hardware channel number
+		self.hardware.sync_mode    = sync_mode 		# 0 = flip logic every trial, 1 = every state
+		
+		self.message_api.hardware_description(self.hardware)
 
 		if not self.message_api.enable_ports(self.hardware.inputs_enabled):
-			raise BpodError('Error: Failed to enable Bpod inputs.')
+			raise BpodErrorException('Error: Failed to enable Bpod inputs.')
 
 		if not self.message_api.set_sync_channel_and_mode(sync_channel=sync_channel,
-		                                                  sync_mode=sync_mode):
-			raise BpodError('Error: Failed to configure syncronization.')
+														  sync_mode=sync_mode):
+			raise BpodErrorException('Error: Failed to configure syncronization.')
+
+		#check if any module is connected
+		self.bpod_modules = self.message_api.get_modules_info(self.hardware)
+
+		self.hardware.setup(self.bpod_modules)
 
 		return self
+
+	def refresh_modules(self):
+		#check if any module is connected
+		self.bpod_modules = self.message_api.get_modules_info(self.hardware)
+		self.hardware.setup(self.bpod_modules)
+
+
+    
+
 
 	def send_state_machine(self, sma):
 		"""
@@ -186,7 +179,7 @@ class BpodBase(object):
 		# self.message_api.run_state_machine()
 		# if self.status.new_sma_sent:
 		# 	if not self.message_api.state_machine_installation_status():
-		# 		raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.')
+		# 		raise BpodErrorException('Error: The last state machine sent was not acknowledged by the Bpod device.')
 		# 	self.status.new_sma_sent = False
 
 		self.message_api.run_state_machine()
@@ -194,7 +187,7 @@ class BpodBase(object):
 			if self.message_api.state_machine_installation_status():
 				self.new_sma_sent = False
 			else:
-				raise BpodError('Error: The last state machine sent was not acknowledged by the Bpod device.', self)
+				raise BpodErrorException('Error: The last state machine sent was not acknowledged by the Bpod device.', self)
 
 		sma.is_running = True
 		while sma.is_running:
@@ -220,7 +213,7 @@ class BpodBase(object):
 		:param int value: value to write on channel
 		"""
 		if channel_type == ChannelType.INPUT:
-			raise BpodError('Manually overriding a Bpod input channel is not yet supported in Python.')
+			raise BpodErrorException('Manually overriding a Bpod input channel is not yet supported in Python.')
 		elif channel_type == ChannelType.OUTPUT:
 			if channel_name == ChannelName.VALVE:
 				if value > 0:
@@ -235,9 +228,9 @@ class BpodBase(object):
 						channel_name + str(channel_number))
 					self.message_api.override_digital_hardware_state(channel_number, value)
 				except:
-					raise BpodError('Error using manual_override: ' + channel_name + ' is not a valid channel name.')
+					raise BpodErrorException('Error using manual_override: ' + channel_name + ' is not a valid channel name.')
 		else:
-			raise BpodError('Error using manualOverride: first argument must be "Input" or "Output".')
+			raise BpodErrorException('Error using manualOverride: first argument must be "Input" or "Output".')
 
 	def load_serial_message(self, serial_channel, message_ID, serial_message, n_messages=1):
 		"""
@@ -251,12 +244,12 @@ class BpodBase(object):
 		"""
 
 		message_container = SerialMessageContainer(serial_channel, message_ID, serial_message,
-		                                           n_messages)  # type: SerialMessageContainer
+												   n_messages)  # type: SerialMessageContainer
 
 		response = self.message_api.load_serial_message(message_container.format_for_sending());
 
 		if not response:
-			raise BpodError('Error: Failed to set serial message.')
+			raise BpodErrorException('Error: Failed to set serial message.')
 
 	def reset_serial_messages(self):
 		"""
@@ -265,7 +258,7 @@ class BpodBase(object):
 		response = self.message_api.reset_serial_messages()
 
 		if not response:
-			raise BpodError('Error: Failed to reset serial message library.')
+			raise BpodErrorException('Error: Failed to reset serial message library.')
 
 	def stop(self):
 		"""
@@ -312,7 +305,7 @@ class BpodBase(object):
 		# TODO: Timestamp implementation on Bpod firmware
 		# type: EventOccurrence
 		event_occurrence = sma.raw_data.add_event_occurrence(event_index=event_index, event_name=event_name,
-		                                                     timestamp=None)
+															 timestamp=None)
 
 		self._publish_data(data=event_occurrence)
 
@@ -433,5 +426,39 @@ class BpodBase(object):
 		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
 
 
-class BpodError(Exception):
-	pass
+	#########################################
+	############## PROPERTIES ###############
+	#########################################
+
+	@property
+	def session(self):
+		return self._session  # type: Session
+
+	@session.setter
+	def session(self, value):
+		self._session = value  # type: Session
+
+	@property
+	def hardware(self):
+		return self._hardware  # type: Hardware
+
+	@hardware.setter
+	def hardware(self, value):
+		self._hardware = value  # type: Hardware
+
+	@property
+	def message_api(self):
+		return self._message_api  # type: MessageAPI
+
+	@message_api.setter
+	def message_api(self, value):
+		self._message_api = value  # type: MessageAPI
+
+	@property
+	def new_sma_sent(self):
+		return self._new_sma_sent  # type: new_sma_sent
+
+	@new_sma_sent.setter
+	def new_sma_sent(self, value):
+		self._new_sma_sent = value  # type: bool
+

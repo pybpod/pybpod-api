@@ -1,13 +1,16 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import logging
+import logging, time, numpy as np
 
 from pybpodapi.com.arcom import ArCOM
 from pybpodapi.com.message_headers import SendMessageHeader
 from pybpodapi.com.message_headers import ReceiveMessageHeader
-from pybpodapi.com.hardware_info_container import HardwareInfoContainer
 from pybpodapi.com.serial_message_container import SerialMessageContainer
+from pybpodapi.model.bpod_modules.bpod_modules import BpodModules
+
+from pybpodapi.model.bpod.bpod_error_exception import BpodErrorException
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +31,8 @@ class MessageAPI(object):
 	"""
 
 	def __init__(self):
-		self._arcom = None  # type: ArCOM
-
+		self._arcom 	= None  # type: ArCOM
+	
 	def connect(self, serial_port, baudrate=115200, timeout=1):
 		"""
 		Connect to Bpod using serial connection
@@ -48,7 +51,6 @@ class MessageAPI(object):
 		:return: True if handshake received, False otherwise
 		:rtype: bool
 		"""
-
 		logger.debug("Requesting handshake (%s)", SendMessageHeader.HANDSHAKE)
 
 		self._arcom.write_char(SendMessageHeader.HANDSHAKE)
@@ -70,7 +72,7 @@ class MessageAPI(object):
 
 		self._arcom.write_char(SendMessageHeader.FIRMWARE_VERSION)
 
-		fw_version = self._arcom.read_uint16()  # type: int
+		fw_version   = self._arcom.read_uint16()  # type: int
 		machine_type = self._arcom.read_uint16()  # type: int
 
 		logger.debug("Firmware version: %s", fw_version)
@@ -78,44 +80,57 @@ class MessageAPI(object):
 
 		return fw_version, machine_type
 
-	def hardware_description(self, hardware_info):
+
+
+	def hardware_description(self):
 		"""
 		Request hardware description from Bpod
 
-		:param HardwareInfoContainer hardware_info: empty container to be filled with data from bpod device
+		:param Hardware hardware: hardware 
 		"""
 		logger.debug("Requesting hardware description (%s)...", SendMessageHeader.HARDWARE_DESCRIPTION)
 		self._arcom.write_char(SendMessageHeader.HARDWARE_DESCRIPTION)
 
-		hardware_info.max_states = self._arcom.read_uint16()  # type: int
-		logger.debug("Read max states: %s", hardware_info.max_states)
+		max_states = self._arcom.read_uint16()  # type: int
+		logger.debug("Read max states: %s", max_states)
 
-		hardware_info.cycle_period = self._arcom.read_uint16()  # type: int
-		logger.debug("Read cycle period: %s", hardware_info.cycle_period)
+		cycle_period = self._arcom.read_uint16()  # type: int
+		logger.debug("Read cycle period: %s", cycle_period)
 
-		hardware_info.n_events_per_serial_channel = self._arcom.read_uint8()  # type: int
-		logger.debug("Read number of events per serial channel: %s", hardware_info.n_events_per_serial_channel)
+		max_serial_events = self._arcom.read_uint8()  # type: int
+		logger.debug("Read number of events per serial channel: %s", max_serial_events)
 
-		hardware_info.n_global_timers = self._arcom.read_uint8()  # type: int
-		logger.debug("Read number of global timers: %s", hardware_info.n_global_timers)
+		n_global_timers = self._arcom.read_uint8()  # type: int
+		logger.debug("Read number of global timers: %s", n_global_timers)
 
-		hardware_info.n_global_counters = self._arcom.read_uint8()  # type: int
-		logger.debug("Read number of global counters: %s", hardware_info.n_global_counters)
+		n_global_counters = self._arcom.read_uint8()  # type: int
+		logger.debug("Read number of global counters: %s", n_global_counters)
 
-		hardware_info.n_conditions = self._arcom.read_uint8()  # type: int
-		logger.debug("Read number of conditions: %s", hardware_info.n_conditions)
+		n_conditions = self._arcom.read_uint8()  # type: int
+		logger.debug("Read number of conditions: %s", n_conditions)
 
-		hardware_info.n_inputs = self._arcom.read_uint8()  # type: int
-		logger.debug("Read number of inputs: %s", hardware_info.n_inputs)
+		n_inputs = self._arcom.read_uint8()  # type: int
+		logger.debug("Read number of inputs: %s", n_inputs)
 
-		hardware_info.inputs = self._arcom.read_char_array(array_len=hardware_info.n_inputs)  # type: list(str)
-		logger.debug("Read inputs: %s", hardware_info.inputs)
+		inputs = self._arcom.read_char_array(array_len=n_inputs)  # type: list(str)
+		logger.debug("Read inputs: %s", inputs)
 
-		hardware_info.n_outputs = self._arcom.read_uint8()  # type: int
-		logger.debug("Read number of outputs: %s", hardware_info.n_outputs)
+		n_outputs = self._arcom.read_uint8()  # type: int
+		logger.debug("Read number of outputs: %s", n_outputs)
 
-		hardware_info.outputs = self._arcom.read_char_array(array_len=hardware_info.n_outputs)  # type: list(str)
-		logger.debug("Read outputs: %s", hardware_info.outputs)
+		outputs = self._arcom.read_char_array(array_len=n_outputs)  # type: list(str)
+		logger.debug("Read outputs: %s", outputs)
+
+		hardware.max_states 		= max_states
+		hardware.cycle_period 		= cycle_period
+		hardware.max_serial_events 	= max_serial_events
+		hardware.n_global_timers 	= n_global_timers
+		hardware.n_global_counters 	= n_global_counters
+		hardware.n_conditions 		= n_conditions
+		hardware.inputs 			= inputs
+		hardware.outputs 			= outputs + ['G', 'G', 'G']
+
+
 
 	def enable_ports(self, inputs_enabled):
 		"""
@@ -326,3 +341,111 @@ class MessageAPI(object):
 		logger.debug("Requesting disconnect (%s)", SendMessageHeader.DISCONNECT)
 
 		self._arcom.write_char(SendMessageHeader.DISCONNECT)
+
+
+	def get_modules_info(self, hardware):
+		
+		bpod_modules = BpodModules(self) # type: BpodModules
+
+		input_modules 	= [inp for inp in hardware.inputs if inp == 'U']
+		n_modules 	 	= len(input_modules)
+		n_serial_events = int(hardware.max_serial_events/(n_modules+1))
+
+		for inp in input_modules: 
+			bpod_modules.add_module(n_serial_events)
+
+		self._arcom.write_char(SendMessageHeader.GET_MODULES)
+		time.sleep(0.1)
+
+		modules_requested_events = np.array([0] * n_modules)
+
+		names = {}
+
+		if self._arcom.bytes_available()>1:
+			for i in range(n_modules):
+
+				connected 		 = self._arcom.read_uint8()==1
+				firmware_version = None
+				module_name 	 = None
+				events_names 	 = []
+
+				if connected:
+					firmware_version = self._arcom.read_uint32()
+					name_length 	 = self._arcom.read_uint8()
+					name_string 	 = self._arcom.read_char_array(name_length)
+
+					if name_string not in names: names[name_string] = 0
+					names[name_string] += 1
+
+					module_name  = name_string + str(names[name_string])
+					
+					while self._arcom.read_uint8()==1: #has more info to be read
+						param_type = self._arcom.read_uint8()
+						if  param_type = ReceiveMessageHeader.MODULE_REQUESTED_EVENT:
+							modules_requested_events[i] = self._arcom.read_uint8()
+						elif param_type = ReceiveMessageHeader.MODULE_EVENT_NAMES:
+							n_event_names = self._arcom.read_uint8()
+							for j in range(n_event_names):
+								n_chars    = self._arcom.read_uint8()
+								event_name = self._arcom.read_char_array(name_length)
+								events_names.append(event_name)
+
+
+				bpod_modules += BpodModule(connected, module_name, firmware_version, events_names)
+				
+
+		if (modules_requested_events.sum()+n_serial_events)>hardware.max_serial_events:
+			raise BpodErrorException('Error: Connected modules requested too many events.')
+
+		for i, module in enmerate(bpod_modules):
+			if module.connected:
+
+				if modules_requested_events[i] > module.n_serial_events:
+					n_to_reassign = modules_requested_events[i] - module.n_serial_events
+					module.n_serial_events = modules_requested_events[i]
+				else:
+					n_to_reassign = 0
+
+				index = n_modules-1
+				while n_to_reassign>0:
+					if bpod_modules[index].n_serial_events >= n_to_reassign:
+						bpod_modules[index].n_serial_events = bpod_modules[index].n_serial_events - n_to_reassign
+						n_to_reassign = 0
+					else:
+						n_to_reassign = n_to_reassign - bpod_modules[index].n_serial_events
+						bpod_modules[index].n_serial_events = 0
+					index -= 1
+
+		n_serial_events_array = [m.n_serial_events for m in bpod_modules]
+		n_soft_codes = hardware.max_serial_events - sum(n_serial_events_array)
+		self._arcom.write_array(['%']+n_serial_events_array+[n_soft_codes])
+		
+		if not self._arcom.read_uint8():
+			raise BpodErrorException('Error: Failed to configure module event assignment.')     
+		
+		return bpod_modules
+
+
+	def activate_module_relay(self, module_index):
+		self._arcom.write_array([SendMessageHeader.SET_MODULE_RELAY, module_index, 1])
+
+	def deactivate_module_relay(self, module_index):
+		self._arcom.write_array([SendMessageHeader.SET_MODULE_RELAY, module_index, 0])
+
+
+	def clean_any_data_in_the_buffer(self):
+		n_bytes_available = self.bytes_available()
+		if n_bytes_available > 0:
+			self._arcom.read_uint8_array(n_bytes_available)
+
+
+	def module_write(self, module_index, message):
+		if len(message)>64:
+			raise BpodError('Error: module messages must be under 64 bytes per transmission')
+
+		self._arcom.write_array([SendMessageHeader.WIRTE_TO_MODULE, module_index, len(message)])
+		self._arcom.write_array(message)
+
+
+	def module_read(self, module_index, size):    
+		return self._arcom.read_uint8_array(size)
