@@ -42,6 +42,7 @@ class BpodBase(object):
 		self.baudrate 		= settings.BAUDRATE
 		self.sync_channel 	= sync_channel 	 if sync_channel 	is not None else settings.SYNC_CHANNEL
 		self.sync_mode 		= sync_mode 	 if sync_mode 		is not None else settings.SYNC_MODE
+		self.log_function 	= settings.PYBPOD_API_PUBLISH_DATA_FUNC
 
 		self._hardware 		= Hardware()  	# type: Hardware
 		self._session 		= Session()  	# type: Session
@@ -288,7 +289,8 @@ class BpodBase(object):
 
 		:param data: data to be published (data type varies)
 		"""
-		pass
+		if self.log_function: self.log_function(data)
+
 
 	def softcode_handler_function(self, data):
 		"""
@@ -315,8 +317,11 @@ class BpodBase(object):
 
 		# TODO: Timestamp implementation on Bpod firmware
 		# type: EventOccurrence
-		event_occurrence = sma.raw_data.add_event_occurrence(event_index=event_index, event_name=event_name,
-															 timestamp=None)
+		event_occurrence = sma.raw_data.add_event_occurrence(
+			event_index=event_index, 
+			event_name=event_name,
+			timestamp=None
+		)
 
 		self._publish_data(data=event_occurrence)
 
@@ -326,7 +331,10 @@ class BpodBase(object):
 
 		# TODO: Timestamp implementation on Bpod firmware
 		# type: SoftCodeOccurrence
-		softcode_occurrence = sma.raw_data.add_softcode_occurrence(softcode_number=data, timestamp=None)
+		softcode_occurrence = sma.raw_data.add_softcode_occurrence(
+			softcode_number=data,
+			timestamp=None
+		)
 
 		self._publish_data(data=softcode_occurrence)
 

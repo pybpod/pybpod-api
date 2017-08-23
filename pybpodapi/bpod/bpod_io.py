@@ -59,6 +59,8 @@ class BpodIO(BpodCOMProtocolModules):
 
 		:param data: data to be published (data type varies)
 		"""
+		super(BpodIO, self)._publish_data(data)
+
 		if isinstance(data, Trial) and self.csv_exporter:
 			self.csv_exporter.save_trial(data, len(self.session.trials))
 
