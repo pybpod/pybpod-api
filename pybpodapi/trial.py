@@ -126,8 +126,11 @@ class Trial(object):
 
 	def export(self):
 		return {'Bpod start timestamp': self.bpod_start_timestamp,
-		        'States timestamps': self.get_all_timestamps_by_state(),
-		        'Events timestamps': self.get_all_timestamps_by_event()}
+				'States timestamps': self.get_all_timestamps_by_state(),
+				'Events timestamps': self.get_all_timestamps_by_event()}
+
+	def pformat(self):
+		return pprint.pformat( self.export(), indent=4)
 
 	def __str__(self):
-		return pprint.pformat( self.export(), indent=4)
+		return str( self.export() )
