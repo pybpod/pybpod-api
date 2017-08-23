@@ -20,7 +20,7 @@ How to update Bpod firmware
 
 6. From the "Tools" menu, choose "Board" and then "Arduino Due (Programming Port)".
 7. From the "Serial Port" menu, choose "COMX" (win) or "/dev/ttySX" (linux) where X is the port number. To find your port number in Win7, choose "Start" and type "device manager" in the search window. In the device manager, scroll down to "Ports (COM & LPT)" and expand the menu. The COM port will be listed as "Arduino Due Programming Port (COMX)".
-8. From the File menu in Arduino, choose "Open" and select "C:\Bpod\Bpod Firmware\Bpod0_X\Bpod_MainModule_0_X_Y\Bpod_MainModule_0_X_Y.ino. A new window should open with the firmware.
+8. From the File menu in Arduino, choose "Open" and select the firmware project. A new window should open with the firmware. [Download the firmware here](https://bitbucket.org/fchampalimaud/bpod-firmware)
 9. In the new window, click the "upload" button (the right-pointing arrow under "edit").
 
 If all went well, the green progress indicator should finish, and be replaced with a message: "Done uploading". In orange text below, should read "Verify successful".
