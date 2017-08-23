@@ -70,7 +70,6 @@ If you have any questions or want to report a problem with this library please f
    :caption: API reference
 
    api_reference/pybpodapi/index
-   api_reference/diagrams
 
 .. toctree::
    :hidden:
