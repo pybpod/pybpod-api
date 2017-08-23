@@ -5,8 +5,8 @@ import os
 import csv
 from datetime import datetime
 
-from pybpodapi.model.trial import Trial
-from pybpodapi.model.session import Session
+from pybpodapi.trial import Trial
+from pybpodapi.session import Session
 
 
 class SessionDataCSVExporter(object):

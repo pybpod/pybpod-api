@@ -6,7 +6,7 @@ Output action codes
 
 Overview
 ========
-Output actions are specified via string labels. Although you can manually specify these values, **we strongly advise to use the API available labels instead** (:py:class:`pybpodapi.hardware.output_channels.OutputChannel`).
+Output actions are specified via string labels. Although you can manually specify these values, **we strongly advise to use the API available labels instead** (:py:class:`pybpodapi.bpod.hardware.output_channels.OutputChannel`).
 
 Standard port setup LED control
 -------------------------------

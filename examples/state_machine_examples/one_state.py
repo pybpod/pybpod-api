@@ -4,37 +4,29 @@
 """
 Example adapted from Josh Sanders' original version on Sanworks Bpod repository
 """
-
-import examples.settings as settings
-
-from pybpodapi.model.bpod import Bpod
-from pybpodapi.model.state_machine import StateMachine
-from pybpodapi.hardware.events import EventName
+from pybpodapi.bpod import Bpod
+from pybpodapi.state_machine import StateMachine
+from pybpodapi.bpod.hardware.events import EventName
 
 
-def run():
-	"""
-	Run this protocol now
-	"""
+"""
+Run this protocol now
+"""
 
-	my_bpod = Bpod().start(settings.SERIAL_PORT, settings.WORKSPACE_PATH, "one_state")
+my_bpod = Bpod()
 
-	sma = StateMachine(my_bpod.hardware)
+sma = StateMachine(my_bpod)
 
-	sma.add_state(
-		state_name='myState',
-		state_timer=1,
-		state_change_conditions={EventName.Tup: 'exit'},
-		output_actions=[])
+sma.add_state(
+	state_name='myState',
+	state_timer=1,
+	state_change_conditions={EventName.Tup: 'exit'},
+	output_actions=[])
 
-	my_bpod.send_state_machine(sma)
+my_bpod.send_state_machine(sma)
 
-	my_bpod.run_state_machine(sma)
+my_bpod.run_state_machine(sma)
 
-	print("Current trial info: {0}".format(my_bpod.session.current_trial()))
+print("Current trial info: {0}".format(my_bpod.session.current_trial()))
 
-	my_bpod.stop()
-
-
-if __name__ == '__main__':
-	settings.run_this_protocol(run)
+my_bpod.stop()
