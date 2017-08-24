@@ -8,9 +8,6 @@
 org.eclipse.core.resources.prefs
 
 # APP USER SETTINGS
-user_settings.py
-user_settings.*.py
-user_settings*.py
 pyforms_generic_editor_user_settings.py
 
 # PIP
