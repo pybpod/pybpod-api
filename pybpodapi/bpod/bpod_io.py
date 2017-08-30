@@ -8,8 +8,6 @@ from pybpodapi.bpod.bpod_com_protocol_modules import BpodCOMProtocolModules
 from pybpodapi.bpod.com.messaging.trial import Trial
 from pybpodapi.session import Session
 
-from pybpodapi.plugins import CSVExporter
-from pybpodapi.plugins import JSONExporter
 
 logger = logging.getLogger(__name__)
 
