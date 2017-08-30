@@ -5,7 +5,7 @@ import os
 import json
 from datetime import datetime
 
-from pybpodapi.trial import Trial
+from pybpodapi.bpod.com.messaging.trial import Trial
 from pybpodapi.session import Session
 
 
@@ -31,11 +31,12 @@ class SessionDataJSONExporter(object):
 		:param Trial trial:
 		:return:
 		"""
-
+		pass
+		"""
 		data2save = trial.export()
 
 		with open(self.path, "a+") as json_file:
-			json.dump(data2save, json_file, sort_keys=False, indent=4, separators=(',', ':'))
+			json.dump(data2save, json_file, sort_keys=False, indent=4, separators=(',', ':'))"""
 
 	def add_session_metadata(self, session):
 		"""

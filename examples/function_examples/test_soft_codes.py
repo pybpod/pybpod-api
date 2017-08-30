@@ -85,7 +85,7 @@ for i in range(nTrials):  # Main loop
 
 	my_bpod.run_state_machine(sma)  # Run state machine
 
-	print("Current trial info: {0}".format(my_bpod.session.current_trial()))
+	print("Current trial info: {0}".format(my_bpod.session.current_trial))
 
 my_bpod.stop()  # Disconnect Bpod
 

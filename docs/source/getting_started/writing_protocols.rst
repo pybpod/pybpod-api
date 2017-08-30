@@ -132,7 +132,7 @@ On run completion, we can print the data available for the current trial includi
 
 		my_bpod.run_state_machine(sma)  # Run state machine
 
-		print("Current trial info: ", my_bpod.session.current_trial())
+		print("Current trial info: ", my_bpod.session.current_trial)
 
 
 

@@ -5,7 +5,7 @@ import os
 import csv
 from datetime import datetime
 
-from pybpodapi.trial import Trial
+from pybpodapi.bpod.com.messaging.trial import Trial
 from pybpodapi.session import Session
 
 
@@ -31,7 +31,8 @@ class SessionDataCSVExporter(object):
 		:param Trial trial:
 		:return:
 		"""
-
+		pass
+		"""
 		with open(self.path, "a+", newline='') as csvfile:
 			csv_writer = csv.writer(csvfile, delimiter=',')
 
@@ -50,6 +51,7 @@ class SessionDataCSVExporter(object):
 				csv_writer.writerow([event.name] + trial.get_timestamps_by_event_name(event.name))
 
 			csv_writer.writerow([])
+		"""
 
 	def add_session_metadata(self, session):
 		"""
@@ -57,9 +59,11 @@ class SessionDataCSVExporter(object):
 		:param Session session:
 		:return:
 		"""
+		"""
 		with open(self.path, "a+") as csvfile:
 			csv_writer = csv.writer(csvfile, delimiter=',')
 
 			csv_writer.writerow([])
 
-			csv_writer.writerow(["Trial start timestamp", session.current_trial().bpod_start_timestamp])
+			csv_writer.writerow(["Trial start timestamp", session.current_trial.bpod_start_timestamp])
+		"""

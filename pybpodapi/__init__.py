@@ -1,8 +1,8 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.4.0.beta"
-__author__ = ['Joshua Sanders', 'Carlos Mão de Ferro']
+__version__ = "1.5.0.beta"
+__author__ = ['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro']
 __credits__ = ["Carlos Mao de Ferro", "Ricardo Ribeiro"]
 __license__ = "Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>"
 __maintainer__ = ['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro']

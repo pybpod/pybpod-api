@@ -1,74 +1,57 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import logging, pprint
+import logging, pprint, dateutil
 
 #from pybpodapi.state_machine import StateMachine
 #from pybpodapi.event_occurrence import EventOccurrence
-from pybpodapi.state_occurrences import StateOccurrences
+
+from pybpodapi.bpod.com.messaging.event_occurrence import EventOccurrence
+from pybpodapi.bpod.com.messaging.state_occurrence import StateOccurrence
+from pybpodapi.bpod.com.messaging.base_message import BaseMessage
 
 logger = logging.getLogger(__name__)
 
 
-class Trial(object):
+class Trial(BaseMessage):
 	"""
 	:ivar float bpod_start_timestamp: None
 	:ivar StateMachine sma: sma
 	:ivar list(StateOccurrences) state_occurrences: list of state occurrences
 	:ivar list(EventOccurrence) events_occurrences: list of event occurrences 
 	"""
+	MESSAGE_TYPE_ALIAS = 'TRIAL'
+	MESSAGE_COLOR = (0,0,255)
 
-	def __init__(self, sma):
-
+	def __init__(self, sma=None):
+		super(Trial,self).__init__('New trial')
 		self.bpod_start_timestamp = None
-		self.sma = sma  # type: StateMachine
+		self.sma = sma  			  # type: StateMachine
 		self.states_occurrences = []  # type: list(StateOccurrences)
 		self.events_occurrences = []  # type: list(EventOccurrence)
 
-	def add_state_duration(self, state_name, start, end):
-		"""
-		Add state duration to state. If state doesn't exist, create a new one.
+		self.states 			= [0]
+		self.state_timestamps 	= [0]
+		self.event_timestamps 	= []  	# see also BpodBase.__update_timestamps
 		
-		:param str state_name: name of the sate
-		:param float start: start timestamp
-		:param float end: end timestamp
-		"""
-		state = [state for state in self.states_occurrences if state.name == state_name]  # type: list(StateOccurrences)
+		self.states_durations 	= {}
 
-		if not state:
-			state = StateOccurrences(state_name)
-			self.states_occurrences.append(state)
-		else:
-			state = state[0]
+	def __add__(self, msg):
+		if   isinstance(msg, EventOccurrence): 
+			self.events_occurrences.append(msg)
+		elif isinstance(msg, StateOccurrence):
+			self.states_occurrences.append(msg)
+			if msg.state_name not in self.states_durations:
+				self.states_durations[msg.state_name] = []
+			self.states_durations[msg.state_name].append( 
+				(	msg.start_timestamp, msg.end_timestamp )
+			)
+		
+		return self
 
-		state.add_state_dur(start, end)
-
-	def get_all_timestamps_by_state(self):
-		"""
-		Create a dictionary whose keys are state names and values are corresponding timestamps (start and end)
-
-		This is just a convenient method for getting all states occurrences as a dictionary. 
-
-		Example:
-
-		.. code-block:: python
-
-			{
-				'TimerTrig': [(0, 0.0001)],
-				'Reward': [(429496.7295, 429496.7295)],
-				'WaitForPort2Poke': [(0, 429496.7295)], 
-				'FlashStimulus': [(429496.7295, 429496.7295)],
-				'WaitForResponse': [(429496.7295, 429496.7295)],
-				'Punish': [(nan, nan)]}
-			}
-
-		:rtype: dict 
-		"""
-		all_timestamps = {}
-		for state in self.states_occurrences:
-			all_timestamps[state.name] = [(state_dur.start, state_dur.end) for state_dur in state.timestamps]
-
-		return all_timestamps
+	def update_events_timestamps(self, timestamps):
+		for event, timestamp in zip(self.events_occurrences, timestamps):
+			event.host_timestamp = timestamp
 
 	def get_timestamps_by_event_name(self, event_name):
 		"""
@@ -80,8 +63,9 @@ class Trial(object):
 		event_timestamps = []  # type: list(float)
 
 		for event in self.events_occurrences:
-			if event.name == event_name:
-				event_timestamps.append(event.timestamp)
+			name = self.sma.hardware.channels.get_event_name(event.event_id)
+			if name == event_name:
+				event_timestamps.append(event.host_timestamp)
 
 		return event_timestamps
 
@@ -94,8 +78,9 @@ class Trial(object):
 		events_names = []  # type: list(str)
 
 		for event in self.events_occurrences:
-			if event.name not in events_names:
-				events_names.append(event.name)
+			event_name = self.sma.hardware.channels.get_event_name(event.event_id)
+			if event_name not in events_names:
+				events_names.append(event_name)
 
 		return events_names
 
@@ -123,14 +108,25 @@ class Trial(object):
 			all_timestamps[event_name] = self.get_timestamps_by_event_name(event_name)
 
 		return all_timestamps
-
+	
 	def export(self):
 		return {'Bpod start timestamp': self.bpod_start_timestamp,
-				'States timestamps': self.get_all_timestamps_by_state(),
+				'States timestamps': self.states_durations,
 				'Events timestamps': self.get_all_timestamps_by_event()}
-
+	
 	def pformat(self):
 		return pprint.pformat( self.export(), indent=4)
 
 	def __str__(self):
 		return str( self.export() )
+
+
+
+	@classmethod
+	def fromlist(cls, row):
+		"""
+		Returns True if the typestr represents the class
+		"""
+		obj = cls()
+		obj.pc_timestamp = dateutil.parser.parse(row[1])
+		return obj

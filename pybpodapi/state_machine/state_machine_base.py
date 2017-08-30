@@ -8,7 +8,7 @@ import math
 from pybpodapi.state_machine.conditions import Conditions
 from pybpodapi.state_machine.global_counters import GlobalCounters
 from pybpodapi.state_machine.global_timers import GlobalTimers
-from pybpodapi.state_machine.raw_data import RawData
+
 from pybpodapi.bpod.hardware.events import EventName
 from pybpodapi.bpod.hardware.output_channels import OutputChannel
 from pybpodapi.bpod.hardware.channels import ChannelName
@@ -37,7 +37,6 @@ class StateMachineBase(object):
 	:ivar list(str) undeclared: list of states names that have been referenced but not yet added
 	:ivar tuple(str) meta_output_names: TODO:
 	:ivar list(tuple(int)) output_matrix: TODO:
-	:ivar RawData raw_data: temporarily stores trial information (state occurrences, event occurrences, etc.)
 	:ivar bool is_running: whether this state machine is being run on bpod box 
 	
 	"""
@@ -69,7 +68,6 @@ class StateMachineBase(object):
 		# output actions
 		self.output_matrix 		= [[] for i in range(self.hardware.max_states)]
 
-		self.raw_data 			= RawData()
 
 		self.is_running 		= False
 
