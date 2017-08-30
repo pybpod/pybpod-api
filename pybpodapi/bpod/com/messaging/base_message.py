@@ -46,7 +46,7 @@ class BaseMessage(object):
 		"""
 		Returns True if the typestr represents the class
 		"""
-		obj = cls(row[3],row[2] if row[2] else None)
+		obj = cls(row[3],float(row[2]) if row[2] else None)
 		obj.pc_timestamp = dateutil.parser.parse(row[1])
 
 		return obj
