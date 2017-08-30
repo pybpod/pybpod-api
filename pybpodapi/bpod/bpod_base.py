@@ -368,7 +368,7 @@ class BpodBase(object):
 				logger.debug("States indexes: %s", current_trial.states)
 
 		elif opcode == 2:  # Handle soft code
-			self._session += SoftcodeOccurrence(event_id)
+			self._session += SoftcodeOccurrence(data)
 			self.softcode_handler_function(data)
 
 
