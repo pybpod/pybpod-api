@@ -47,9 +47,9 @@ class StateOccurrence(BaseMessage):
 		"""
 		obj = cls(
 			row[3],
-			row[4] if row[4] else None,
-			row[5] if row[5] else None,
-			host_timestamp = row[2] if row[2] else None,
+			float(row[4]) if row[4] else None,
+			float(row[5]) if row[5] else None,
+			host_timestamp = float(row[2]) if row[2] else None,
 		)
 		obj.pc_timestamp = dateutil.parser.parse(row[1])
 
