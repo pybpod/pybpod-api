@@ -49,9 +49,7 @@ class Trial(BaseMessage):
 		
 		return self
 
-	def update_events_timestamps(self, timestamps):
-		for event, timestamp in zip(self.events_occurrences, timestamps):
-			event.host_timestamp = timestamp
+	
 
 	def get_timestamps_by_event_name(self, event_name):
 		"""

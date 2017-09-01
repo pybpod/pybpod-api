@@ -19,6 +19,7 @@ from pybpodapi.state_machine import StateMachine
 from pybpodapi.bpod.com.messaging.end_trial 			import EndTrial
 from pybpodapi.bpod.com.messaging.trial 				import Trial
 from pybpodapi.bpod.com.messaging.event_occurrence 		import EventOccurrence
+from pybpodapi.bpod.com.messaging.event_resume 			import EventResume
 from pybpodapi.bpod.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
 
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
@@ -389,7 +390,13 @@ class BpodBase(object):
 		timestamps = self._bpodcom_read_timestamps()
 
 		current_trial.event_timestamps = [i / float(self._hardware.cycle_frequency) for i in timestamps]
-		current_trial.update_events_timestamps(current_trial.event_timestamps)
+		
+		# update the timestamps of the events #############################################################
+		for event, timestamp in zip(current_trial.events_occurrences, current_trial.event_timestamps):
+			event.host_timestamp = timestamp
+			e = EventResume(event.event_id, event.event_name, host_timestamp=timestamp)
+			self.session += e
+		###################################################################################################
 
 		current_trial.state_timestamps += current_trial.event_timestamps[:len(state_change_indexes)]
 		current_trial.state_timestamps += [current_trial.event_timestamps[-1]]

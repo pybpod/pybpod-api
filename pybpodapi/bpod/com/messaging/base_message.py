@@ -15,7 +15,7 @@ class BaseMessage(object):
 
 	def __init__(self, content, host_timestamp=None):
 		self.pc_timestamp 	= datetime.now()
-		self.host_timestamp = None
+		self.host_timestamp = host_timestamp
 		self.content 		= content
 
 	def __str__(self):
