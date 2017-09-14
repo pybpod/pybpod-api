@@ -47,8 +47,6 @@ class BpodModule(object):
 
 
 
-
-
 	def write_char_array(self, message):
 		self.bpod_modules.module_write(self, message, ArduinoTypes.CHAR)
 
@@ -70,19 +68,19 @@ class BpodModule(object):
 
 
 	def read_char_array(self, size=None):
-		self.__read(self, size, ArduinoTypes.CHAR)
+		self.__read( size, ArduinoTypes.CHAR)
 
 	def read_uint8_array(self, size=None):
-		self.__read(self, size, ArduinoTypes.UINT8)
+		self.__read( size, ArduinoTypes.UINT8)
 
 	def read_uint16_array(self, size=None):
-		self.__read(self, size, ArduinoTypes.UINT16)
+		self.__read( size, ArduinoTypes.UINT16)
 
 	def read_uint32_array(self, size=None):
-		self.__read(self, size, ArduinoTypes.UINT32)
+		self.__read( size, ArduinoTypes.UINT32)
 
 	def read_float_array(self, size=None):
-		self.__read(self, size, ArduinoTypes.FLOAT)
+		self.__read( size, ArduinoTypes.FLOAT)
 
 
 	

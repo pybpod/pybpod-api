@@ -71,7 +71,7 @@ class StateMachineBase(object):
 
 		self.is_running 		= False
 
-	def add_state(self, state_name, state_timer, state_change_conditions={}, output_actions=()):
+	def add_state(self, state_name, state_timer=0, state_change_conditions={}, output_actions=()):
 		"""
 		Adds a state to an existing state matrix. 
 

@@ -16,6 +16,7 @@ from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 
 from pybpodapi.bpod.bpod_base import BpodBase
+from pysettings import conf as settings
 
 logger = logging.getLogger(__name__)
 
@@ -184,20 +185,24 @@ class BpodCOMProtocol(BpodBase):
 		:rtype: bool
 		"""
 
-		# configure inputs enabled
-
+		###### set inputs enabled or disabled #######################################################
 		hardware.inputs_enabled = [0] * len(hardware.inputs)
-		ports_found = False
-		for i in range(len(hardware.inputs)):
-			if hardware.inputs[i] == 'B':
-				hardware.inputs_enabled[i] = 1
-			elif hardware.inputs[i] == 'W':
-				hardware.inputs_enabled[i] = 1
-			if ports_found == False and hardware.inputs[i] == 'P':  # Enable ports 1-3 by default
-				ports_found = True
-				hardware.inputs_enabled[i] = 1
-				hardware.inputs_enabled[i + 1] = 1
-				hardware.inputs_enabled[i + 2] = 1
+		ports_found 			= False
+
+		bnc_inputports 	  	= [i for i, input_type in enumerate( hardware.inputs ) if input_type=='B']
+		wired_inputports  	= [i for i, input_type in enumerate( hardware.inputs ) if input_type=='W']
+		behavior_inputports = [i for i, input_type in enumerate( hardware.inputs ) if input_type=='P']
+		
+		for j, i in enumerate(bnc_inputports): 
+			hardware.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
+
+		for j, i in enumerate(wired_inputports): 
+			hardware.inputs_enabled[i] = settings.BPOD_WIRED_PORTS_ENABLED[j]
+
+		for j, i in enumerate(behavior_inputports): 
+			hardware.inputs_enabled[i] = settings.BPOD_BEHAVIOR_PORTS_ENABLED[j]
+		#############################################################################################
+
 
 		logger.debug("Requesting ports enabling (%s)", SendMessageHeader.ENABLE_PORTS)
 		logger.debug("Inputs enabled (%s): %s", len(hardware.inputs_enabled), hardware.inputs_enabled)
