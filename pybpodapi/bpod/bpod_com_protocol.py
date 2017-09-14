@@ -189,17 +189,13 @@ class BpodCOMProtocol(BpodBase):
 		hardware.inputs_enabled = [0] * len(hardware.inputs)
 		ports_found 			= False
 
-		bnc_inputports 	  	= [i for i, input_type in enumerate( hardware.inputs ) if input_type=='B']
-		wired_inputports  	= [i for i, input_type in enumerate( hardware.inputs ) if input_type=='W']
-		behavior_inputports = [i for i, input_type in enumerate( hardware.inputs ) if input_type=='P']
-		
-		for j, i in enumerate(bnc_inputports): 
+		for j, i in enumerate(hardware.bnc_inputports_indexes): 
 			hardware.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
 
-		for j, i in enumerate(wired_inputports): 
+		for j, i in enumerate(hardware.wired_inputports_indexes): 
 			hardware.inputs_enabled[i] = settings.BPOD_WIRED_PORTS_ENABLED[j]
 
-		for j, i in enumerate(behavior_inputports): 
+		for j, i in enumerate(hardware.behavior_inputports_indexes): 
 			hardware.inputs_enabled[i] = settings.BPOD_BEHAVIOR_PORTS_ENABLED[j]
 		#############################################################################################
 
