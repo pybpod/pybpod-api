@@ -1,0 +1,7 @@
+# 3rd party dependencies
+pyserial>=3.1.1
+numpy
+
+# swp dependencies
+https://github.com/UmSenhorQualquer/pysettings/archive/master.zip
+https://bitbucket.org/fchampalimaud/logging-bootstrap/get/master.zip
