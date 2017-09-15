@@ -13,7 +13,6 @@
    state_machine
    builder
    runner
-   raw_data
 
 Overview
 --------
