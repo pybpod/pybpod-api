@@ -1,7 +1,7 @@
 .. pybpodapi documentation master file, created by
-   sphinx-quickstart on Wed Jan 18 09:35:10 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+	 sphinx-quickstart on Wed Jan 18 09:35:10 2017.
+	 You can adapt this file completely to your liking, but it should at least
+	 contain the root `toctree` directive.
 
 .. _running-label:
 
@@ -9,55 +9,36 @@
 Running examples
 ****************
 
+
 Configure settings
 ==================
 
-In order to run protocols you need to specify bpod serial port on the file *'user_settings.py'*.
+In order to run protocols you need to specify bpod serial port on the file *'examples/user_settings.py'*.
 
-Example of  *'user_settings.py'*  file:
-
-::
-
-    # -*- coding: utf-8 -*-
-
-    SERIAL_PORT = '/dev/tty.usbmodem1411'
-
-    WORKSPACE_PATH = "~/Desktop/bpod_workspace"
-
-
-
-You can duplicate the *'user_settings.py.template'* and save it as *'user_settings.py'*
-
-
-Running protocol examples using script (easy way)
-=================================================
-
-The pybpod-api library provides a simple script that allows you to choose and run a protocol example.
-
-To run this script execute the following commands:
+Example of  *'examples/user_settings.py'*  file:
 
 ::
 
-   cd PROJECT_FOLDER/
-   python3 -m examples
+	# -*- coding: utf-8 -*-
+
+	PYBPOD_API_LOG_LEVEL = None
+	
+	WORKSPACE_PATH  = 'BPOD-WORKSPACE'
+	PROTOCOL_NAME   = 'PROTOCOL-NAME'
+
+	SERIAL_PORT   = '/dev/ttyACM0'
 
 
-Screenshot:
 
-.. image:: /_images/running_bpod_script.png
-   :scale: 100 %
-
-Running protocol examples individually (advanced way)
+Running protocol examples
 =====================================================
-
-Alternatively, you can run a specific protocol.
 
 Example for running the *'add_trial_events.py'*:
 
 ::
 
-   cd PROJECT_FOLDER/
-   python3 -m examples.function_examples.add_trial_events
+	 cd PROJECT_FOLDER/examples
+	 python3 -m function_examples.add_trial_events
 
 
 
@@ -72,7 +53,7 @@ Basic example demonstrating how to initialize Bpod and read version, firmware ve
 
 ::
 
-   python3 -m examples.function_examples.bpod_info
+	 python3 -m function_examples.bpod_info
 
 One state example
 -----------------
@@ -81,7 +62,7 @@ Simple example of adding a state to the state machine and run it. A timer is use
 
 ::
 
-   python3 -m examples.state_machine_examples.one_state
+	 python3 -m state_machine_examples.one_state
 
 Light chasing example (3 pokes)
 -------------------------------
@@ -92,7 +73,7 @@ Connect noseports to ports 1-3.
 
 ::
 
-   python3 -m examples.state_machine_examples.light_chasing
+	 python3 -m state_machine_examples.light_chasing
 
 Light chasing example (2 pokes)
 -------------------------------
@@ -103,7 +84,7 @@ Connect noseports to ports 1-2.
 
 ::
 
-   python3 -m examples.state_machine_examples.light_chasing_2_pokes
+	 python3 -m state_machine_examples.light_chasing_2_pokes
 
 Add trial events
 ----------------
@@ -115,7 +96,7 @@ Connect noseports to ports 1-3.
 
 ::
 
-   python3 -m examples.function_examples.add_trial_events
+	 python3 -m function_examples.add_trial_events
 
 Add trial events 2
 ------------------
@@ -125,7 +106,7 @@ Connect noseports to ports 1-3.
 
 ::
 
-   python3 -m examples.function_examples.add_trial_events2
+	 python3 -m function_examples.add_trial_events2
 
 
 Manual override
@@ -134,7 +115,7 @@ Manually interact with Bpod hardware. For a detailed explanation, please refer t
 
 ::
 
-   python3 -m examples.function_examples.manual_override
+	 python3 -m function_examples.manual_override
 
 Serial messages
 ---------------
@@ -142,7 +123,7 @@ Example on how to use serial capabilities of Bpod.
 
 ::
 
-   python3 -m examples.function_examples.serial_message
+	 python3 -m function_examples.serial_message
 
 Global timers examples
 ----------------------
@@ -150,9 +131,9 @@ Several examples demonstrating how to interact with Bpod timers.
 
 ::
 
-   python3 -m examples.state_machine_examples.global_timer_example
-   python3 -m examples.state_machine_examples.global_timer_example_digital
-   python3 -m examples.state_machine_examples.global_timer_start_and_end_events
+	 python3 -m state_machine_examples.global_timer_example
+	 python3 -m state_machine_examples.global_timer_example_digital
+	 python3 -m state_machine_examples.global_timer_start_and_end_events
 
 
 Global counter example
@@ -163,7 +144,7 @@ To interrupt the infinite loop one have to interrupt poke1 or poke3 a number of 
 
 ::
 
-   python3 -m examples.state_machine_examples.global_counter_example
+	 python3 -m state_machine_examples.global_counter_example
 
 Setting a condition example
 ---------------------------
@@ -172,7 +153,7 @@ Example on how to set a condition.
 
 ::
 
-   python3 -m examples.state_machine_examples.condition_example
+	 python3 -m state_machine_examples.condition_example
 
 
 UART triggered state example
@@ -182,7 +163,7 @@ Example on how a UART event can trigger a state change.
 
 ::
 
-   python3 -m examples.state_machine_examples.uart_triggered_state_change
+	 python3 -m state_machine_examples.uart_triggered_state_change
 
 
 

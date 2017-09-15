@@ -10,13 +10,13 @@ After :ref:`installing <installing-label>` pybpod-api, open a python terminal an
 
 .. code-block:: python
 
-    from pybpodapi.model.bpod import Bpod # import Bpod main class
-    from pybpodapi.hardware.channels import ChannelType # import available types of channels
-    from pybpodapi.hardware.channels import ChannelName # import available names of channels
+    from pybpodapi.bpod import Bpod # import Bpod main class
+    from pybpodapi.bpod.hardware.channels import ChannelType # import available types of channels
+    from pybpodapi.bpod.hardware.channels import ChannelName # import available names of channels
 
     # connect to bpod
 
-    my_bpod = Bpod().start('YOUR_SERIAL_PORT_HERE', 'PATH_FOR_OUTPUT_FOLDER', "manual_interaction")  # Start bpod
+    my_bpod = Bpod() # Start bpod
 
     # set poke led connected on port 1 to maximum intensity
     my_bpod.manual_override(ChannelType.OUTPUT, ChannelName.PWM, channel_number=1, value=255)
@@ -28,14 +28,14 @@ After :ref:`installing <installing-label>` pybpod-api, open a python terminal an
     my_bpod.manual_override(ChannelType.OUTPUT, ChannelName.PWM, channel_number=1, value=128)
 
     # disconnect from bpod
-    my_bpod.disconnect()
+    my_bpod.stop()
 
 
 .. seealso::
     For more available commands, please refer to:
 
-        * :meth:`pybpodapi.model.bpod.Bpod.manual_override`
+        * :meth:`pybpodapi.bpod.bpod_base.BpodBase.manual_override`
 
-        * :class:`pybpodapi.hardware.channels.ChannelType`
+        * :class:`pybpodapi.bpod.hardware.channels.ChannelType`
 
-        * :class:`pybpodapi.hardware.channels.ChannelName`
+        * :class:`pybpodapi.bpod.hardware.channels.ChannelName`

@@ -1,8 +1,8 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.3.0"
-__author__ = ['Joshua Sanders', 'Carlos Mão de Ferro']
+__version__ = "1.5.1"
+__author__ = ['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro']
 __credits__ = ["Carlos Mao de Ferro", "Ricardo Ribeiro"]
 __license__ = "Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>"
 __maintainer__ = ['Joshua Sanders', 'Carlos Mão de Ferro', 'Ricardo Ribeiro']
@@ -11,6 +11,18 @@ __status__ = "Development"
 
 
 from pysettings import conf
+import loggingbootstrap
+
+#load the user settings
+try:
+	import user_settings
+	conf += user_settings
+except:
+	pass
 
 conf += 'pybpodapi.settings'
 
+
+if conf.PYBPOD_API_LOG_LEVEL is not None:
+	# setup different loggers for example script and api
+	loggingbootstrap.create_double_logger("pybpodapi", conf.PYBPOD_API_LOG_LEVEL, conf.PYBPOD_API_LOG_FILE, conf.PYBPOD_API_LOG_LEVEL)
