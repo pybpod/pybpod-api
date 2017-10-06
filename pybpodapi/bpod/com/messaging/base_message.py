@@ -10,8 +10,8 @@ class BaseMessage(object):
 	It may have been originated from the board of from pc
 	"""
 
-	MESSAGE_TYPE_ALIAS = 'message'
-	MESSAGE_COLOR = None
+	MESSAGE_TYPE_ALIAS = 'MESSAGE'
+	MESSAGE_COLOR = (200,200,200)
 
 	def __init__(self, content, host_timestamp=None):
 		self.pc_timestamp 	= datetime.now()
