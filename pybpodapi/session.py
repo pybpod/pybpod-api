@@ -29,6 +29,7 @@ class Session(object):
 	INFO_SESSION_STARTED	= 'SESSION-STARTED'
 	INFO_SESSION_ENDED		= 'SESSION-ENDED'
 	INFO_SERIAL_PORT		= 'SERIAL-PORT'
+	INFO_BPODAPI_VERSION	= 'BPOD-API-VERSION'
 
 	def __init__(self, path=None):
 		self.history 			= []				# type: list[Trial]

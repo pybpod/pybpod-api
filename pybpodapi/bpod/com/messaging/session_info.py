@@ -15,7 +15,7 @@ class SessionInfo(BaseMessage):
 	MESSAGE_TYPE_ALIAS = 'INFO'
 	MESSAGE_COLOR 	   = (150,150,255)
 
-	def __init__(self, infoname, infovalue):
+	def __init__(self, infoname, infovalue=None):
 		super(SessionInfo, self).__init__(infoname)
 		self._infovalue = infovalue
 

@@ -8,7 +8,7 @@ from pybpodapi.bpod.bpod_com_protocol_modules import BpodCOMProtocolModules
 from pybpodapi.bpod.com.messaging.trial 		import Trial
 from pybpodapi.bpod.com.messaging.session_info 	import SessionInfo
 from pybpodapi.session import Session
-
+import pybpodapi
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,8 @@ class BpodIO(BpodCOMProtocolModules):
 		# type: Session
 		self._session = Session(os.path.join(self.workspace_path, self.protocol_name)) if self.workspace_path else  Session()
 		
+		self.session += SessionInfo("This is a PYBPOD file. Find more info at http://pybpod.readthedocs.io")
+		self.session += SessionInfo( Session.INFO_BPODAPI_VERSION, pybpodapi.__version__)
 		self.session += SessionInfo( Session.INFO_PROTOCOL_NAME, 	self.protocol_name )
 		self.session += SessionInfo( Session.INFO_SESSION_STARTED,  self.session.start_timestamp )
 		

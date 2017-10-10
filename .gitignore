@@ -41,3 +41,7 @@ uninstall-requirements-dev-*.txt
 
 # Node JS (for documentation)
 **/node_modules/*
+
+examples/BPOD-WORKSPACE/
+
+
