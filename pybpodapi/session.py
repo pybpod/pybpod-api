@@ -10,6 +10,7 @@ from pybpodapi.bpod.com.messaging.trial					import Trial
 from pybpodapi.bpod.com.messaging.event_occurrence 		import EventOccurrence
 from pybpodapi.bpod.com.messaging.state_occurrence 		import StateOccurrence
 from pybpodapi.bpod.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
+from pybpodapi.bpod.com.messaging.session_info 			import SessionInfo
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,12 @@ class Session(object):
 	:ivar datetime start_timestamp: it stores session start timestamp
 
 	"""
+
+	INFO_PROTOCOL_NAME 		= 'PROTOCOL-NAME'
+	INFO_SESSION_STARTED	= 'SESSION-STARTED'
+	INFO_SESSION_ENDED		= 'SESSION-ENDED'
+	INFO_SERIAL_PORT		= 'SERIAL-PORT'
+	INFO_BPODAPI_VERSION	= 'BPOD-API-VERSION'
 
 	def __init__(self, path=None):
 		self.history 			= []				# type: list[Trial]
@@ -39,8 +46,12 @@ class Session(object):
 		else:
 			self.csvfile  = None
 
+
 	def __del__(self):
-		if self.csvfile: self.csvfile.close()
+		if self.csvfile: 
+			self.csvwriter.writerow( SessionInfo( self.INFO_SESSION_ENDED, datetime.now() ).tolist() )
+			self.csvfile.close()
+
 
 	def __add__(self, msg):
 		"""
@@ -50,13 +61,13 @@ class Session(object):
 		"""
 		if isinstance(msg, Trial): 
 			self.trials.append(msg)
-		else:
+		elif not isinstance(msg, SessionInfo): 
 			self.current_trial += msg
 
 		self.history.append(msg)
 
-		if self.csvfile: 
-			self.csvwriter.writerow( msg.tolist() )
+		if self.csvfile:  self.csvwriter.writerow( msg.tolist() )
+
 		self.log_function(msg)		
 		return self
 

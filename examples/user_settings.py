@@ -16,3 +16,6 @@ PYBPOD_API_PUBLISH_DATA_FUNC = print
 
 
 
+BPOD_BNC_PORTS_ENABLED 		= [True, True]
+BPOD_WIRED_PORTS_ENABLED 	= [True, True]
+BPOD_BEHAVIOR_PORTS_ENABLED = [False, False, False, False, False, False, False, False]

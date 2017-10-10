@@ -12,10 +12,6 @@ Implementation
     :members:
     :private-members:
 
-.. automodule:: pybpodapi.state_machine.raw_data
-    :members:
-    :private-members:
-
 .. automodule:: pybpodapi.state_machine.global_counters
     :members:
     :private-members:

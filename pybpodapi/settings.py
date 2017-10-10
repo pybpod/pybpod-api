@@ -21,5 +21,9 @@ BAUDRATE 		= 1312500
 SYNC_CHANNEL 	= 255
 SYNC_MODE 		= 1
 
+BPOD_BNC_PORTS_ENABLED 		= [True, True]
+BPOD_WIRED_PORTS_ENABLED 	= [True, True]
+BPOD_BEHAVIOR_PORTS_ENABLED = [True, True, True, True, True, True, True, True]
+
 
 #SERIAL_PORT = '/dev/ttyACM0'

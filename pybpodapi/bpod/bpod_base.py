@@ -12,15 +12,13 @@ from pybpodapi.bpod.hardware.hardware import Hardware
 from pybpodapi.bpod.hardware.channels import ChannelType
 from pybpodapi.bpod.hardware.channels import ChannelName
 
-from pybpodapi.state_machine import StateMachine
-
-
 
 from pybpodapi.bpod.com.messaging.end_trial 			import EndTrial
 from pybpodapi.bpod.com.messaging.trial 				import Trial
 from pybpodapi.bpod.com.messaging.event_occurrence 		import EventOccurrence
 from pybpodapi.bpod.com.messaging.event_resume 			import EventResume
 from pybpodapi.bpod.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
+from pybpodapi.bpod.com.messaging.session_info 			import SessionInfo
 
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
 
@@ -59,8 +57,8 @@ class BpodBase(object):
 		self._hardware.sync_mode    = self.sync_mode 	# 0 = flip logic every trial, 1 = every state
 		
 
+		self.session += SessionInfo( self.session.INFO_SERIAL_PORT, self.serial_port )
 		
-		#TODO: FALTA PERCEBER O QUE O SETUP FAZ
 
 	#########################################
 	############ PUBLIC METHODS #############
@@ -134,6 +132,7 @@ class BpodBase(object):
 		Close connection with Bpod
 		"""
 		self._bpodcom_disconnect()
+
 
 
 	def refresh_modules(self):

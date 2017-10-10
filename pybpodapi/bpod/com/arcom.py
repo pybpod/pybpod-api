@@ -17,8 +17,10 @@ class DataType(object):
 
 
 class ArduinoTypes(object):
+	BYTE 	= DataType('byte', 1)
 	CHAR 	= DataType('char', 1)
 	UINT8 	= DataType('uint8', 1)
+	INT16 	= DataType('int16', 2)
 	UINT16 	= DataType('uint16', 2)
 	UINT32 	= DataType('uint32', 4)
 	FLOAT 	= DataType('float', 4)
@@ -37,6 +39,11 @@ class ArduinoTypes(object):
 	@staticmethod
 	def get_uint8_array(array):
 		return np.array(array, dtype=str(ArduinoTypes.UINT8)).tobytes()
+
+	@staticmethod
+	def get_int16_array(array):
+		return np.array(array, dtype=str(ArduinoTypes.INT16)).tobytes()
+
 
 	@staticmethod
 	def get_uint16_array(array):
@@ -101,6 +108,10 @@ class ArCOM(object):
 	## READ BYTE #################################################
 	##############################################################
 
+	def read_byte(self):
+		message_bytes = self.serial_object.read(ArduinoTypes.BYTE.size)
+		return message_bytes
+
 	def read_char(self):
 		message_bytes = self.serial_object.read(ArduinoTypes.CHAR.size)
 
@@ -139,6 +150,13 @@ class ArCOM(object):
 	##############################################################
 	## READ ARRAY ################################################
 	##############################################################
+
+	def read_bytes_array(self, array_len=1):
+		message_array = []
+		for pos in range(0, array_len):
+			message_bytes = self.read_byte()
+			message_array.append(message_bytes)
+		return message_array
 
 	def read_char_array(self, array_len=1):
 		message_array = []

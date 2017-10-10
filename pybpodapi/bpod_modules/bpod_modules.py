@@ -1,5 +1,6 @@
 import time
 from pybpodapi.bpod_modules.bpod_module import BpodModule
+from pybpodapi.bpod_modules.modules.rotary_encoder import RotaryEncoder
 
 class BpodModules(object):
 	
@@ -8,22 +9,29 @@ class BpodModules(object):
 		self.modules = []
 		self.bpod 	 = bpod
 		
-		
 	def __add__(self, module):
 		module.bpod_modules = self
 		self.modules.append(module)
 		return self
 
 	def __getitem__(self, index):
-		return self.modules[index]
-
-	
+		return self.modules[index]	
 
 	def __len__(self):
 		return len(self.modules)
 
 	def __iter__(self):
 		return iter(self.modules)
+
+
+
+	@staticmethod
+	def create_module(connected, module_name, firmware_version, events_names, n_serial_events):
+		if module_name and module_name.startswith('RotaryEncoder'):
+			return RotaryEncoder(connected, module_name, firmware_version, events_names, n_serial_events)
+		else:
+			return BpodModule(connected, module_name, firmware_version, events_names, n_serial_events)
+
 
 	def activate_module_relay(self, module):
 		index = self.modules.index(module)

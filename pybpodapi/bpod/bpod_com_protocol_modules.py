@@ -7,7 +7,7 @@ from pybpodapi.bpod.com.arcom import ArCOM, ArduinoTypes
 
 
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
-from pybpodapi.bpod_modules.bpod_module import BpodModule
+
 
 from pybpodapi.bpod.com.protocol.send_msg_headers import SendMessageHeader
 from pybpodapi.bpod.com.protocol.recv_msg_headers import ReceiveMessageHeader
@@ -86,7 +86,7 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 								events_names.append(event_name)
 
 
-				bpod_modules += BpodModule(connected, module_name, firmware_version, events_names, n_serial_events)
+				bpod_modules += BpodModules.create_module(connected, module_name, firmware_version, events_names, n_serial_events)
 				
 
 		if (modules_requested_events.sum()+n_serial_events)>hardware.max_serial_events:
@@ -152,9 +152,12 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 
 		if len(msg)>64:
 			raise BpodError('Error: module messages must be under 64 bytes per transmission')
-		
-		self._arcom.write_array([ord(SendMessageHeader.WRITE_TO_MODULE), module_index, len(msg)])		
-		self._arcom.write_array(msg)
+
+
+		to_send = [ord(SendMessageHeader.WRITE_TO_MODULE), module_index+1, len(msg)]
+		to_send = ArduinoTypes.get_uint8_array(to_send)
+
+		self._arcom.write_array(to_send+msg)		
 
 
 	def _bpodcom_module_read(self, module_index, size, dtype=None):
