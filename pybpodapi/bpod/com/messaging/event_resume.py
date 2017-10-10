@@ -13,7 +13,7 @@ class EventResume(BaseMessage):
 	:ivar float board_timestamp: timestamp associated with this event (from bpod)
 
 	"""
-	MESSAGE_TYPE_ALIAS = 'EVENT-RESUME'
+	MESSAGE_TYPE_ALIAS = 'EVENT-SUMMARY'
 	
 	
 	def __init__(self, event_id, event_name, host_timestamp=None):
@@ -25,6 +25,13 @@ class EventResume(BaseMessage):
 		"""		
 		super(EventResume, self).__init__(event_name, host_timestamp)
 		self._event_id = event_id
+
+	@classmethod
+	def check_type(cls, typestr):
+		"""
+		Returns True if the typestr represents the class
+		"""		
+		return typestr == cls.MESSAGE_TYPE_ALIAS or typestr == 'EVENT-RESUME'
 
 	@property
 	def event_name(self): return self.content
