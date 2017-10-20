@@ -8,7 +8,7 @@ PYBPOD_API_LOG_LEVEL = None
 PYBPOD_API_LOG_FILE  = 'pybpod-api.log'
 
 PYBPOD_API_MODULES = [
-	#'bpod_rotaryencoder_module'
+	'bpod_rotaryencoder_module'
 ]
 
 #SUPPORTED BPOD FIRMWARE VERSION
