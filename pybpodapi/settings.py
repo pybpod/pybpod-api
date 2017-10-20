@@ -1,16 +1,21 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import datetime, time, logging
+import datetime, time
 
 
 PYBPOD_API_LOG_LEVEL = None
 PYBPOD_API_LOG_FILE  = 'pybpod-api.log'
 
-# SUPPORTED BPOD FIRMWARE VERSION
-#TARGET_BPOD_FIRMWARE_VERSION = "9" # 0.7.5
-#TARGET_BPOD_FIRMWARE_VERSION = "13" # 0.7.9
-TARGET_BPOD_FIRMWARE_VERSION  = "15" # 0.8
+PYBPOD_API_MODULES = [
+	#'bpod_rotaryencoder_module'
+]
+
+#SUPPORTED BPOD FIRMWARE VERSION
+#TARGET_BPOD_FIRMWARE_VERSION = "9"   # 0.7.5
+#TARGET_BPOD_FIRMWARE_VERSION = "13"  # 0.7.9
+#TARGET_BPOD_FIRMWARE_VERSION  = "15" # 0.8
+TARGET_BPOD_FIRMWARE_VERSION  = "17"  # 0.9
 
 PYBPOD_API_PUBLISH_DATA_FUNC = lambda x:x
 
@@ -25,5 +30,5 @@ BPOD_BNC_PORTS_ENABLED 		= [True, True]
 BPOD_WIRED_PORTS_ENABLED 	= [True, True]
 BPOD_BEHAVIOR_PORTS_ENABLED = [True, True, True, True, True, True, True, True]
 
-
 #SERIAL_PORT = '/dev/ttyACM0'
+

@@ -40,7 +40,7 @@ Initialize Bpod and provide serial connection.
 
 	my_bpod = Bpod(serial_port='/dev/ttyACM0')
 
-Instead of hard coding the serial port in your script you can configure it using the **user_settings.py** file.
+Instead of hard coding the serial port in your scripts you can configure it using the **user_settings.py** file.
 
 Create the files \_\_init\_\_.py and user_settings.py in the running directory (check the examples folder on pybpod source code).
 Now you can instantiate Bpod() without having to pass the serial port as parameter.

@@ -33,8 +33,8 @@ class BpodIO(BpodCOMProtocolModules):
 	
 		
 	def __del__(self):
-		del self.session
-		super(BpodIO, self).__del__(self)
+		if hasattr(self, 'session') and self.session:
+			del self._session
 		
 
 

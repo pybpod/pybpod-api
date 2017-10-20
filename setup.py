@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-from setuptools import setup, find_packages
 import re
+from setuptools import setup, find_packages
 
 version = ''
-with open('pybpodapi/__init__.py', 'r') as fd: version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-                                                                      fd.read(), re.MULTILINE).group(1)
+with open('pybpodapi/__init__.py', 'r') as fd: 
+	version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
+
 if not version:
 	raise RuntimeError('Cannot find version information')
 
