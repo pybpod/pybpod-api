@@ -17,7 +17,4 @@ structure to manage the bpod modules
 .. module:: pybpodapi.bpod_modules.modules
    :synopsis: Implementation of specific modules
 
-.. toctree::
-   :titlesonly:
 
-   modules/rotary_encoder

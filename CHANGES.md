@@ -1,5 +1,13 @@
-## v.1.4.0.beta ()
-VERSION IN DEVELOPMENT
+## v.1.5.3
+Bpod modules functionalities are now configured dynamically
+
+## v.1.5.0
+Update session logs format file.
+Added ports enabled variable to the settings.
+Fixed some bugs.
+
+## v.1.4.0
+Added compatibility with the bpod firmware v17.
 
 ## v.1.3.0 (2017/06/21)
 Fixes Issue #9 - Cannot run several consecutive trials without a timer between them
