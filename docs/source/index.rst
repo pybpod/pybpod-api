@@ -57,7 +57,6 @@ If you have any questions or want to report a problem with this library please f
    getting_started/installing
    getting_started/running
    getting_started/writing_protocols
-   getting_started/exporting
    getting_started/manual_interaction
    getting_started/firmware_update
    getting_started/output_action_codes

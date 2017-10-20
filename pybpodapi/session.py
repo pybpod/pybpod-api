@@ -51,6 +51,7 @@ class Session(object):
 		if self.csvfile: 
 			self.csvwriter.writerow( SessionInfo( self.INFO_SESSION_ENDED, datetime.now() ).tolist() )
 			self.csvfile.close()
+		
 
 
 	def __add__(self, msg):
