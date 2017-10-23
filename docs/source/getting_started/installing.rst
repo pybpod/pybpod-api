@@ -47,7 +47,7 @@ Settings file
 
 	# list of python libraries to interfaces bpod modules. 
 	PYBPOD_API_MODULES = [
-		'bpod_rotaryencoder_module'
+		'pybpod_rotaryencoder_module'
 	]
 
 	# folder where the bpod output files are be saved
