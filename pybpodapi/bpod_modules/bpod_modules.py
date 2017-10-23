@@ -1,6 +1,5 @@
 import time, importlib
 from pysettings import conf
-from pybpodapi.bpod_modules.bpod_module import BpodModule
 
 class BpodModules(object):
 	
@@ -26,6 +25,8 @@ class BpodModules(object):
 
 	@staticmethod
 	def create_module(connected, module_name, firmware_version, events_names, n_serial_events):
+		from pybpodapi.bpod_modules.bpod_module import BpodModule #solve issue related with circular imports
+
 		if len(BpodModules.LOADED_MODULES)==0 and len(conf.PYBPOD_API_MODULES)>0:
 			
 			for module2import in conf.PYBPOD_API_MODULES:

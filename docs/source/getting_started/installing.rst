@@ -45,12 +45,12 @@ Settings file
 
 ::
 
-	# list of python libraries that interfaces with a specific bpod modules. 
+	# list of python libraries to interfaces bpod modules. 
 	PYBPOD_API_MODULES = [
 		'bpod_rotaryencoder_module'
 	]
 
-	# folder where the bpod output files will be saved
+	# folder where the bpod output files are be saved
 	WORKSPACE_PATH 	= 'BPOD-WORKSPACE'
 
 	# name of the session file
