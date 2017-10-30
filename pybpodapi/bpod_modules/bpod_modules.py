@@ -35,7 +35,7 @@ class BpodModules(object):
 
 			for mclass in BpodModules.LOADED_MODULES:
 				if mclass.check_module_type(module_name):
-					return m(connected, module_name, firmware_version, events_names, n_serial_events)
+					return mclass(connected, module_name, firmware_version, events_names, n_serial_events)
 		
 		return BpodModule(connected, module_name, firmware_version, events_names, n_serial_events)
 
