@@ -22,7 +22,7 @@ from pybpodapi.bpod.com.messaging.session_info 			import SessionInfo
 
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
 
-
+from pybpodapi.session import Session
 from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 logger = logging.getLogger(__name__)
@@ -56,6 +56,7 @@ class BpodBase(object):
 		self._hardware.sync_channel = self.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
 		self._hardware.sync_mode    = self.sync_mode 	# 0 = flip logic every trial, 1 = every state
 		
+		if not hasattr(self, '_session'): self._session = Session()
 
 		self.session += SessionInfo( self.session.INFO_SERIAL_PORT, self.serial_port )
 		
