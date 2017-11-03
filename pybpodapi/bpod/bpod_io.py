@@ -20,16 +20,18 @@ class BpodIO(BpodCOMProtocolModules):
 	def __init__(self, serial_port=None, workspace_path=None, protocol_name=None, sync_channel=None, sync_mode=None):
 		self.workspace_path = workspace_path if workspace_path 	is not None else settings.WORKSPACE_PATH
 		self.protocol_name	= protocol_name  if protocol_name 	is not None else settings.PROTOCOL_NAME
+
+		super(BpodIO,self).__init__(serial_port, sync_channel, sync_mode)
 		
-		# type: Session
-		self._session = Session(os.path.join(self.workspace_path, self.protocol_name)) if self.workspace_path else  Session()
 		
 		self.session += SessionInfo("This is a PYBPOD file. Find more info at http://pybpod.readthedocs.io")
 		self.session += SessionInfo( Session.INFO_BPODAPI_VERSION, pybpodapi.__version__)
 		self.session += SessionInfo( Session.INFO_PROTOCOL_NAME, 	self.protocol_name )
 		self.session += SessionInfo( Session.INFO_SESSION_STARTED,  self.session.start_timestamp )
 		
-		super(BpodIO,self).__init__(serial_port, sync_channel, sync_mode)
+	def create_session(self):
+		return Session(os.path.join(self.workspace_path, self.protocol_name)) if self.workspace_path else  Session()
+		
 	
 		
 	def __del__(self):

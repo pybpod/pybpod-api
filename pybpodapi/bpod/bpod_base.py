@@ -41,7 +41,8 @@ class BpodBase(object):
 	CHECK_STATE_MACHINE_COUNTER = 0
 
 	def __init__(self, serial_port=None, sync_channel=None, sync_mode=None):
-
+		self._session = self.create_session()
+		
 		self.serial_port 	= serial_port 	 if serial_port 	is not None else settings.SERIAL_PORT
 		self.baudrate 		= settings.BAUDRATE
 		self.sync_channel 	= sync_channel 	 if sync_channel 	is not None else settings.SYNC_CHANNEL
@@ -56,8 +57,6 @@ class BpodBase(object):
 		self._hardware.sync_channel = self.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
 		self._hardware.sync_mode    = self.sync_mode 	# 0 = flip logic every trial, 1 = every state
 		
-		if not hasattr(self, '_session'): self._session = Session()
-
 		self.session += SessionInfo( self.session.INFO_SERIAL_PORT, self.serial_port )
 		
 
@@ -157,8 +156,7 @@ class BpodBase(object):
 		sma.update_state_numbers()
 
 		message = sma.build_message()
-
-		
+	
 		message32 = sma.build_message_32_bits()
 
 		self._bpodcom_send_state_machine(message, message32)
@@ -289,6 +287,9 @@ class BpodBase(object):
 	#########################################
 	############ PRIVATE METHODS ############
 	#########################################
+
+	def create_session(self):
+		return Session()
 
 	def __process_opcode(self, sma, opcode, data, state_change_indexes):
 		"""
