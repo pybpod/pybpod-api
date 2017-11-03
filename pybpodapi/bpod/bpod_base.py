@@ -11,14 +11,18 @@ from pysettings import conf as settings
 from pybpodapi.bpod.hardware.hardware import Hardware
 from pybpodapi.bpod.hardware.channels import ChannelType
 from pybpodapi.bpod.hardware.channels import ChannelName
-from pybpodapi.session import Session
-from pybpodapi.state_machine import StateMachine
-from pybpodapi.trial import Trial
-from pybpodapi.state_machine.raw_data import RawData
-from pybpodapi.event_occurrence import EventOccurrence
-from pybpodapi.softcode_occurrence import SoftCodeOccurrence
+
+
+from pybpodapi.bpod.com.messaging.end_trial 			import EndTrial
+from pybpodapi.bpod.com.messaging.trial 				import Trial
+from pybpodapi.bpod.com.messaging.event_occurrence 		import EventOccurrence
+from pybpodapi.bpod.com.messaging.event_resume 			import EventResume
+from pybpodapi.bpod.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
+from pybpodapi.bpod.com.messaging.session_info 			import SessionInfo
+
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
 
+from pybpodapi.session import Session
 from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 logger = logging.getLogger(__name__)
@@ -37,15 +41,14 @@ class BpodBase(object):
 	CHECK_STATE_MACHINE_COUNTER = 0
 
 	def __init__(self, serial_port=None, sync_channel=None, sync_mode=None):
-
+		self._session = self.create_session()
+		
 		self.serial_port 	= serial_port 	 if serial_port 	is not None else settings.SERIAL_PORT
 		self.baudrate 		= settings.BAUDRATE
 		self.sync_channel 	= sync_channel 	 if sync_channel 	is not None else settings.SYNC_CHANNEL
 		self.sync_mode 		= sync_mode 	 if sync_mode 		is not None else settings.SYNC_MODE
-		self.log_function 	= settings.PYBPOD_API_PUBLISH_DATA_FUNC
-
+		
 		self._hardware 		= Hardware()  	# type: Hardware
-		self._session 		= Session()  	# type: Session
 		self.bpod_modules 	= None			# type: BpodModules
 
 		self._new_sma_sent 	= False  		# type: bool
@@ -54,9 +57,8 @@ class BpodBase(object):
 		self._hardware.sync_channel = self.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
 		self._hardware.sync_mode    = self.sync_mode 	# 0 = flip logic every trial, 1 = every state
 		
-
+		self.session += SessionInfo( self.session.INFO_SERIAL_PORT, self.serial_port )
 		
-		#TODO: FALTA PERCEBER O QUE O SETUP FAZ
 
 	#########################################
 	############ PUBLIC METHODS #############
@@ -132,6 +134,7 @@ class BpodBase(object):
 		self._bpodcom_disconnect()
 
 
+
 	def refresh_modules(self):
 		#check if any module is connected
 		self.bpod_modules = self._bpodcom_get_modules_info(self._hardware)
@@ -153,8 +156,7 @@ class BpodBase(object):
 		sma.update_state_numbers()
 
 		message = sma.build_message()
-
-		
+	
 		message32 = sma.build_message_32_bits()
 
 		self._bpodcom_send_state_machine(message, message32)
@@ -189,17 +191,12 @@ class BpodBase(object):
 		:param pybpodapi.mode.state_machine sma: initialized state machine
 		"""
 
-		self._session.add_trial(sma)
+		self.session += Trial(sma)
 
-		logger.info("Running state machine, trial %s", len(self._session.trials))
+		logger.info("Running state machine, trial %s", len(self.session.trials) )
 
 		state_change_indexes = []
 
-		# self._bpodcom_run_state_machine()
-		# if self.status.new_sma_sent:
-		# 	if not self._bpodcom_state_machine_installation_status():
-		# 		raise BpodErrorException('Error: The last state machine sent was not acknowledged by the Bpod device.')
-		# 	self.status.new_sma_sent = False
 
 		self._bpodcom_run_state_machine()
 		if self._new_sma_sent:
@@ -212,17 +209,19 @@ class BpodBase(object):
 		while sma.is_running:
 			if self.data_available():
 				opcode, data = self._bpodcom_read_opcode_message()
-
 				self.__process_opcode(sma, opcode, data, state_change_indexes)
+
+		self.session += EndTrial('The trial ended')
 
 		self.__update_timestamps(sma, state_change_indexes)
 
-		self.__add_trial_events()
+		self.session.add_trial_events()
+
+
 
 		logger.info("Publishing Bpod trial")
 
-		self._publish_data(self._session.current_trial())
-
+	
 	def manual_override(self, channel_type, channel_name, channel_number, value):
 		"""
 		Manually override a Bpod channel
@@ -277,21 +276,6 @@ class BpodBase(object):
 			raise BpodErrorException('Error: Failed to reset serial message library.')
 
 
-
-	def _publish_data(self, data):
-		"""
-		Publish data from current trial.
-		This method can be overwritten from other projects that use pybpod-api libraries to export data in a customized way.
-
-		.. seealso::
-			:py:meth:`pybpodapi.model.bpod.bpod_io.BpodIO._publish_data`.
-
-
-		:param data: data to be published (data type varies)
-		"""
-		if self.log_function: self.log_function(data)
-
-
 	def softcode_handler_function(self, data):
 		"""
 		Users can override this function directly on the protocol to handle a softcode from Bpod
@@ -304,41 +288,8 @@ class BpodBase(object):
 	############ PRIVATE METHODS ############
 	#########################################
 
-	def __add_trial_events(self):
-		"""
-		Fill current trial with latest information
-		"""
-
-		self._session.add_trial_events()
-
-	def __add_event_occurrence(self, sma, event_index):
-
-		event_name = self._hardware.channels.get_event_name(event_index)  # type: str
-
-		# TODO: Timestamp implementation on Bpod firmware
-		# type: EventOccurrence
-		event_occurrence = sma.raw_data.add_event_occurrence(
-			event_index=event_index, 
-			event_name=event_name,
-			timestamp=None
-		)
-
-		self._publish_data(data=event_occurrence)
-
-		logger.debug("Event fired: %s", str(event_occurrence))
-
-	def __add_softcode_occurrence(self, sma, data):
-
-		# TODO: Timestamp implementation on Bpod firmware
-		# type: SoftCodeOccurrence
-		softcode_occurrence = sma.raw_data.add_softcode_occurrence(
-			softcode_number=data,
-			timestamp=None
-		)
-
-		self._publish_data(data=softcode_occurrence)
-
-		logger.debug("Softcode received: %s", str(softcode_occurrence))
+	def create_session(self):
+		return Session()
 
 	def __process_opcode(self, sma, opcode, data, state_change_indexes):
 		"""
@@ -353,6 +304,8 @@ class BpodBase(object):
 		:return:
 		"""
 
+		current_trial = self.session.current_trial
+
 		if opcode == 1:  # Read events
 			n_current_events = data
 			
@@ -360,11 +313,11 @@ class BpodBase(object):
 			transition_event_found = False
 
 			
-			for event in current_events:
-				if event == 255:
+			for event_id in current_events:
+				if event_id == 255:
 					sma.is_running = False
 				else:
-					self.__add_event_occurrence(sma, event)
+					self._session += EventOccurrence(event_id, sma.hardware.channels.get_event_name(event_id) )
 
 					# input matrix
 					if not transition_event_found:
@@ -372,54 +325,54 @@ class BpodBase(object):
 						logger.debug("Current state: %s", sma.current_state)
 						for transition in sma.input_matrix[sma.current_state]:
 							logger.debug("Transition: %s", transition)
-							if transition[0] == event:
+							if transition[0] == event_id:
 								sma.current_state = transition[1]
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states input matrix")
-									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
+									current_trial.states.append(sma.current_state)
+									state_change_indexes.append(len(current_trial.events_occurrences) - 1)
 								transition_event_found = True
 
 					# state timer matrix
 					if not transition_event_found:
 						this_state_timer_transition = sma.state_timer_matrix[sma.current_state]
-						if event == sma.hardware.channels.events_positions.Tup:
+						if event_id == sma.hardware.channels.events_positions.Tup:
 							if not (this_state_timer_transition == sma.current_state):
 								sma.current_state = this_state_timer_transition
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states state timer matrix")
-									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
+									current_trial.states.append(sma.current_state)
+									state_change_indexes.append(len(current_trial.events_occurrences) - 1)
 								transition_event_found = True
 
 					# global timers start matrix
 					if not transition_event_found:
 						for transition in sma.global_timers.start_matrix[sma.current_state]:
-							if transition[0] == event:
+							if transition[0] == event_id:
 								sma.current_state = transition[1]
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states global timers start matrix")
-									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
+									current_trial.states.append(sma.current_state)
+									state_change_indexes.append(len(current_trial.events_occurrences) - 1)
 								transition_event_found = True
 
 					# global timers end matrix
 					if not transition_event_found:
 						for transition in sma.global_timers.end_matrix[sma.current_state]:
-							if transition[0] == event:
+							if transition[0] == event_id:
 								sma.current_state = transition[1]
 								if not math.isnan(sma.current_state):
 									logger.debug("adding states global timers end matrix")
-									sma.raw_data.states.append(sma.current_state)
-									state_change_indexes.append(len(sma.raw_data.events_occurrences) - 1)
+									current_trial.states.append(sma.current_state)
+									state_change_indexes.append(len(current_trial.events_occurrences) - 1)
 								transition_event_found = True
-				logger.debug("States indexes: %s", sma.raw_data.states)
+								
+				logger.debug("States indexes: %s", current_trial.states)
 
 		elif opcode == 2:  # Handle soft code
+			self._session += SoftcodeOccurrence(data)
 			self.softcode_handler_function(data)
-			self.__add_softcode_occurrence(sma, data)
 
-		logger.debug("Raw data: %s", sma.raw_data)
 
 	def __update_timestamps(self, sma, state_change_indexes):
 		"""
@@ -428,23 +381,26 @@ class BpodBase(object):
 		:param StateMachine sma:
 		:param list state_change_indexes:
 		"""
-		sma.raw_data.trial_start_timestamp = self._bpodcom_read_trial_start_timestamp_seconds()  # start timestamp of first trial
+
+		current_trial 		  = self.session.current_trial
+		start_trial_timestamp = self._bpodcom_read_trial_start_timestamp_seconds()
+		
+		current_trial.trial_start_timestamp = start_trial_timestamp  # start timestamp of first trial
+		current_trial.bpod_start_timestamp = start_trial_timestamp
 
 		timestamps = self._bpodcom_read_timestamps()
 
-		sma.raw_data.event_timestamps = [i / float(self._hardware.cycle_frequency) for i in timestamps]
+		current_trial.event_timestamps = [i / float(self._hardware.cycle_frequency) for i in timestamps]
+		
+		# update the timestamps of the events #############################################################
+		for event, timestamp in zip(current_trial.events_occurrences, current_trial.event_timestamps):
+			event.host_timestamp = timestamp
+			e = EventResume(event.event_id, event.event_name, host_timestamp=timestamp)
+			self.session += e
+		###################################################################################################
 
-		for event, timestamp in zip(sma.raw_data.events_occurrences, sma.raw_data.event_timestamps):
-			event.timestamp = timestamp
-
-		logger.debug("Events with timestamps: %s", [str(event) for event in sma.raw_data.events_occurrences])
-
-		logger.debug("state_change_indexes: %s", state_change_indexes)
-
-		for i in range(len(state_change_indexes)):
-			sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[i])
-		sma.raw_data.state_timestamps.append(sma.raw_data.event_timestamps[-1])
-
+		current_trial.state_timestamps += current_trial.event_timestamps[:len(state_change_indexes)]
+		current_trial.state_timestamps += [current_trial.event_timestamps[-1]]
 
 	#########################################
 	############## PROPERTIES ###############
@@ -453,6 +409,9 @@ class BpodBase(object):
 	@property
 	def session(self):
 		return self._session  # type: Session
+	@session.setter
+	def session(self, value):
+		self._session = value # type: Session
 
 	@property
 	def hardware(self):

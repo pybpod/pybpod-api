@@ -6,9 +6,6 @@ import logging, time, numpy as np
 from pybpodapi.bpod.com.arcom import ArCOM, ArduinoTypes
 
 
-from pybpodapi.bpod_modules.bpod_modules import BpodModules
-from pybpodapi.bpod_modules.bpod_module import BpodModule
-
 from pybpodapi.bpod.com.protocol.send_msg_headers import SendMessageHeader
 from pybpodapi.bpod.com.protocol.recv_msg_headers import ReceiveMessageHeader
 
@@ -16,6 +13,7 @@ from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 
 from pybpodapi.bpod.bpod_base import BpodBase
+from pysettings import conf as settings
 
 logger = logging.getLogger(__name__)
 
@@ -184,20 +182,20 @@ class BpodCOMProtocol(BpodBase):
 		:rtype: bool
 		"""
 
-		# configure inputs enabled
-
+		###### set inputs enabled or disabled #######################################################
 		hardware.inputs_enabled = [0] * len(hardware.inputs)
-		ports_found = False
-		for i in range(len(hardware.inputs)):
-			if hardware.inputs[i] == 'B':
-				hardware.inputs_enabled[i] = 1
-			elif hardware.inputs[i] == 'W':
-				hardware.inputs_enabled[i] = 1
-			if ports_found == False and hardware.inputs[i] == 'P':  # Enable ports 1-3 by default
-				ports_found = True
-				hardware.inputs_enabled[i] = 1
-				hardware.inputs_enabled[i + 1] = 1
-				hardware.inputs_enabled[i + 2] = 1
+		ports_found 			= False
+
+		for j, i in enumerate(hardware.bnc_inputports_indexes): 
+			hardware.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
+
+		for j, i in enumerate(hardware.wired_inputports_indexes): 
+			hardware.inputs_enabled[i] = settings.BPOD_WIRED_PORTS_ENABLED[j]
+
+		for j, i in enumerate(hardware.behavior_inputports_indexes): 
+			hardware.inputs_enabled[i] = settings.BPOD_BEHAVIOR_PORTS_ENABLED[j]
+		#############################################################################################
+
 
 		logger.debug("Requesting ports enabling (%s)", SendMessageHeader.ENABLE_PORTS)
 		logger.debug("Inputs enabled (%s): %s", len(hardware.inputs_enabled), hardware.inputs_enabled)

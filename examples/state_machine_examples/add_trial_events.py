@@ -20,8 +20,10 @@ from pybpodapi.bpod.hardware.output_channels import OutputChannel
 
 my_bpod = Bpod()
 
-nTrials = 5
+nTrials = 100
 trialTypes = [1, 2]  # 1 (rewarded left) or 2 (rewarded right)
+
+dosomething = True
 
 for i in range(nTrials):  # Main loop
 	print('Trial: ', i + 1)
@@ -43,18 +45,25 @@ for i in range(nTrials):  # Main loop
 	sma.add_state(
 		state_name='WaitForPort2Poke',
 		state_timer=1,
-		state_change_conditions={EventName.Port2In: 'FlashStimulus'},
+		state_change_conditions={EventName.Tup: 'FlashStimulus'},
 		output_actions=[(OutputChannel.PWM2, 255)])
 	sma.add_state(
 		state_name='FlashStimulus',
 		state_timer=0.1,
 		state_change_conditions={EventName.Tup: 'WaitForResponse'},
 		output_actions=[(stimulus, 255)])
-	sma.add_state(
-		state_name='WaitForResponse',
-		state_timer=1,
-		state_change_conditions={EventName.Port1In: leftAction, EventName.Port3In: rightAction},
-		output_actions=[])
+	if dosomething:
+		sma.add_state(
+			state_name='WaitForResponse',
+			state_timer=1,
+			state_change_conditions={EventName.Tup: leftAction, EventName.Port3In: rightAction},
+			output_actions=[])
+	else:
+		sma.add_state(
+			state_name='WaitForResponse',
+			state_timer=1,
+			state_change_conditions={EventName.Tup: leftAction, EventName.Port3In: rightAction},
+			output_actions=[])
 	sma.add_state(
 		state_name='Reward',
 		state_timer=0.1,
@@ -73,6 +82,7 @@ for i in range(nTrials):  # Main loop
 	my_bpod.run_state_machine(sma)  # Run state machine
 
 	print("Current trial info: {0}".format(my_bpod.session.current_trial))
+
 
 my_bpod.stop()  # Disconnect Bpod
 

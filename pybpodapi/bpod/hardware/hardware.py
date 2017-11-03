@@ -104,3 +104,23 @@ class Hardware(object):
 
 	@property
 	def cycle_frequency(self): 	return int(self.DEFAULT_FREQUENCY_DIVIDER / self.cycle_period )
+
+	@property
+	def bnc_inputports_indexes(self): return [i for i, input_type in enumerate( self.inputs ) if input_type=='B']
+
+	@property
+	def wired_inputports_indexes(self): return [i for i, input_type in enumerate( self.inputs ) if input_type=='W']
+
+	@property
+	def behavior_inputports_indexes(self): return [i for i, input_type in enumerate( self.inputs ) if input_type=='P']
+	
+
+	@property
+	def bnc_inputports_names(self): return ['BNC{0}'.format(i) for i, input_type in enumerate( self.inputs ) if input_type=='B']
+
+	@property
+	def wired_inputports_names(self): return ['Wire{0}'.format(i) for i, input_type in enumerate( self.inputs ) if input_type=='W']
+
+	@property
+	def behavior_inputports_names(self): return ['Port{0}'.format(i) for i, input_type in enumerate( self.inputs ) if input_type=='P']
+	

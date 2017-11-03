@@ -13,7 +13,7 @@ Running examples
 Configure settings
 ==================
 
-In order to run protocols you need to specify bpod serial port on the file *'examples/user_settings.py'*.
+In order to run protocols you need to specify bpod *'user_settings.py'* file that should be located at the execution directory.
 
 Example of  *'examples/user_settings.py'*  file:
 
@@ -24,7 +24,10 @@ Example of  *'examples/user_settings.py'*  file:
 	PYBPOD_API_LOG_LEVEL = None
 	
 	WORKSPACE_PATH  = 'BPOD-WORKSPACE'
-	PROTOCOL_NAME   = 'PROTOCOL-NAME'
+
+	# if you do not define the next variable, the PROTOCOL_NAME 
+	# will assume the current datetime value.
+	PROTOCOL_NAME   = 'PROTOCOL-NAME' 
 
 	SERIAL_PORT   = '/dev/ttyACM0'
 
