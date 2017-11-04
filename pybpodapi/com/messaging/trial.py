@@ -6,9 +6,9 @@ import logging, pprint, dateutil
 #from pybpodapi.state_machine import StateMachine
 #from pybpodapi.event_occurrence import EventOccurrence
 
-from pybpodapi.bpod.com.messaging.event_occurrence import EventOccurrence
-from pybpodapi.bpod.com.messaging.state_occurrence import StateOccurrence
-from pybpodapi.bpod.com.messaging.base_message import BaseMessage
+from pybpodapi.com.messaging.event_occurrence import EventOccurrence
+from pybpodapi.com.messaging.state_occurrence import StateOccurrence
+from pybpodapi.com.messaging.base_message import BaseMessage
 
 logger = logging.getLogger(__name__)
 

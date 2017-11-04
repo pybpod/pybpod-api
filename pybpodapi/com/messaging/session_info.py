@@ -1,7 +1,7 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 import dateutil
-from pybpodapi.bpod.com.messaging.base_message import BaseMessage
+from pybpodapi.com.messaging.base_message import BaseMessage
 
 class SessionInfo(BaseMessage):
 	"""

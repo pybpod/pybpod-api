@@ -13,17 +13,18 @@ from pybpodapi.bpod.hardware.channels import ChannelType
 from pybpodapi.bpod.hardware.channels import ChannelName
 
 
-from pybpodapi.bpod.com.messaging.end_trial 			import EndTrial
-from pybpodapi.bpod.com.messaging.trial 				import Trial
-from pybpodapi.bpod.com.messaging.event_occurrence 		import EventOccurrence
-from pybpodapi.bpod.com.messaging.event_resume 			import EventResume
-from pybpodapi.bpod.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
-from pybpodapi.bpod.com.messaging.session_info 			import SessionInfo
+from pybpodapi.com.messaging.end_trial 			import EndTrial
+from pybpodapi.com.messaging.trial 				import Trial
+from pybpodapi.com.messaging.event_occurrence 		import EventOccurrence
+from pybpodapi.com.messaging.event_resume 			import EventResume
+from pybpodapi.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
+from pybpodapi.com.messaging.session_info 			import SessionInfo
 
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
+from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 from pybpodapi.session import Session
-from pybpodapi.exceptions.bpod_error import BpodErrorException
+
 
 logger = logging.getLogger(__name__)
 

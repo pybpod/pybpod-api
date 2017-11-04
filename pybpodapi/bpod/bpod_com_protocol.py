@@ -3,11 +3,11 @@
 
 import logging, time, numpy as np
 
-from pybpodapi.bpod.com.arcom import ArCOM, ArduinoTypes
+from pybpodapi.com.arcom import ArCOM, ArduinoTypes
 
 
-from pybpodapi.bpod.com.protocol.send_msg_headers import SendMessageHeader
-from pybpodapi.bpod.com.protocol.recv_msg_headers import ReceiveMessageHeader
+from pybpodapi.com.protocol.send_msg_headers import SendMessageHeader
+from pybpodapi.com.protocol.recv_msg_headers import ReceiveMessageHeader
 
 from pybpodapi.exceptions.bpod_error import BpodErrorException
 

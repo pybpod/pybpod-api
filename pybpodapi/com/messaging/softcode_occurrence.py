@@ -1,7 +1,7 @@
-# !/usr/bin/python3from pybpodapi.bpod.com.messaging.base_message import BaseMessage
+# !/usr/bin/python3from pybpodapi.com.messaging.base_message import BaseMessage
 # -*- coding: utf-8 -*-
 import dateutil
-from pybpodapi.bpod.com.messaging.base_message import BaseMessage
+from pybpodapi.com.messaging.base_message import BaseMessage
 
 
 class SoftcodeOccurrence(BaseMessage):
