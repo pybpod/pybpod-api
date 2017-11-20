@@ -5,10 +5,13 @@ import logging, os
 
 from pysettings import conf as settings
 from pybpodapi.bpod.bpod_com_protocol_modules import BpodCOMProtocolModules
-from pybpodapi.bpod.com.messaging.trial 		import Trial
-from pybpodapi.bpod.com.messaging.session_info 	import SessionInfo
-from pybpodapi.session import Session
+from pybpodapi.com.messaging.trial 		import Trial
+from pybpodapi.com.messaging.session_info 	import SessionInfo
+
 import pybpodapi
+
+from pybpodapi.session import Session
+
 
 logger = logging.getLogger(__name__)
 

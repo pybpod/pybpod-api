@@ -1,5 +1,5 @@
 from pybpodapi.exceptions.bpod_error import BpodErrorException
-from pybpodapi.bpod.com.arcom import ArduinoTypes
+from pybpodapi.com.arcom import ArduinoTypes
 
 class BpodModule(object):
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging, dateutil
-from pybpodapi.bpod.com.messaging.base_message import BaseMessage
+from pybpodapi.com.messaging.base_message import BaseMessage
 
 logger = logging.getLogger(__name__)
 

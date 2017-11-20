@@ -6,11 +6,11 @@ from pysettings import conf
 from datetime import datetime
 
 #from pybpodapi.state_machine import StateMachine
-from pybpodapi.bpod.com.messaging.trial					import Trial
-from pybpodapi.bpod.com.messaging.event_occurrence 		import EventOccurrence
-from pybpodapi.bpod.com.messaging.state_occurrence 		import StateOccurrence
-from pybpodapi.bpod.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
-from pybpodapi.bpod.com.messaging.session_info 			import SessionInfo
+from pybpodapi.com.messaging.trial					import Trial
+from pybpodapi.com.messaging.event_occurrence 		import EventOccurrence
+from pybpodapi.com.messaging.state_occurrence 		import StateOccurrence
+from pybpodapi.com.messaging.softcode_occurrence 	import SoftcodeOccurrence
+from pybpodapi.com.messaging.session_info 			import SessionInfo
 
 logger = logging.getLogger(__name__)
 
