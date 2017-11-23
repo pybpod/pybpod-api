@@ -10,4 +10,4 @@ recommonmark
 # swp dependencies
 git+https://github.com/UmSenhorQualquer/pysettings.git
 git+https://UmSenhorQualquer@bitbucket.org/fchampalimaud/logging-bootstrap.git
-git+https://UmSenhorQualquer@bitbucket.org/fchampalimaud/rotary-encoder-module.git
+git+https://UmSenhorQualquer@bitbucket.org/fchampalimaud/pybpod-rotary-encoder-module.git
