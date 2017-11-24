@@ -18,14 +18,14 @@ class StateOccurrence(BaseMessage):
 	MESSAGE_TYPE_ALIAS = 'STATE'
 	MESSAGE_COLOR = (0,100,0)
 
-	def __init__(self, state_name, start_timestamp, end_timestamp, host_timestamp=None):
+	def __init__(self, state_name, host_timestamp, end_timestamp):
 		"""
 
 		:param str name: name of the state
 		"""
 		super(StateOccurrence, self).__init__(state_name, host_timestamp)
 
-		self.start_timestamp = start_timestamp
+		self.start_timestamp = host_timestamp
 		self.end_timestamp   = end_timestamp
 
 
@@ -34,10 +34,9 @@ class StateOccurrence(BaseMessage):
 		return [
 			self.MESSAGE_TYPE_ALIAS, 
 			str(self.pc_timestamp), 
-			self.host_timestamp,
-			self.content,
 			self.start_timestamp,
-			self.end_timestamp
+			self.end_timestamp,
+			self.content
 		]
 
 	@classmethod
@@ -46,10 +45,9 @@ class StateOccurrence(BaseMessage):
 		Returns True if the typestr represents the class
 		"""
 		obj = cls(
-			row[3],
-			float(row[4]) if row[4] else None,
-			float(row[5]) if row[5] else None,
-			host_timestamp = float(row[2]) if row[2] else None,
+			row[4],
+			float(row[2]) if row[2] else None,
+			float(row[3]) if row[3] else None
 		)
 		obj.pc_timestamp = dateutil.parser.parse(row[1])
 

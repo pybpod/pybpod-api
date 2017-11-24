@@ -177,6 +177,11 @@ class Channels(object):
 		self.events_positions.Tup = Pos
 		Pos += 1
 
+
+		logger.debug('event_names: %s',self.event_names)
+		logger.debug('events_positions: %s',self.events_positions)
+	
+
 	def setup_output_channels(self, hw_outputs):
 		"""
 		Generate output channel names
@@ -230,6 +235,7 @@ class Channels(object):
 		self.output_channel_names += ['GlobalCounterReset']
 		Pos += 1
 
+		logger.debug('output_channel_names: %s',self.output_channel_names)
 	
 
 	def get_event_name(self, event_idx):

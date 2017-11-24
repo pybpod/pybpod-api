@@ -38,6 +38,7 @@ class EventOccurrence(BaseMessage):
 			self.MESSAGE_TYPE_ALIAS, 
 			str(self.pc_timestamp), 
 			self.host_timestamp,
+			None,
 			self.event_id,
 			self.event_name
 		]
@@ -48,8 +49,8 @@ class EventOccurrence(BaseMessage):
 		Returns True if the typestr represents the class
 		"""
 		obj = cls(
-			int(row[3]),
-			row[4],
+			int(row[4]),
+			row[5],
 			float(row[2]) if row[2] else None
 		)
 		obj.pc_timestamp = dateutil.parser.parse(row[1])

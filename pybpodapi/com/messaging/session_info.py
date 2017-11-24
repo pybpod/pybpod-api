@@ -24,6 +24,7 @@ class SessionInfo(BaseMessage):
 			self.MESSAGE_TYPE_ALIAS, 
 			self.pc_timestamp,
 			self.host_timestamp,
+			None,
 			self.content,
 			self._infovalue
 		]
@@ -33,9 +34,9 @@ class SessionInfo(BaseMessage):
 		"""
 		Returns True if the typestr represents the class
 		"""
-		obj = cls(row[3],float(row[2]) if row[2] else None)
+		obj = cls(row[4],float(row[2]) if row[2] else None)
 		obj.pc_timestamp = dateutil.parser.parse(row[1])
-		obj._infovalue = row[4] if len(row)>4 else None
+		obj._infovalue = row[5] if len(row)>5 else None
 		return obj
 	
 	
