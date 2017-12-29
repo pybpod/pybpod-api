@@ -4,7 +4,7 @@ dependencies:
   - numpy
   - sphinx>=1.5
   - pip:
-      - dateutil
+      - python-dateutil
       - pyserial>=3.1.1
       - https://github.com/snide/sphinx_rtd_theme/archive/master.zip
       - https://bitbucket.org/fchampalimaud/logging-bootstrap/get/master.zip
