@@ -17,7 +17,7 @@ class Trial(BaseMessage):
 	"""
 	:ivar float bpod_start_timestamp: None
 	:ivar StateMachine sma: sma
-	:ivar list(StateOccurrences) states_occurrences: list of state occurrences
+	:ivar list(StateOccurrence) states_occurrences: list of state occurrences
 	:ivar list(EventOccurrence) events_occurrences: list of event occurrences 
 	"""
 	MESSAGE_TYPE_ALIAS = 'TRIAL'
@@ -27,7 +27,7 @@ class Trial(BaseMessage):
 		super(Trial,self).__init__('New trial')
 		self.bpod_start_timestamp = None
 		self.sma = sma  			  # type: StateMachine
-		self.states_occurrences = []  # type: list(StateOccurrences)
+		self.states_occurrences = []  # type: list(StateOccurrence)
 		self.events_occurrences = []  # type: list(EventOccurrence)
 
 		self.states 			= [0]
