@@ -1,6 +1,7 @@
 # 3rd party dependencies
 pyserial>=3.1.1
 numpy
+dateutil
 
 # swp dependencies
 git+https://github.com/UmSenhorQualquer/pysettings.git

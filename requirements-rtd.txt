@@ -6,6 +6,7 @@ numpy
 sphinx>=1.5.5
 sphinx_rtd_theme>=0.2.4
 recommonmark
+dateutil
 
 # swp dependencies
 git+https://github.com/UmSenhorQualquer/pysettings.git
