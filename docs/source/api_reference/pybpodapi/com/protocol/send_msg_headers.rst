@@ -18,6 +18,6 @@ Implementation
 --------------
 
 
-.. automodule:: pybpodapi.bpod.com.protocol.send_msg_headers
+.. automodule:: pybpodapi.com.protocol.send_msg_headers
     :members:
     :private-members:

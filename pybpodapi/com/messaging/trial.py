@@ -17,7 +17,7 @@ class Trial(BaseMessage):
 	"""
 	:ivar float bpod_start_timestamp: None
 	:ivar StateMachine sma: sma
-	:ivar list(StateOccurrences) state_occurrences: list of state occurrences
+	:ivar list(StateOccurrences) states_occurrences: list of state occurrences
 	:ivar list(EventOccurrence) events_occurrences: list of event occurrences 
 	"""
 	MESSAGE_TYPE_ALIAS = 'TRIAL'

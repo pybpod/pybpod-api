@@ -18,6 +18,6 @@ Implementation
 --------------
 
 
-.. automodule:: pybpodapi.bpod.com.arcom
+.. automodule:: pybpodapi.com.arcom
     :members:
     :private-members:

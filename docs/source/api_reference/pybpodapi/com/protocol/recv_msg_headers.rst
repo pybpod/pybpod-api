@@ -18,6 +18,6 @@ Implementation
 --------------
 
 
-.. automodule:: pybpodapi.bpod.com.protocol.recv_msg_headers
+.. automodule:: pybpodapi.com.protocol.recv_msg_headers
     :members:
     :private-members:

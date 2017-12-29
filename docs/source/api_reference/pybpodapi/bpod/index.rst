@@ -41,11 +41,3 @@ Hardware module
 |
 |
 
-Communication module
----------------------
-
-.. toctree::
-   :titlesonly:
-
-   com/index
-
