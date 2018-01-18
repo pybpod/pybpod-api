@@ -24,7 +24,7 @@ class BpodModules(object):
 		return iter(self.modules)
 
 	@staticmethod
-	def create_module(connected, module_name, firmware_version, events_names, n_serial_events):
+	def create_module(connected, module_name, firmware_version, events_names, n_serial_events, serial_port):
 		from pybpodapi.bpod_modules.bpod_module import BpodModule #solve issue related with circular imports
 
 		if len(BpodModules.LOADED_MODULES)==0 and len(conf.PYBPOD_API_MODULES)>0:
@@ -35,9 +35,9 @@ class BpodModules(object):
 
 			for mclass in BpodModules.LOADED_MODULES:
 				if mclass.check_module_type(module_name):
-					return mclass(connected, module_name, firmware_version, events_names, n_serial_events)
+					return mclass(connected, module_name, firmware_version, events_names, n_serial_events, serial_port)
 		
-		return BpodModule(connected, module_name, firmware_version, events_names, n_serial_events)
+		return BpodModule(connected, module_name, firmware_version, events_names, n_serial_events, serial_port)
 
 
 	def activate_module_relay(self, module):

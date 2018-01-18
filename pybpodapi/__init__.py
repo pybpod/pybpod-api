@@ -1,13 +1,13 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.5.3"
-__author__ = ['Ricardo Ribeiro', 'Carlos Mão de Ferro', 'Joshua Sanders']
-__credits__ = ["Ricardo Ribeiro", "Carlos Mao de Ferro"]
-__license__ = "Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>"
-__maintainer__ = ['Ricardo Ribeiro', 'Carlos Mão de Ferro','Joshua Sanders']
-__email__ = ['ricardojvr@gmail.com', 'cajomferro@gmail.com', 'joshua21@gmail.com']
-__status__ = "Development"
+__version__ 	= "1.5.4"
+__author__ 		= ['Ricardo Ribeiro', 'Carlos Mão de Ferro', 'Joshua Sanders']
+__credits__ 	= ["Ricardo Ribeiro", "Carlos Mao de Ferro"]
+__license__ 	= "Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>"
+__maintainer__ 	= ['Ricardo Ribeiro', 'Carlos Mão de Ferro','Joshua Sanders']
+__email__ 		= ['ricardojvr@gmail.com', 'cajomferro@gmail.com', 'joshua21@gmail.com']
+__status__ 		= "Development"
 
 
 from pysettings import conf
