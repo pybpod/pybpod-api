@@ -10,10 +10,7 @@ Example adapted from Josh Sanders' original version on Sanworks Bpod repository
 """
 import random
 
-from pybpodapi.bpod import Bpod
-from pybpodapi.state_machine import StateMachine
-from pybpodapi.bpod.hardware.events import EventName
-from pybpodapi.bpod.hardware.output_channels import OutputChannel
+from pybpodapi.protocol import Bpod, StateMachine
 
 import timeit, random, numpy as np, time
 from toolsR import SoundR, VideoRP
@@ -74,23 +71,23 @@ for i in range(nTrials):  # Main loop
     sma.add_state(
         state_name='WaitForPort2Poke',
         state_timer=1,
-        state_change_conditions={EventName.Tup: 'PlaySound'},
-        output_actions=[(OutputChannel.PWM1, 255)])
+        state_change_conditions={Bpod.Events.Tup: 'PlaySound'},
+        output_actions=[(Bpod.OutputChannels.PWM1, 255)])
     sma.add_state(
         state_name='PlaySound',
         state_timer=0.5,
-        state_change_conditions={EventName.Tup: 'StopSound'},
-        output_actions=[(OutputChannel.SoftCode, 55), (OutputChannel.Wire1, 5)])
+        state_change_conditions={Bpod.Events.Tup: 'StopSound'},
+        output_actions=[(Bpod.OutputChannels.SoftCode, 55), (Bpod.OutputChannels.Wire1, 5)])
     sma.add_state(
         state_name='StopSound',
         state_timer=1,
-        state_change_conditions={EventName.Tup: 'Exit'},
-        output_actions=[(OutputChannel.SoftCode, 66)])
+        state_change_conditions={Bpod.Events.Tup: 'Exit'},
+        output_actions=[(Bpod.OutputChannels.SoftCode, 66)])
     sma.add_state(
         state_name='Exit',
         state_timer=1,
-        state_change_conditions={EventName.Tup: 'exit'},
-        output_actions=[(OutputChannel.PWM1, 255)])  # Stop the sound
+        state_change_conditions={Bpod.Events.Tup: 'exit'},
+        output_actions=[(Bpod.OutputChannels.PWM1, 255)])  # Stop the sound
 
     my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 

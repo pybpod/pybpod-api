@@ -6,7 +6,7 @@ Get hardware info from Bpod
 
 """
 
-from pybpodapi.bpod import Bpod
+from pybpodapi.protocol import Bpod
 from pysettings import conf
 
 

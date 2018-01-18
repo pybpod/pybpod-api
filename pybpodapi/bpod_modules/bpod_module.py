@@ -19,14 +19,21 @@ class BpodModule(object):
 		return "{0} (connected: {1})(firmware: {2})".format(self.name, self.connected, self.firmware_version)
 
 
-	def load_message(self, msg):
-		for i in range(255):
-			if not self.bpod_modules.bpod.msg_id_list[i]:
-				msg_id = i
-				break 
+	def load_message(self, msg, msg_id=None):
+		"""
+		Load a message through bpod to the module and associate an ID to it.
 
-		self.bpod_modules.bpod.load_serial_message(self.serial_port, msg_id+1, msg)
-		return msg_id+1
+		:param list(int) msg: Message to send
+		:param int msg_id: Id of the message to use
+		"""
+		if msg_id is None:
+			for i in range(255):
+				if not self.bpod_modules.bpod.msg_id_list[i]:
+					msg_id = i+1
+					break 
+
+		self.bpod_modules.bpod.load_serial_message(self.serial_port, msg_id, msg)
+		return msg_id
 
 	def start_module_relay(self):
 		
