@@ -5,7 +5,7 @@ import logging, time, numpy as np
 
 from pybpodapi.com.arcom import ArCOM, ArduinoTypes
 
-
+from pybpodapi.bpod_modules.bpod_module import BpodModule
 from pybpodapi.com.protocol.send_msg_headers import SendMessageHeader
 from pybpodapi.com.protocol.recv_msg_headers import ReceiveMessageHeader
 
@@ -38,6 +38,8 @@ class BpodCOMProtocol(BpodBase):
 
 		self._arcom 		= None  # type: ArCOM
 		self.bpod_com_ready = False
+
+		self.msg_id_list = [False for i in range(255)]#used to keep the list of msg ids sent using the load_serial_message function
 
 
 
@@ -348,6 +350,12 @@ class BpodCOMProtocol(BpodBase):
 		:param TODO
 		:rtype: bool
 		"""
+		self.__bpodcom_check_com_ready()
+
+		if isinstance(serial_channel, BpodModule):
+			serial_channel = serial_channel.serial_port
+
+		self.msg_id_list[message_id] = True
 
 		if len(serial_message) > 3:
 			raise BpodErrorException('Error: Serial messages cannot be more than 3 bytes in length.')
