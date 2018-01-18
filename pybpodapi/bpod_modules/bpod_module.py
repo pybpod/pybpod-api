@@ -3,8 +3,9 @@ from pybpodapi.com.arcom import ArduinoTypes
 
 class BpodModule(object):
 
-	def __init__(self, connected=False, module_name='', firmware_version=0, events_names=[], n_serial_events=0):
+	def __init__(self, connected=False, module_name='', firmware_version=0, events_names=[], n_serial_events=0, serial_port=None):
 		self.name 				= module_name
+		self.serial_port 		= serial_port
 		self.connected 			= connected
 		self.firmware_version 	= firmware_version
 		self.event_names 		= events_names		
@@ -18,7 +19,14 @@ class BpodModule(object):
 		return "{0} (connected: {1})(firmware: {2})".format(self.name, self.connected, self.firmware_version)
 
 
-		
+	def load_message(self, msg):
+		for i in range(255):
+			if not self.bpod_modules.bpod.msg_id_list[i]:
+				msg_id = i
+				break 
+
+		self.bpod_modules.bpod.load_serial_message(self.serial_port, msg_id+1, msg)
+		return msg_id+1
 
 	def start_module_relay(self):
 		

@@ -11,7 +11,7 @@ from pysettings import conf as settings
 from pybpodapi.bpod.hardware.hardware import Hardware
 from pybpodapi.bpod.hardware.channels import ChannelType
 from pybpodapi.bpod.hardware.channels import ChannelName
-
+from pybpodapi.bpod.hardware.events   import EventName
 
 from pybpodapi.com.messaging.end_trial 			import EndTrial
 from pybpodapi.com.messaging.trial 				import Trial
@@ -38,6 +38,9 @@ class BpodBase(object):
 	:ivar MessageAPI message_api: Abstracts communication with Bpod box
 	:ivar bool new_sma_sent: whether a new state machine was already uploaded to Bpod box
 	"""
+
+	class Events(EventName): pass
+	
 
 	CHECK_STATE_MACHINE_COUNTER = 0
 

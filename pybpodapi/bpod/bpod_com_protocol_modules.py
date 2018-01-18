@@ -86,7 +86,7 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 								events_names.append(event_name)
 
 
-				bpod_modules += BpodModules.create_module(connected, module_name, firmware_version, events_names, n_serial_events)
+				bpod_modules += BpodModules.create_module(connected, module_name, firmware_version, events_names, n_serial_events, serial_port=i+1)
 				
 
 		if (modules_requested_events.sum()+n_serial_events)>hardware.max_serial_events:
