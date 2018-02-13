@@ -5,7 +5,7 @@ import logging
 import math
 import time
 
-from pysettings import conf as settings
+from pyforms import conf as settings
 
 
 from pybpodapi.bpod.hardware.hardware import Hardware

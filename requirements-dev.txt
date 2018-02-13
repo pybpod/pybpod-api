@@ -4,6 +4,6 @@ numpy
 python-dateutil
 
 # swp dependencies
-git+https://github.com/UmSenhorQualquer/pysettings.git
+git+https://github.com/UmSenhorQualquer/pyforms.git
 git+https://UmSenhorQualquer@bitbucket.org/fchampalimaud/logging-bootstrap.git
 git+https://UmSenhorQualquer@bitbucket.org/fchampalimaud/pybpod-rotary-encoder-module.git

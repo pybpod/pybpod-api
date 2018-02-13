@@ -13,7 +13,7 @@ from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 
 from pybpodapi.bpod.bpod_base import BpodBase
-from pysettings import conf as settings
+from pyforms import conf as settings
 
 logger = logging.getLogger(__name__)
 

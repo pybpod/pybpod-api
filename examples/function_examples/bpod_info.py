@@ -7,7 +7,7 @@ Get hardware info from Bpod
 """
 
 from pybpodapi.protocol import Bpod
-from pysettings import conf
+from pyforms import conf
 
 
 my_bpod = Bpod()

@@ -3,7 +3,7 @@
 
 import logging, os
 
-from pysettings import conf as settings
+from pyforms import conf as settings
 from pybpodapi.bpod.bpod_com_protocol_modules import BpodCOMProtocolModules
 from pybpodapi.com.messaging.trial 		import Trial
 from pybpodapi.com.messaging.session_info 	import SessionInfo

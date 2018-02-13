@@ -1,5 +1,5 @@
 import time, importlib
-from pysettings import conf
+from pyforms import conf
 
 class BpodModules(object):
 	
