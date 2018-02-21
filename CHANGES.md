@@ -33,7 +33,7 @@ Enhances trial building
 Adds new example for testing states that occur several times
 
 ## v1.0.0
-Use pyforms to manage this library settings
+Use pysettings to manage this library settings
 Simplifies bpod protocol by processing trial events when running state machine
 Allows timeout to be defined for serial connections
 Changes some logger calls
