@@ -3,7 +3,7 @@
 
 import logging, uuid
 from pyforms import conf
-from datetime import datetime
+from datetime import datetime as datetime_now
 
 import pybpodapi
 #from pybpodapi.state_machine import StateMachine
@@ -40,7 +40,7 @@ class Session(object):
         self.trials             = []                # type: list[Trial]
         self.firmware_version   = None              # type: int
         self.bpod_version       = None              # type: int
-        self.start_timestamp    = datetime.now()    # type: datetime
+        self.start_timestamp    = datetime_now.now()    # type: datetime
 
         self.log_function = conf.PYBPOD_API_PUBLISH_DATA_FUNC
 
@@ -59,7 +59,7 @@ class Session(object):
 
     def __del__(self):
         if self.csvwriter:
-            self.csvwriter.writerow( SessionInfo( self.INFO_SESSION_ENDED, datetime.now() ).tolist() )
+            self.csvwriter.writerow( SessionInfo( self.INFO_SESSION_ENDED, datetime_now.now() ).tolist() )
             self.csvfile.close()
 
 
