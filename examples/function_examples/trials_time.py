@@ -6,10 +6,7 @@ Testing timer intervals between consecutive trials
 
 @authors: Rachid Azizi, Carlos Mão de Ferro, Ricardo Ribeiro
 """
-from pybpodapi.bpod import Bpod
-from pybpodapi.state_machine import StateMachine
-from pybpodapi.bpod.hardware.events import EventName
-from pybpodapi.bpod.hardware.output_channels import OutputChannel
+from pybpodapi.protocol import Bpod, StateMachine
 from functools import reduce
 
 import time
@@ -33,28 +30,28 @@ for i in range(nTrials):
 	sma.add_state(
 		state_name='State1',
 		state_timer=TS,
-		state_change_conditions={EventName.Tup: 'State2'},
-		output_actions=[(OutputChannel.PWM2, 255)])
+		state_change_conditions={Bpod.Events.Tup: 'State2'},
+		output_actions=[(Bpod.OutputChannels.PWM2, 255)])
 	sma.add_state(
 		state_name='State2',
 		state_timer=TS,
-		state_change_conditions={EventName.Tup: 'State3'},
-		output_actions=[(OutputChannel.PWM2, 255)])
+		state_change_conditions={Bpod.Events.Tup: 'State3'},
+		output_actions=[(Bpod.OutputChannels.PWM2, 255)])
 	sma.add_state(
 		state_name='State3',
 		state_timer=TS,
-		state_change_conditions={EventName.Tup: 'State4'},
-		output_actions=[(OutputChannel.Valve, 1)])
+		state_change_conditions={Bpod.Events.Tup: 'State4'},
+		output_actions=[(Bpod.OutputChannels.Valve, 1)])
 	sma.add_state(
 		state_name='State4',
 		state_timer=TS,
-		state_change_conditions={EventName.Tup: 'State5'},
-		output_actions=[(OutputChannel.PWM2, 255)])
+		state_change_conditions={Bpod.Events.Tup: 'State5'},
+		output_actions=[(Bpod.OutputChannels.PWM2, 255)])
 	sma.add_state(
 		state_name='State5',
 		state_timer=TS,
-		state_change_conditions={EventName.Tup: 'exit'},
-		output_actions=[(OutputChannel.Valve, 1)])
+		state_change_conditions={Bpod.Events.Tup: 'exit'},
+		output_actions=[(Bpod.OutputChannels.Valve, 1)])
 
 	my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
 

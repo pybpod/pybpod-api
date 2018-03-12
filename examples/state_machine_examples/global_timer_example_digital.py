@@ -4,10 +4,7 @@
 """
 Example adapted from Josh Sanders' original version on Sanworks Bpod repository
 """
-from pybpodapi.bpod import Bpod
-from pybpodapi.state_machine import StateMachine
-from pybpodapi.bpod.hardware.events import EventName
-from pybpodapi.bpod.hardware.output_channels import OutputChannel
+from pybpodapi.protocol import Bpod, StateMachine
 
 """
 Run this protocol now
@@ -23,20 +20,20 @@ sma.set_global_timer(timer_id=1, timer_duration=3, on_set_delay=1.5, channel='BN
 sma.add_state(
 	state_name='TimerTrig',  # Trigger global timer
 	state_timer=0,
-	state_change_conditions={EventName.Tup: 'Port1Lit'},
-	output_actions=[(OutputChannel.GlobalTimerTrig, 1)])
+	state_change_conditions={Bpod.Events.Tup: 'Port1Lit'},
+	output_actions=[(Bpod.OutputChannels.GlobalTimerTrig, 1)])
 
 sma.add_state(
 	state_name='Port1Lit',  # Infinite loop (with next state). Only a global timer can save us.
 	state_timer=.25,
-	state_change_conditions={EventName.Tup: 'Port3Lit', 'GlobalTimer1_End': 'exit'},
-	output_actions=[(OutputChannel.PWM1, 255)])
+	state_change_conditions={Bpod.Events.Tup: 'Port3Lit', 'GlobalTimer1_End': 'exit'},
+	output_actions=[(Bpod.OutputChannels.PWM1, 255)])
 
 sma.add_state(
 	state_name='Port3Lit',
 	state_timer=.25,
-	state_change_conditions={EventName.Tup: 'Port1Lit', 'GlobalTimer1_End': 'exit'},
-	output_actions=[(OutputChannel.PWM3, 255)])
+	state_change_conditions={Bpod.Events.Tup: 'Port1Lit', 'GlobalTimer1_End': 'exit'},
+	output_actions=[(Bpod.OutputChannels.PWM3, 255)])
 
 my_bpod.send_state_machine(sma)
 

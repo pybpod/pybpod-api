@@ -4,9 +4,7 @@
 """
 Example adapted from Josh Sanders' original version on Sanworks Bpod repository
 """
-from pybpodapi.bpod import Bpod
-from pybpodapi.state_machine import StateMachine
-from pybpodapi.bpod.hardware.events import EventName
+from pybpodapi.protocol import Bpod, StateMachine
 
 
 """
@@ -20,7 +18,7 @@ sma = StateMachine(my_bpod)
 sma.add_state(
 	state_name='myState',
 	state_timer=1,
-	state_change_conditions={EventName.Tup: 'exit'},
+	state_change_conditions={Bpod.Events.Tup: 'exit'},
 	output_actions=[])
 
 my_bpod.send_state_machine(sma)

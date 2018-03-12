@@ -13,7 +13,7 @@ from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 
 from pybpodapi.bpod.bpod_base import BpodBase
-from pysettings import conf as settings
+from pyforms import conf as settings
 
 logger = logging.getLogger(__name__)
 
@@ -360,8 +360,8 @@ class BpodCOMProtocol(BpodBase):
 		if len(serial_message) > 3:
 			raise BpodErrorException('Error: Serial messages cannot be more than 3 bytes in length.')
 
-		if message_id > 255 or message_id < 1:
-			raise BpodErrorException('Error: Bpod can only store 255 serial messages (indexed 1-255).')
+		if not (1 <= message_id <= 255):
+			raise BpodErrorException('Error: Bpod can only store 255 serial messages (indexed 1-255). You used the message_id {0}'.format(message_id))
 
 
 		message_container = [serial_channel-1, n_messages, message_id, len(serial_message)] + serial_message

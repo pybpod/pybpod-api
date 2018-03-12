@@ -23,10 +23,7 @@ First, you will need to import Bpod modules.
 	:linenos:
 	:lineno-start: 1
 
-	from pybpodapi.bpod import Bpod # Bpod main module
-	from pybpodapi.state_machine import StateMachine # State machine module
-	from pybpodapi.bpod.hardware.events import EventName # Input events labels
-	from pybpodapi.bpod.hardware.output_channels import OutputChannel # Output action labels
+	from pybpodapi.protocol import Bpod, StateMachine
 
 
 2. Initialize Bpod 
@@ -68,12 +65,12 @@ Fun several trials in each Bpod execution. In this example, we will use 5 trials
 		print('Trial: ', i+1)
 		thisTrialType = random.choice(trialTypes)  # Randomly choose trial type =
 		if thisTrialType == 1:
-			stimulus = OutputChannel.PWM1  # set stimulus channel for trial type 1
+			stimulus = Bpod.OutputChannels.PWM1  # set stimulus channel for trial type 1
 			leftAction = 'Reward'
 			rightAction = 'Punish'
 			rewardValve = 1
 		elif thisTrialType == 2:
-			stimulus = OutputChannel.PWM3  # set stimulus channel for trial type 1
+			stimulus = Bpod.OutputChannels.PWM3  # set stimulus channel for trial type 1
 			leftAction = 'Punish'
 			rightAction = 'Reward'
 			rewardValve = 3
@@ -95,28 +92,28 @@ Please see :ref:`State Machine API <api_state_machine-label>` for detailed infor
 		sma.add_state(
 			state_name='WaitForPort2Poke',
 			state_timer=1,
-			state_change_conditions={EventName.Port2In: 'FlashStimulus'},
-			output_actions=[(OutputChannel.PWM2, 255)])
+			state_change_conditions={Bpod.Events.Port2In: 'FlashStimulus'},
+			output_actions=[(Bpod.OutputChannels.PWM2, 255)])
 		sma.add_state(
 			state_name='FlashStimulus',
 			state_timer=0.1,
-			state_change_conditions={EventName.Tup: 'WaitForResponse'},
+			state_change_conditions={Bpod.Events.Tup: 'WaitForResponse'},
 			output_actions=[(stimulus, 255)])
 		sma.add_state(
 			state_name='WaitForResponse',
 			state_timer=1,
-			state_change_conditions={EventName.Port1In: leftAction, EventName.Port3In: rightAction},
+			state_change_conditions={Bpod.Events.Port1In: leftAction, Bpod.Events.Port3In: rightAction},
 			output_actions=[])
 		sma.add_state(
 			state_name='Reward',
 			state_timer=0.1,
-			state_change_conditions={EventName.Tup: 'exit'},
-			output_actions=[(OutputChannel.Valve, rewardValve)])  # Reward correct choice
+			state_change_conditions={Bpod.Events.Tup: 'exit'},
+			output_actions=[(Bpod.OutputChannels.Valve, rewardValve)])  # Reward correct choice
 		sma.add_state(
 			state_name='Punish',
 			state_timer=3,
-			state_change_conditions={EventName.Tup: 'exit'},
-			output_actions=[(OutputChannel.LED, 1), (OutputChannel.LED, 2), (OutputChannel.LED, 3)])  # Signal incorrect choice
+			state_change_conditions={Bpod.Events.Tup: 'exit'},
+			output_actions=[(Bpod.OutputChannels.LED, 1), (Bpod.OutputChannels.LED, 2), (Bpod.OutputChannels.LED, 3)])  # Signal incorrect choice
 
 
 After configuring the state machine, we send it to the Bpod device by calling the method *send_state_machine*. We are then ready to run the next trial, by calling the *run_state_machine* method.

@@ -1,9 +1,9 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import logging, csv, uuid
-from pysettings import conf
-from datetime import datetime
+import logging, uuid
+from pyforms import conf
+from datetime import datetime as datetime_now
 
 import pybpodapi
 #from pybpodapi.state_machine import StateMachine
@@ -12,6 +12,9 @@ from pybpodapi.com.messaging.event_occurrence       import EventOccurrence
 from pybpodapi.com.messaging.state_occurrence       import StateOccurrence
 from pybpodapi.com.messaging.softcode_occurrence    import SoftcodeOccurrence
 from pybpodapi.com.messaging.session_info           import SessionInfo
+
+from sca.formats import csv
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,30 +40,31 @@ class Session(object):
         self.trials             = []                # type: list[Trial]
         self.firmware_version   = None              # type: int
         self.bpod_version       = None              # type: int
-        self.start_timestamp    = datetime.now()    # type: datetime
+        self.start_timestamp    = datetime_now.now()    # type: datetime
 
         self.log_function = conf.PYBPOD_API_PUBLISH_DATA_FUNC
 
+        self.csvwriter  = None
+        self._path = path
+
         if path:
-            with open(path, 'w') as csvfile:
-                csvwriter = csv.writer(path)
-                json.dump(data2save, jsonfile)
-            self.csv = CSVWriter(
-                path,
+            self.csvfile   = open(path, 'w')
+            self.csvwriter = csv.writer(
+                self.csvfile,
                 columns_headers=['TYPE', 'PC-TIME', 'BPOD-INITIAL-TIME', 'BPOD-FINAL-TIME', 'MSG', '+INFO'],
                 software='PyBpod API v'+str(pybpodapi.__version__),
                 def_url='http://pybpod-api.readthedocs.org',
                 def_text='This file contains data recorded during a session from the PyBpod system'
             )
-            self.csvwriter.open()
-        else:
-            self.csvwriter  = None
-
 
     def __del__(self):
-        if self.csvwriter: 
-            self.csvwriter.writerow( SessionInfo( self.INFO_SESSION_ENDED, datetime.now() ).tolist() )
-            self.csvwriter.close()
+        if self.csvwriter:
+            self.csvwriter.writerow( SessionInfo( self.INFO_SESSION_ENDED, datetime_now.now() ).tolist() )
+            self.csvfile.close()
+
+
+            
+
         
 
 

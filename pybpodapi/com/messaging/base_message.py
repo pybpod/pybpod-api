@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import dateutil
-from datetime import datetime
+from datetime import datetime as datetime_now
 
 
 class BaseMessage(object):
@@ -14,7 +14,7 @@ class BaseMessage(object):
 	MESSAGE_COLOR = (200,200,200)
 
 	def __init__(self, content, host_timestamp=None):
-		self.pc_timestamp 	= datetime.now()
+		self.pc_timestamp 	= datetime_now.now()
 		self.host_timestamp = host_timestamp
 		self.content 		= content
 
