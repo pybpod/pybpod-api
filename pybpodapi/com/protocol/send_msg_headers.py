@@ -19,6 +19,15 @@ class SendMessageHeader(object):
 	#: Request firmware build number
 	FIRMWARE_VERSION = 'F'
 
+	#: Reset session clock		
+	RESET_CLOCK = '*'
+
+	#: Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+	PAUSE_TRIAL = '$'
+
+	#: Return timestamp transmission scheme
+	GET_TIMESTAMP_TRANSMISSION = 'G'
+
 	#: Request hardware configuration
 	HARDWARE_DESCRIPTION = 'H'
 
@@ -57,3 +66,12 @@ class SendMessageHeader(object):
 
 	#: Write to the module
 	WRITE_TO_MODULE = 'T'
+
+	#: Echo soft code
+	ECHO_SOFTCODE = 'S'
+
+	#: Manual override: execute virtual event
+	MANUAL_OVERRIDE_EXEC_EVENT = 'V'
+
+	#: Trigger soft code
+	TRIGGER_SOFTCODE = '~'

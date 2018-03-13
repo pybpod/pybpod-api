@@ -73,11 +73,12 @@ class BpodCOMProtocol(BpodBase):
 
 		self._arcom.write_char(SendMessageHeader.DISCONNECT)
 
-
-
 	def __bpodcom_check_com_ready(self):
 		if not self.bpod_com_ready: self.start()
 
+	#############################################################
+	## PROTOCOL #################################################
+	#############################################################
 
 	def _bpodcom_handshake(self):
 		"""
@@ -96,11 +97,6 @@ class BpodCOMProtocol(BpodBase):
 		logger.debug("Response command is: %s", response)
 
 		return True if response == ReceiveMessageHeader.HANDSHAKE_OK else False
-
-
-	
-
-
 
 
 	def _bpodcom_firmware_version(self):
@@ -123,6 +119,34 @@ class BpodCOMProtocol(BpodBase):
 
 		return fw_version, machine_type
 
+
+
+	def _bpodcom_reset_clock(self):
+		"""
+		Reset session clock
+		"""
+		logger.debug("Resetting clock")
+
+		self._arcom.write_char(SendMessageHeader.RESET_CLOCK)
+		return self._arcom.read_byte()==byte(1)
+
+	def _bpodcom_pause_trial(self):
+		"""
+		Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+		"""
+		logger.debug("Pausing trial")
+		
+		self._arcom.write_char(SendMessageHeader.RESET_CLOCK)
+		return self._arcom.read_byte()==byte(1)
+
+	def _bpodcom_get_timestamp_transmission(self):
+		"""
+		Return timestamp transmission scheme
+		"""
+		logger.debug("Get timestamp transmission")
+		
+		self._arcom.write_char(SendMessageHeader.GET_TIMESTAMP_TRANSMISSION)
+		return self._arcom.read_byte()
 
 
 	def _bpodcom_hardware_description(self, hardware):
@@ -232,6 +256,36 @@ class BpodCOMProtocol(BpodBase):
 		logger.debug("Response: %s", response)
 
 		return True if response == ReceiveMessageHeader.SYNC_CHANNEL_MODE_OK else False
+
+
+	def _bpodcom_echo_softcode(self, softcode):
+		"""
+		Send soft code
+		"""
+		logger.debug("Echo softcode")
+		self._arcom.write_char(SendMessageHeader.ECHO_SOFTCODE)
+		self._arcom.write_char(softcode)
+		flag = self._arcom.read_char()
+		retcode = self._arcom.read_char()
+		return byte(2)==flag && retcode==softcode
+
+	def _bpodcom_manual_override_exec_event(self, state_index, event):
+		"""
+		Send soft code
+		"""
+		logger.debug("Manual override execute virtual event")
+		self._arcom.write_char(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT)
+		self._arcom.write_char(state_index)
+		self._arcom.write_char(event)
+
+	def _bpodcom_send_softcode(self, softcode):
+		"""
+		Send soft code
+		"""
+		logger.debug("Send softcode")
+		self._arcom.write_char(SendMessageHeader.TRIGGER_SOFTCODE)
+		self._arcom.write_char(softcode)
+		
 
 	def _bpodcom_send_state_machine(self, message, message32):
 		"""

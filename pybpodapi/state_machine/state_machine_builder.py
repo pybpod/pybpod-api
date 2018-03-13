@@ -74,6 +74,8 @@ class StateMachineBuilder(StateMachineBase):
 			raise StateMachineBuilderError(
 				'Error: some states were referenced by name, but not subsequently declared.')
 
+
+
 	def build_message(self):
 		"""
 		Builds state machine to send to Bpod box

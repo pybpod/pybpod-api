@@ -291,6 +291,17 @@ class BpodBase(object):
         """
         pass
 
+   
+    def echo_softcode(self, softcode):
+        return self._bpodcom_echo_softcode(softcode)
+
+    def trigger_event(self, state_index, event):
+        return self._bpodcom_manual_override_exec_event(state_index, event)
+
+     def trigger_softcode(self, softcode):
+        return self._bpodcom_send_softcode(softcode)
+
+
     #########################################
     ############ PRIVATE METHODS ############
     #########################################
