@@ -298,7 +298,7 @@ class BpodBase(object):
     def trigger_event(self, state_index, event):
         return self._bpodcom_manual_override_exec_event(state_index, event)
 
-     def trigger_softcode(self, softcode):
+    def trigger_softcode(self, softcode):
         return self._bpodcom_send_softcode(softcode)
 
 

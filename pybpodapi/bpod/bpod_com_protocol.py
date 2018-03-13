@@ -267,7 +267,7 @@ class BpodCOMProtocol(BpodBase):
 		self._arcom.write_char(softcode)
 		flag = self._arcom.read_char()
 		retcode = self._arcom.read_char()
-		return byte(2)==flag && retcode==softcode
+		return byte(2)==flag and retcode==softcode
 
 	def _bpodcom_manual_override_exec_event(self, state_index, event):
 		"""
