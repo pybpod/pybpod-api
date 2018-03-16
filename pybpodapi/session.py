@@ -106,6 +106,7 @@ class Session(object):
                 uniqueStateIndexes[i] = nUniqueStates
                 nUniqueStates += 1
                 uniqueStates.append(current_trial.states[i])
+                print('state', current_trial.states[i])
                 visitedStates[current_trial.states[i]] = 1
 
         # Create a 2-d matrix for each state in a list

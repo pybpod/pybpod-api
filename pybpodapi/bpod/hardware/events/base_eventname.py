@@ -29,13 +29,31 @@ class BaseEventName(object):
 		return True if event_name.startswith('Condition') else False
 
 	@staticmethod
-	def is_global_counter(event_name):
+	def is_global_counter_end(event_name):
 		"""
 		
 		:param str event_name: 
 		:rtype: bool 
 		"""
-		return True if event_name.startswith('GlobalCounter') else False
+		return True if event_name.startswith('GlobalCounter') and event_name.endswith('End') else False
+
+	@staticmethod
+	def is_global_timer_trigger(event_name):
+		"""
+		:param str event_name: 
+		:rtype: bool 
+		"""
+		return event_name=='GlobalTimerTrig'
+
+	@staticmethod
+	def is_global_timer_cancel(event_name):
+		"""
+		
+		:param str event_name: 
+		:rtype: bool 
+		"""
+		return event_name=='GlobalTimerCancel'
+
 
 	@staticmethod
 	def is_global_timer_start(event_name):
