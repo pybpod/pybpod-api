@@ -177,7 +177,7 @@ class StateMachineBase(object):
         for action_name, action_value in output_actions:
             
             if action_name == OutputChannel.Valve:
-                output_code  = self.hardware.channels.output_channel_names.index(OutputChannel.ValveState)
+                output_code  = self.hardware.channels.output_channel_names.index( OutputChannel.Valve+str(action_value) )
                 output_value = math.pow(2, action_value - 1)
             
             elif action_name == OutputChannel.LED:
