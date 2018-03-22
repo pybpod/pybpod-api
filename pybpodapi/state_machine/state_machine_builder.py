@@ -333,8 +333,6 @@ class StateMachineBuilder(StateMachineBase):
                                  [self.global_counters.thresholds[i]                                    for i in used_counters      ]
                                 
 
-        print(thirty_two_bit_message)
-    
         return ArduinoTypes.get_uint32_array(thirty_two_bit_message)
 
 

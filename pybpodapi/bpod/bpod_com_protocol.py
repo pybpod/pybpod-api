@@ -301,7 +301,6 @@ class BpodCOMProtocol(BpodBase):
         :param list(int) ThirtyTwoBitMessage: TODO
         """
         self.__bpodcom_check_com_ready()
-        print([b for b in message])
         
         self._arcom.write_array(message)
 

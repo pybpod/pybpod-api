@@ -243,7 +243,6 @@ class BpodBase(object):
         while sma.is_running:
             if self.data_available():
                 opcode, data = self._bpodcom_read_opcode_message()
-                print('op', opcode, data)
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
 
         if sock is not None:
@@ -255,7 +254,6 @@ class BpodBase(object):
                     if msg[0]=='~':
                         self.trigger_softcode(msg[1])
                     elif msg[0]=='S':
-                        print('send', msg[1])
                         self.echo_softcode(msg[1])
 
             except socket.error as e:
@@ -386,7 +384,7 @@ class BpodBase(object):
                     sma.is_running = False
                 else:
                     self._session += EventOccurrence(event_id, sma.hardware.channels.get_event_name(event_id), event_timestamp )
-
+                    
                     # input matrix
                     if not transition_event_found:
                         logger.debug("transition event not found")
