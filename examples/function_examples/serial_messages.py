@@ -28,4 +28,4 @@ my_bpod.reset_serial_messages()
 my_bpod.manual_override(Bpod.ChannelTypes.OUTPUT, Bpod.ChannelNames.SERIAL, channel_number=1, value=65)
 
 # Stop Bpod
-my_bpod.stop()  # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.
+my_bpod.close()  # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.

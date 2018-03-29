@@ -7,6 +7,7 @@ import time
 import socket
 import fcntl
 import os
+import sys
 
 from pyforms import conf as settings
 
@@ -29,6 +30,8 @@ from pybpodapi.com.messaging.session_info        import SessionInfo
 from pybpodapi.com.messaging.warning              import WarningMessage
 
 from pybpodapi.session import Session
+
+from .non_blockingstreamreader import NonBlockingStreamReader
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +80,7 @@ class BpodBase(object):
     ############ PUBLIC METHODS #############
     #########################################
 
-    def start(self):
+    def open(self):
         """
         Starts Bpod.
 
@@ -88,7 +91,7 @@ class BpodBase(object):
         
         .. code-block:: python
         
-            my_bpod = Bpod().start("/dev/tty.usbmodem1293", "/Users/John/Desktop/bpod_workspace", "2afc_protocol")
+            my_bpod = Bpod().open("/dev/tty.usbmodem1293", "/Users/John/Desktop/bpod_workspace", "2afc_protocol")
 
         :param str serial_port: serial port to connect
         :param str workspace_path: path for bpod output files (no folders will be created)
@@ -142,13 +145,20 @@ class BpodBase(object):
         return self
 
 
-    def stop(self):
+    def close(self):
         """
         Close connection with Bpod
         """
         self._bpodcom_disconnect()
 
+    def stop_trial(self):
+        self._bpodcom_stop_trial()
 
+    def pause(self):
+        self._bpodcom_pause_trial()
+
+    def resume(self):
+        self._bpodcom_resume_trial()
 
     def refresh_modules(self):
         #check if any module is connected
@@ -165,6 +175,8 @@ class BpodBase(object):
 
         :param pybpodapi.model.state_machine sma: initialized state machine
         """
+        if not self.bpod_com_ready: raise Exception('Bpod connection is closed')
+        
 
         logger.info("Sending state machine")
 
@@ -180,6 +192,7 @@ class BpodBase(object):
         self._new_sma_sent = True
 
     def run_state_machine(self, sma):
+        if not self.bpod_com_ready: raise Exception('Bpod connection is closed')
         """
 
         Adds a new trial to current session and runs state machine on Bpod box.
@@ -224,9 +237,6 @@ class BpodBase(object):
         self.trial_start_timestamp = self._bpodcom_get_trial_timestamp_start()
 
 
-
-
-
         if self.net_port is not None:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.bind(('0.0.0.0', self.net_port))
@@ -235,16 +245,33 @@ class BpodBase(object):
         else:
             sock = None
 
-
-
-
-
+        # initialise the thread that will handle the stdin commands
+        stdin = NonBlockingStreamReader(sys.stdin) if settings.PYBPOD_API_ACCEPT_STDIN else None
+        
         sma.is_running = True
         while sma.is_running:
+
+            # read commands from the stdin ######################
+            if stdin is not None:
+                inline = stdin.readline()
+                if inline is not None:
+                    if inline.startswith('pause-trial'):
+                        self.pause()
+                    elif inline.startswith('resume-trial'):
+                        self.resume()
+                    elif inline.startswith('stop-trial'):
+                        self.stop_trial()
+                    elif inline.startswith('close'):
+                        self.stop_trial()
+                        self.close()
+                        sma.is_running = False
+                        break
+            #####################################################
+
             if self.data_available():
                 opcode, data = self._bpodcom_read_opcode_message()
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
-
+        
         if sock is not None:
             try:
                 msg = sock.recv(64)

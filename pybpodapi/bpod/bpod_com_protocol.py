@@ -41,14 +41,15 @@ class BpodCOMProtocol(BpodBase):
 
         self.msg_id_list = [False for i in range(255)]#used to keep the list of msg ids sent using the load_serial_message function
 
+        if self.serial_port: self.open()        
 
 
-    def start(self):
-        super(BpodCOMProtocol, self).start()
+    def open(self):
+        super(BpodCOMProtocol, self).open()
         self.bpod_com_ready = True
 
-    def stop(self):
-        super(BpodCOMProtocol, self).stop()
+    def close(self):
+        super(BpodCOMProtocol, self).close()
         self.bpod_com_ready = False
 
         
@@ -73,10 +74,14 @@ class BpodCOMProtocol(BpodBase):
 
         self._arcom.write_char(SendMessageHeader.DISCONNECT)
 
+        res = self._arcom.read_byte()==b'1'
+
+        logger.debug("Disconnect result (%s)", str(res) )
+        return res
 
 
-    def __bpodcom_check_com_ready(self):
-        if not self.bpod_com_ready: self.start()
+    #def __bpodcom_check_com_ready(self):
+    #    if not self.bpod_com_ready: self.open()
 
 
     def _bpodcom_handshake(self):
@@ -134,14 +139,29 @@ class BpodCOMProtocol(BpodBase):
         self._arcom.write_char(SendMessageHeader.RESET_CLOCK) 
         return self._arcom.read_byte()==byte(1) 
 
+    def _bpodcom_stop_trial(self): 
+        """ 
+        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
+        """ 
+        logger.debug("Pausing trial")  
+        self._arcom.write_char(SendMessageHeader.EXIT_AND_RETURN)
+        
+
     def _bpodcom_pause_trial(self): 
         """ 
         Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
         """ 
-        logger.debug("Pausing trial") 
-         
-        self._arcom.write_char(SendMessageHeader.RESET_CLOCK) 
-        return self._arcom.read_byte()==byte(1) 
+        logger.debug("Pausing trial")  
+        self._arcom.write_char(SendMessageHeader.PAUSE_TRIAL) 
+        self._arcom.write_char(chr(0))
+
+    def _bpodcom_resume_trial(self): 
+        """ 
+        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
+        """ 
+        logger.debug("Resume trial")  
+        self._arcom.write_char(SendMessageHeader.PAUSE_TRIAL) 
+        self._arcom.write_char(chr(1))
 
     def _bpodcom_get_timestamp_transmission(self): 
         """ 
@@ -300,7 +320,7 @@ class BpodCOMProtocol(BpodBase):
         :param list(int) message: TODO
         :param list(int) ThirtyTwoBitMessage: TODO
         """
-        self.__bpodcom_check_com_ready()
+        #self.__bpodcom_check_com_ready()
         
         self._arcom.write_array(message)
 
@@ -308,7 +328,7 @@ class BpodCOMProtocol(BpodBase):
         """
         Request to run state machine now
         """
-        self.__bpodcom_check_com_ready()
+        #self.__bpodcom_check_com_ready()
 
         logger.debug("Requesting state machine run (%s)", SendMessageHeader.RUN_STATE_MACHINE)
 
@@ -326,7 +346,7 @@ class BpodCOMProtocol(BpodBase):
 
         :rtype: bool
         """
-        self.__bpodcom_check_com_ready()
+        #self.__bpodcom_check_com_ready()
 
         response = self._arcom.read_uint8()  # type: int
 
@@ -427,7 +447,7 @@ class BpodCOMProtocol(BpodBase):
         :param TODO
         :rtype: bool
         """
-        self.__bpodcom_check_com_ready()
+        #self.__bpodcom_check_com_ready()
 
         if isinstance(serial_channel, BpodModule):
             serial_channel = serial_channel.serial_port
@@ -500,12 +520,12 @@ class BpodCOMProtocol(BpodBase):
 
     @property
     def hardware(self):
-        self.__bpodcom_check_com_ready()
+        #self.__bpodcom_check_com_ready()
         return BpodBase.hardware.fget(self)  # type: Hardware
 
     @property
     def modules(self):
-        self.__bpodcom_check_com_ready()
+        #self.__bpodcom_check_com_ready()
         return BpodBase.modules.fget(self)
 
     

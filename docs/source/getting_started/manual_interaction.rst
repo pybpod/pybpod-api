@@ -26,7 +26,7 @@ After :ref:`installing <installing-label>` pybpod-api, open a python terminal an
     my_bpod.manual_override(Bpod.ChannelTypes.OUTPUT, Bpod.ChannelNames.PWM, channel_number=1, value=128)
 
     # disconnect from bpod
-    my_bpod.stop()
+    my_bpod.close()
 
 
 .. seealso::

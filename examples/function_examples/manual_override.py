@@ -97,4 +97,4 @@ print("Send byte 66 on UART port 1")
 my_bpod.manual_override(Bpod.ChannelTypes.OUTPUT, Bpod.ChannelNames.SERIAL, channel_number=1, value=66)
 
 # Stop Bpod
-my_bpod.stop()  # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.
+my_bpod.close()  # Sends a termination byte and closes the serial port. PulsePal stores current params to its EEPROM.

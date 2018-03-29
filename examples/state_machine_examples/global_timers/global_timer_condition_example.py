@@ -65,4 +65,4 @@ bpod.run_state_machine(sma)
 
 print("Current trial info: {0}".format(bpod.session.current_trial))
 """
-bpod.stop()
+bpod.close()

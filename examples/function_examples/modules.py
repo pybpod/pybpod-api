@@ -13,5 +13,5 @@ bpod = Bpod()
 for m in bpod.modules:
 	print(m)
 
-bpod.stop()
+bpod.close()
 

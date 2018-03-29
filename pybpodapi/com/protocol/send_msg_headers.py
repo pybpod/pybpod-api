@@ -75,3 +75,6 @@ class SendMessageHeader(object):
 
     #: Trigger soft code 
     TRIGGER_SOFTCODE = '~' 
+
+    #: Exit state matrix and return data
+    EXIT_AND_RETURN = 'X'

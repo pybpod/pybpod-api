@@ -44,5 +44,5 @@ for i in range(2):  # Main loop
     my_bpod.send_state_machine(sma)  # Send state machine description to Bpod device
     my_bpod.run_state_machine(sma)  # Run state machine
 
-my_bpod.stop()
+my_bpod.close()
 
