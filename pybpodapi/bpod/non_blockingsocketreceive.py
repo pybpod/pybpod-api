@@ -1,23 +1,23 @@
 from threading import Thread
 from queue import Queue, Empty
 
-class NonBlockingStreamReader:
+class NonBlockingSocketReceive:
 
-    def __init__(self, stream):
+    def __init__(self, socket):
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
         '''
-        self._s = stream
+        self._s = socket
         self._q = Queue()
         self._active = True
 
-        def _populateQueue(stream, queue):
+        def _populateQueue(socket, queue):
             '''
             Collect lines from 'stream' and put them in 'quque'.
             '''
             while self._active:
-                line = stream.readline()
+                line = socket.recv(64)
                 if line:
                     queue.put(line)
                 else:

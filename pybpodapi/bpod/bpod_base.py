@@ -5,7 +5,6 @@ import logging
 import math
 import time
 import socket
-import fcntl
 import os
 import sys
 
@@ -32,6 +31,7 @@ from pybpodapi.com.messaging.warning              import WarningMessage
 from pybpodapi.session import Session
 
 from .non_blockingstreamreader import NonBlockingStreamReader
+from .non_blockingsocketreceive import NonBlockingSocketReceive
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,8 @@ class BpodBase(object):
         self._hardware.sync_mode    = self.sync_mode    # 0 = flip logic every trial, 1 = every state
         
         self.session += SessionInfo( self.session.INFO_SERIAL_PORT, self.serial_port )
+        if self.net_port:
+            self.session += SessionInfo( self.session.INFO_NET_PORT,    self.net_port )
         
 
     #########################################
@@ -237,17 +239,19 @@ class BpodBase(object):
         self.trial_start_timestamp = self._bpodcom_get_trial_timestamp_start()
 
 
+        # initialise the server to handle commands
         if self.net_port is not None:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.bind(('0.0.0.0', self.net_port))
-            #set non blocking
-            fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
+            socketin = NonBlockingSocketReceive(sock)
         else:
-            sock = None
+            socketin = None
+        #####################################################
 
         # initialise the thread that will handle the stdin commands
         stdin = NonBlockingStreamReader(sys.stdin) if settings.PYBPOD_API_ACCEPT_STDIN else None
-        
+        #####################################################
+
         sma.is_running = True
         while sma.is_running:
 
@@ -266,25 +270,42 @@ class BpodBase(object):
                         self.close()
                         sma.is_running = False
                         break
+                    elif inline.startswith('softcode'):
+                        self.trigger_softcode(inline[8:])
             #####################################################
+
+            # read commands from a net socket ###################
+            if socketin is not None:
+                inline = socketin.readline()
+                if inline is not None:
+                    inline = inline.decode()
+                    if inline.startswith('pause-trial'):
+                        self.pause()
+                    elif inline.startswith('resume-trial'):
+                        self.resume()
+                    elif inline.startswith('stop-trial'):
+                        self.stop_trial()
+                    elif inline.startswith('close'):
+                        self.stop_trial()
+                        self.close()
+                        sma.is_running = False
+                        break
+                    elif inline.startswith('softcode'):
+                        self.trigger_softcode(inline[8:])
+                    
+            #####################################################
+            
 
             if self.data_available():
                 opcode, data = self._bpodcom_read_opcode_message()
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
-        
-        if sock is not None:
-            try:
-                msg = sock.recv(64)
-                
-                if len(msg)>0:
-                    msg = msg.decode("utf-8")
-                    if msg[0]=='~':
-                        self.trigger_softcode(msg[1])
-                    elif msg[0]=='S':
-                        self.echo_softcode(msg[1])
 
-            except socket.error as e:
-                pass
+        if socketin is not None: 
+            socketin.close()
+            sock.close()
+
+        if stdin is not None: 
+            stdin.close()
 
         self.session += EndTrial('The trial ended')
 
