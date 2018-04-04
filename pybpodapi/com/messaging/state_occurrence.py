@@ -36,7 +36,8 @@ class StateOccurrence(BaseMessage):
 			str(self.pc_timestamp), 
 			self.start_timestamp,
 			self.end_timestamp,
-			self.content
+			self.content,
+			None
 		]
 
 	@classmethod

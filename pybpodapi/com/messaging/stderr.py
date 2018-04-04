@@ -33,7 +33,9 @@ class StderrMessage(BaseMessage):
 			self.MESSAGE_TYPE_ALIAS, 
 			str(self.pc_timestamp), 
 			self.host_timestamp,
-			self.content
+			self.content,
+			None,
+			None
 		]
 
 	@classmethod
