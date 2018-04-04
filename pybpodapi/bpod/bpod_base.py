@@ -9,7 +9,7 @@ import os
 import sys
 
 from pyforms import conf as settings
-
+from datetime import datetime as datetime_now
 from pybpodapi.bpod.hardware.hardware        import Hardware
 from pybpodapi.bpod.hardware.channels        import ChannelType
 from pybpodapi.bpod.hardware.channels        import ChannelName
@@ -77,7 +77,16 @@ class BpodBase(object):
         if self.net_port:
             self.session += SessionInfo( self.session.INFO_NET_PORT,    self.net_port )
         
+        self.session += SessionInfo(self.session.INFO_CREATOR_NAME, settings.PYBPOD_CREATOR)
+        self.session += SessionInfo(self.session.INFO_PROJECT_NAME, settings.PYBPOD_PROJECT)
+        self.session += SessionInfo(self.session.INFO_EXPERIMENT_NAME, settings.PYBPOD_EXPERIMENT)
+        self.session += SessionInfo(self.session.INFO_BOARD_NAME, settings.PYBPOD_BOARD)
+        self.session += SessionInfo(self.session.INFO_SETUP_NAME, settings.PYBPOD_SETUP)
+        self.session += SessionInfo(self.session.INFO_BPODGUI_VERSION, settings.PYBPOD_BPODGUI_VERSION)
 
+        for subject_name in settings.PYBPOD_SUBJECTS: 
+            self.session += SessionInfo(self.session.INFO_SUBJECT_NAME, subject_name)
+        
     #########################################
     ############ PUBLIC METHODS #############
     #########################################
@@ -151,6 +160,7 @@ class BpodBase(object):
         """
         Close connection with Bpod
         """
+        self.session += SessionInfo( self.session.INFO_SESSION_ENDED, datetime_now.now() )
         self._bpodcom_disconnect()
 
     def stop_trial(self):

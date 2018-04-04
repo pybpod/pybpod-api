@@ -61,6 +61,15 @@ class Session(object):
     INFO_NET_PORT           = 'NET-PORT'
     INFO_BPODAPI_VERSION    = 'BPOD-API-VERSION'
 
+    INFO_CREATOR_NAME       = 'CREATOR-NAME'
+    INFO_PROJECT_NAME       = 'PROJECT-NAME'
+    INFO_EXPERIMENT_NAME    = 'EXPERIMENT-NAME'
+    INFO_BOARD_NAME         = 'BOARD-NAME'
+    INFO_SETUP_NAME         = 'SETUP-NAME'
+    INFO_SUBJECT_NAME       = 'SUBJECT-NAME'
+    INFO_BPODGUI_VERSION    = 'BPOD-GUI-VERSION'
+    
+
     def __init__(self, path=None):
         self.ostdout = sys.stdout
         self.ostderr = sys.stderr
@@ -100,9 +109,6 @@ class Session(object):
        
     def __del__(self):
 
-        self.csvwriter.writerow( 
-            SessionInfo( self.INFO_SESSION_ENDED, datetime_now.now() ).tolist()
-        )
         self.csvstream.close()
         
         sys.stdout = self.ostdout
