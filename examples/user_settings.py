@@ -9,11 +9,9 @@ WORKSPACE_PATH 	= 'BPOD-WORKSPACE'
 
 PROTOCOL_NAME 	= datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-SERIAL_PORT 	= '/dev/tty.usbmodem3174431'
+SERIAL_PORT 	= '/dev/ttyACM0'
 #SERIAL_PORT 	= '/dev/tty.usbmodem3174431'
 
-
-PYBPOD_API_PUBLISH_DATA_FUNC = print
 
 
 BPOD_BNC_PORTS_ENABLED 		= [True, True]
