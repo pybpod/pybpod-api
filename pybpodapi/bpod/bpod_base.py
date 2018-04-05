@@ -153,6 +153,15 @@ class BpodBase(object):
 
         self.session_timestamps = []
 
+        # initialise the server to handle commands
+        if self.net_port is not None:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.sock.bind(('0.0.0.0', self.net_port))
+            self.socketin = NonBlockingSocketReceive(self.sock)
+        else:
+            self.sock = None
+            self.socketin = None
+
         return self
 
 
@@ -162,6 +171,10 @@ class BpodBase(object):
         """
         self.session += SessionInfo( self.session.INFO_SESSION_ENDED, datetime_now.now() )
         self._bpodcom_disconnect()
+
+        if self.socketin is not None: 
+            self.socketin.close()
+            self.sock.close()
 
     def stop_trial(self):
         self._bpodcom_stop_trial()
@@ -249,13 +262,7 @@ class BpodBase(object):
         self.trial_start_timestamp = self._bpodcom_get_trial_timestamp_start()
 
 
-        # initialise the server to handle commands
-        if self.net_port is not None:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.bind(('0.0.0.0', self.net_port))
-            socketin = NonBlockingSocketReceive(sock)
-        else:
-            socketin = None
+        
         #####################################################
 
         # initialise the thread that will handle the stdin commands
@@ -285,8 +292,8 @@ class BpodBase(object):
             #####################################################
 
             # read commands from a net socket ###################
-            if socketin is not None:
-                inline = socketin.readline()
+            if self.socketin is not None:
+                inline = self.socketin.readline()
                 if inline is not None:
                     inline = inline.decode()
                     if inline.startswith('pause-trial'):
@@ -310,9 +317,7 @@ class BpodBase(object):
                 opcode, data = self._bpodcom_read_opcode_message()
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
 
-        if socketin is not None: 
-            socketin.close()
-            sock.close()
+        
 
         if stdin is not None: 
             stdin.close()
