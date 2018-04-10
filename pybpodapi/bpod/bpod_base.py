@@ -162,6 +162,10 @@ class BpodBase(object):
             self.sock = None
             self.socketin = None
 
+        # initialise the thread that will handle the stdin commands
+        self.stdin = NonBlockingStreamReader(sys.stdin) if settings.PYBPOD_API_ACCEPT_STDIN else None
+        #####################################################
+
         return self
 
 
@@ -175,6 +179,9 @@ class BpodBase(object):
         if self.socketin is not None: 
             self.socketin.close()
             self.sock.close()
+
+        if self.stdin is not None: 
+            self.stdin.close()
 
     def stop_trial(self):
         self._bpodcom_stop_trial()
@@ -265,16 +272,14 @@ class BpodBase(object):
         
         #####################################################
 
-        # initialise the thread that will handle the stdin commands
-        stdin = NonBlockingStreamReader(sys.stdin) if settings.PYBPOD_API_ACCEPT_STDIN else None
-        #####################################################
+        
 
         sma.is_running = True
         while sma.is_running:
 
             # read commands from the stdin ######################
-            if stdin is not None:
-                inline = stdin.readline()
+            if self.stdin is not None:
+                inline = self.stdin.readline()
                 if inline is not None:
                     if inline.startswith('pause-trial'):
                         self.pause()
@@ -319,8 +324,7 @@ class BpodBase(object):
 
         
 
-        if stdin is not None: 
-            stdin.close()
+        
 
         self.session += EndTrial('The trial ended')
 
