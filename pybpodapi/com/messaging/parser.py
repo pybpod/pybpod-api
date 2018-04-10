@@ -1,8 +1,8 @@
 import logging, dateutil
-from pybranch.com.messaging.error 	import ErrorMessage
-from pybranch.com.messaging.debug 	import DebugMessage
-from pybranch.com.messaging.stderr 	import StderrMessage
-from pybranch.com.messaging.stdout 	import StdoutMessage
+from pybpodapi.com.messaging.error 	import ErrorMessage
+from pybpodapi.com.messaging.debug 	import DebugMessage
+from pybpodapi.com.messaging.stderr 	import StderrMessage
+from pybpodapi.com.messaging.stdout 	import StdoutMessage
 from pybpodapi.com.messaging.warning import WarningMessage
 
 
