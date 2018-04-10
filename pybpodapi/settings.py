@@ -25,8 +25,8 @@ TARGET_BPOD_FIRMWARE_VERSION  = "20"
 
 SERIAL_PORT     = None
 NET_PORT        = None
-WORKSPACE_PATH  = 'BPOD-WORKSPACE'
-PROTOCOL_NAME   = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H-%M-%S')
+WORKSPACE_PATH  = None
+PROTOCOL_NAME   = None
 BAUDRATE        = 1312500
 SYNC_CHANNEL    = 255
 SYNC_MODE       = 1
