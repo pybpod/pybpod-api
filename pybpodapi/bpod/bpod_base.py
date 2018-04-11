@@ -26,7 +26,8 @@ from pybpodapi.com.messaging.event_occurrence    import EventOccurrence
 from pybpodapi.com.messaging.event_resume        import EventResume
 from pybpodapi.com.messaging.softcode_occurrence import SoftcodeOccurrence
 from pybpodapi.com.messaging.session_info        import SessionInfo
-from pybpodapi.com.messaging.warning              import WarningMessage
+from pybpodapi.com.messaging.warning             import WarningMessage
+from pybpodapi.com.messaging.value             import ValueMessage
 
 from pybpodapi.session import Session
 
@@ -198,7 +199,8 @@ class BpodBase(object):
         self._hardware.setup(self.bpod_modules)
 
 
-    
+    def register_value(self, name, value):
+        self._session += ValueMessage(name, value)
 
 
     def send_state_machine(self, sma, run_asap=None ):
@@ -292,15 +294,16 @@ class BpodBase(object):
                         self.close()
                         sma.is_running = False
                         break
-                    elif inline.startswith('softcode'):
-                        self.trigger_softcode(inline[8:])
+                    elif inline.startswith('SoftCode'):
+                        softcode = chr(int(inline[-1])-1)
+                        self.trigger_softcode(softcode)
             #####################################################
 
             # read commands from a net socket ###################
             if self.socketin is not None:
                 inline = self.socketin.readline()
                 if inline is not None:
-                    inline = inline.decode()
+                    inline = inline.decode().strip()
                     if inline.startswith('pause-trial'):
                         self.pause()
                     elif inline.startswith('resume-trial'):
@@ -312,8 +315,10 @@ class BpodBase(object):
                         self.close()
                         sma.is_running = False
                         break
-                    elif inline.startswith('softcode'):
-                        self.trigger_softcode(inline[8:])
+                    elif inline.startswith('SoftCode'):
+                        print('soft-code', '-----')
+                        softcode = chr(int(inline[-1])-1)
+                        self.trigger_softcode(softcode)
                     
             #####################################################
             
