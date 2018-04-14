@@ -79,7 +79,7 @@ class Session(object):
     INFO_SETUP_NAME      = 'SETUP-NAME'
     INFO_SUBJECT_NAME    = 'SUBJECT-NAME'
     INFO_BPODGUI_VERSION = 'BPOD-GUI-VERSION'
-    
+
 
     def __init__(self, path=None):
         self.ostdout = sys.stdout

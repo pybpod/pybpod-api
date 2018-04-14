@@ -27,7 +27,7 @@ from pybpodapi.com.messaging.event_resume        import EventResume
 from pybpodapi.com.messaging.softcode_occurrence import SoftcodeOccurrence
 from pybpodapi.com.messaging.session_info        import SessionInfo
 from pybpodapi.com.messaging.warning             import WarningMessage
-from pybpodapi.com.messaging.value             import ValueMessage
+from pybpodapi.com.messaging.value               import ValueMessage
 
 from pybpodapi.session import Session
 
@@ -87,6 +87,11 @@ class BpodBase(object):
 
         for subject_name in settings.PYBPOD_SUBJECTS: 
             self.session += SessionInfo(self.session.INFO_SUBJECT_NAME, subject_name)
+
+        if hasattr(settings, 'PYBPOD_VARSNAMES'):
+            for varname in settings.PYBPOD_VARSNAMES: 
+                self.session += ValueMessage(varname, getattr(settings, varname))
+
         
     #########################################
     ############ PUBLIC METHODS #############
@@ -175,6 +180,11 @@ class BpodBase(object):
         Close connection with Bpod
         """
         self.session += SessionInfo( self.session.INFO_SESSION_ENDED, datetime_now.now() )
+        
+        if hasattr(settings, 'PYBPOD_VARSNAMES'):
+            for varname in settings.PYBPOD_VARSNAMES: 
+                self.session += ValueMessage(varname, getattr(settings, varname))
+
         self._bpodcom_disconnect()
 
         if self.socketin is not None: 
