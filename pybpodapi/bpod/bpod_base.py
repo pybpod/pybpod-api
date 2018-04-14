@@ -326,7 +326,6 @@ class BpodBase(object):
                         sma.is_running = False
                         break
                     elif inline.startswith('SoftCode'):
-                        print('soft-code', '-----')
                         softcode = chr(int(inline[-1])-1)
                         self.trigger_softcode(softcode)
                     
