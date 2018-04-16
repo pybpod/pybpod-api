@@ -1,29 +1,48 @@
-from threading import Thread
+from threading import Thread, Event
 from queue import Queue, Empty
+import socket
 
 class NonBlockingSocketReceive:
 
-    def __init__(self, socket):
+    def __init__(self, sck):
         '''
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
         '''
-        self._s = socket
+        self._s = sck
         self._q = Queue()
-        self._active = True
 
-        def _populateQueue(socket, queue):
-            '''
-            Collect lines from 'stream' and put them in 'quque'.
-            '''
-            while self._active:
-                line = socket.recv(64)
-                if line:
-                    queue.put(line)
-                else:
-                    raise UnexpectedEndOfStream
+        class PopulateQueue(Thread):
 
-        self._t = Thread(target=_populateQueue, args=(self._s, self._q))
+            def __init__(self,sck, queue):
+                Thread.__init__(self)
+                self.daemon = True
+                self.socket = sck
+                self.queue  = queue
+                self.event  = Event()
+
+            def run(self):
+                try:
+                    self.socket.settimeout(1.0)
+                    data = None
+                    while True:
+                        if self.event.is_set(): break
+                        
+                        if not self.socket: break
+                        try:
+                            data = self.socket.recv(64)
+                            if not data: self.event.set()
+                        except socket.timeout:
+                            pass
+                        if data:     self.queue.put(data)
+
+                        self.event.wait(0.01)
+
+                except OSError:
+                    self.event.set()
+                    
+               
+        self._t = PopulateQueue(self._s, self._q)
         self._t.daemon = True
         self._t.start() #start collecting lines from the stream
 
@@ -34,9 +53,8 @@ class NonBlockingSocketReceive:
             return None
 
     def close(self):
-        try:
-            self._active = False
-        except SystemExit:
-            pass
+        self._t.event.set()
+        
+    def is_alive(self): return self._t.is_alive()
 
 class UnexpectedEndOfStream(Exception): pass

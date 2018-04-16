@@ -49,10 +49,11 @@ class BpodCOMProtocol(BpodBase):
         self.bpod_com_ready = True
 
     def close(self):
-        super(BpodCOMProtocol, self).close()
-        self.bpod_com_ready = False
-
-        
+        if self.bpod_com_ready:
+            super(BpodCOMProtocol, self).close()
+            self._arcom.close()
+            self.bpod_com_ready = False
+            
     
     def _bpodcom_connect(self, serial_port, baudrate=115200, timeout=1):
         """
@@ -335,8 +336,37 @@ class BpodCOMProtocol(BpodBase):
         self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
 
     def _bpodcom_get_trial_timestamp_start(self):
-        return float(self._arcom.read_uint64()) / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
+        self.trial_start_micros = float(self._arcom.read_uint64())
+        return self.trial_start_micros / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
 
+    def _bpodcom_read_trial_start_timestamp_seconds(self):
+        """
+        A new incoming timestamp message is available. Read trial start timestamp in millseconds and convert to seconds.
+
+        :return: trial start timestamp in milliseconds
+        :rtype: float
+        """
+        response = self._arcom.read_float32()  # type: int
+
+        print('response', response)
+        logger.debug("Received start trial timestamp in millseconds: %s", response)
+
+        trial_start_timestamp = response / 1000.0
+
+        return trial_start_timestamp
+
+    def _bpodcom_read_timestamps(self):
+
+        data = self._arcom.read_bytes_array(12)
+
+        n_hw_timer_cyles        = ArduinoTypes.cvt_float32(b''.join(data[:4]))
+        trial_end_micros        = ArduinoTypes.cvt_float64(b''.join(data[4:12]))# / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
+        trial_time_from_micros  = trial_end_micros - self.trial_start_micros
+        trial_time_from_cycles  = n_hw_timer_cyles/self.hardware.cycle_frequency
+        discrepancy             = abs(trial_time_from_micros - trial_time_from_cycles)*1000
+
+        return trial_end_micros / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER), discrepancy
+        
 
 
 
@@ -377,34 +407,10 @@ class BpodCOMProtocol(BpodBase):
 
         return opcode, data
 
-    def _bpodcom_read_trial_start_timestamp_seconds(self):
-        """
-        A new incoming timestamp message is available. Read trial start timestamp in millseconds and convert to seconds.
-
-        :return: trial start timestamp in milliseconds
-        :rtype: float
-        """
-        response = self._arcom.read_float32()  # type: int
-
-        logger.debug("Received start trial timestamp in millseconds: %s", response)
-
-        trial_start_timestamp = response / 1000.0
-
-        return trial_start_timestamp
+    
 
 
-    def _bpodcom_read_timestamps(self):
-
-        data = self._arcom.read_bytes_array(12)
-
-        n_hw_timer_cyles    = ArduinoTypes.cvt_float32(b''.join(data[:4]))
-        trial_end_timestamp = ArduinoTypes.cvt_float64(b''.join(data[4:12]))
-        trial_time_from_micros = trial_end_timestamp - self.trial_start_timestamp
-        trial_time_from_cycles = n_hw_timer_cyles/self.hardware.cycle_frequency
-        discrepancy = abs(trial_time_from_micros - trial_time_from_cycles)*1000
-
-        return trial_end_timestamp, discrepancy
-        
+    
     def _bpodcom_read_alltimestamps(self):
         """
         A new incoming timestamps message is available.

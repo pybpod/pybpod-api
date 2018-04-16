@@ -187,13 +187,15 @@ class BpodBase(object):
 
         self._bpodcom_disconnect()
 
+        del self._session
+
         if self.socketin is not None: 
             self.socketin.close()
             self.sock.close()
-
+            
         if self.stdin is not None: 
             self.stdin.close()
-
+            
     def stop_trial(self):
         self._bpodcom_stop_trial()
 
@@ -284,7 +286,7 @@ class BpodBase(object):
         
         #####################################################
 
-        
+        interrupt_task = False
 
         sma.is_running = True
         while sma.is_running:
@@ -301,9 +303,8 @@ class BpodBase(object):
                         self.stop_trial()
                     elif inline.startswith('close'):
                         self.stop_trial()
-                        self.close()
                         sma.is_running = False
-                        break
+                        interrupt_task = True
                     elif inline.startswith('SoftCode'):
                         softcode = chr(int(inline[-1])-1)
                         self.trigger_softcode(softcode)
@@ -322,13 +323,11 @@ class BpodBase(object):
                         self.stop_trial()
                     elif inline.startswith('close'):
                         self.stop_trial()
-                        self.close()
                         sma.is_running = False
-                        break
+                        interrupt_task = True
                     elif inline.startswith('SoftCode'):
                         softcode = chr(int(inline[-1])-1)
                         self.trigger_softcode(softcode)
-                    
             #####################################################
             
 
@@ -337,7 +336,7 @@ class BpodBase(object):
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
 
         
-
+            if interrupt_task: break
         
 
         self.session += EndTrial('The trial ended')
@@ -347,8 +346,11 @@ class BpodBase(object):
         self.session.add_trial_events()
 
 
-
         logger.info("Publishing Bpod trial")
+
+        if interrupt_task: 
+            self.close()
+            exit(0)
 
     
     def manual_override(self, channel_type, channel_name, channel_number, value):
@@ -556,6 +558,7 @@ class BpodBase(object):
 
         trial_end_timestamp, discrepancy    = self._bpodcom_read_timestamps()
 
+        print('discrepancy', discrepancy)
         if discrepancy>1:
             self.session += WarningMessage( "Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy) )
 
