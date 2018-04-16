@@ -47,6 +47,8 @@ class BpodBase(object):
     :ivar bool new_sma_sent: whether a new state machine was already uploaded to Bpod box
     """
 
+
+
     class Events(EventName):             pass
     class OutputChannels(OutputChannel): pass
     class ChannelTypes(ChannelType):     pass
@@ -96,6 +98,12 @@ class BpodBase(object):
     #########################################
     ############ PUBLIC METHODS #############
     #########################################
+
+    def loop_handler(self):
+        """
+        handler that will execute on every loop when the bpod is running
+        """
+        pass
 
     def open(self):
         """
@@ -335,7 +343,9 @@ class BpodBase(object):
                 opcode, data = self._bpodcom_read_opcode_message()
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
 
-        
+            
+            self.loop_handler()
+            
             if interrupt_task: break
         
 
