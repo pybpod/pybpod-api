@@ -1,6 +1,9 @@
 from threading import Thread, Event
 from queue import Queue, Empty
-import fcntl, os
+from sys import platform
+
+if platform in ["linux", "linux2", "darwin"]:
+    import fcntl, os
 
 class NonBlockingStreamReader:
 
@@ -12,9 +15,10 @@ class NonBlockingStreamReader:
         self._s = stream
         self._q = Queue()
 
-        fd = stream.fileno()
-        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+        if platform in ["linux", "linux2", "darwin"]:
+            fd = stream.fileno()
+            fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+            fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
         class PopulateQueue(Thread):
 
