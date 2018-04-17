@@ -1,5 +1,6 @@
 from threading import Thread, Event
 from queue import Queue, Empty
+import fcntl, os
 
 class NonBlockingStreamReader:
 
@@ -11,24 +12,27 @@ class NonBlockingStreamReader:
         self._s = stream
         self._q = Queue()
 
+        fd = stream.fileno()
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
         class PopulateQueue(Thread):
 
-            def __init__(self,socket, queue):
+            def __init__(self, stream, queue):
                 Thread.__init__(self)
                 self.daemon = True
-                self.socket = socket
+                self.stream = stream
                 self.queue  = queue
                 self.event  = Event()
 
             def run(self):
                 while True:
                     if self.event.is_set(): break
-                    line = stream.readline()
-                    if line:
-                        self.queue.put(line)
-                    else:
-                        self.event.set()
+                    line = self.stream.readline()
+                    if line: self.queue.put(line)
+                    
                     self.event.wait(0.01)
+               
 
         self._t = PopulateQueue(self._s, self._q)
         self._t.daemon = True
@@ -40,8 +44,7 @@ class NonBlockingStreamReader:
         except Empty:
             return None
 
-    def close(self):
-        self._t.event.set()
+    def close(self): self._t.event.set()
         
     def is_alive(self): return self._t.is_alive()
 
