@@ -153,16 +153,16 @@ class BpodCOMProtocol(BpodBase):
         Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
         """ 
         logger.debug("Pausing trial")  
-        self._arcom.write_char(SendMessageHeader.PAUSE_TRIAL) 
-        self._arcom.write_char(chr(0))
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.PAUSE_TRIAL), 0])
+        self._arcom.write_array(bytes2send)
 
     def _bpodcom_resume_trial(self): 
         """ 
         Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
         """ 
         logger.debug("Resume trial")  
-        self._arcom.write_char(SendMessageHeader.PAUSE_TRIAL) 
-        self._arcom.write_char(chr(1))
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.PAUSE_TRIAL), 1])
+        self._arcom.write_array(bytes2send)
 
     def _bpodcom_get_timestamp_transmission(self): 
         """ 
@@ -292,18 +292,17 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Echo softcode") 
         self._arcom.write_char(SendMessageHeader.ECHO_SOFTCODE) 
         self._arcom.write_char(softcode) 
-        #flag = self._arcom.read_char() 
-        #retcode = self._arcom.read_char() 
-        #return byte(2)==flag and retcode==softcode 
+        
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.ECHO_SOFTCODE), softcode])
+        self._arcom.write_array(bytes2send)  
 
     def _bpodcom_manual_override_exec_event(self, state_index, event): 
         """ 
         Send soft code 
         """ 
         logger.debug("Manual override execute virtual event") 
-        self._arcom.write_char(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT) 
-        self._arcom.write_char(state_index) 
-        self._arcom.write_char(event) 
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), ord(state_index), ord(event)])
+        self._arcom.write_array(bytes2send) 
  
     def _bpodcom_send_softcode(self, softcode): 
         """ 
