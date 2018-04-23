@@ -309,9 +309,9 @@ class BpodCOMProtocol(BpodBase):
         """ 
         Send soft code 
         """ 
-        logger.debug("Send softcode") 
-        self._arcom.write_char(SendMessageHeader.TRIGGER_SOFTCODE) 
-        self._arcom.write_char(softcode) 
+        logger.debug("Send softcode")
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.TRIGGER_SOFTCODE), softcode])
+        self._arcom.write_array(bytes2send)
 
 
     def _bpodcom_send_state_machine(self, message):

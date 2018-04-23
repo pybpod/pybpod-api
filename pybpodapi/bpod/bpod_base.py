@@ -314,7 +314,7 @@ class BpodBase(object):
                         sma.is_running = False
                         interrupt_task = True
                     elif inline.startswith('SoftCode'):
-                        softcode = chr(int(inline[-1])-1)
+                        softcode = int(inline[-1])-1
                         self.trigger_softcode(softcode)
             #####################################################
 
@@ -334,7 +334,7 @@ class BpodBase(object):
                         sma.is_running = False
                         interrupt_task = True
                     elif inline.startswith('SoftCode'):
-                        softcode = chr(int(inline[-1])-1)
+                        softcode = int(inline[-1])-1
                         self.trigger_softcode(softcode)
             #####################################################
             
