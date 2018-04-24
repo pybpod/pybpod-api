@@ -5,7 +5,7 @@ PYBPOD_API_LOG_LEVEL = logging.DEBUG #logging.WARNING; logging.DEBUG
 PYBPOD_API_LOG_FILE  = 'pybpod-api.log'
 
 
-WORKSPACE_PATH 	= 'BPOD-WORKSPACE'
+PYBPOD_SESSION_PATH 	= 'PYBPOD_SESSION_PATH'
 
 PROTOCOL_NAME 	= datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 

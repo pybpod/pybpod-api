@@ -22,7 +22,7 @@ class BpodIO(BpodCOMProtocolModules):
     Bpod I/O logic.
     """
     def __init__(self, serial_port=None, workspace_path=None, protocol_name=None, sync_channel=None, sync_mode=None):
-        self.workspace_path = workspace_path if workspace_path  is not None else settings.WORKSPACE_PATH
+        self.workspace_path = workspace_path if workspace_path  is not None else settings.PYBPOD_SESSION_PATH
         self.protocol_name  = protocol_name  if protocol_name   is not None else settings.PROTOCOL_NAME
 
         super(BpodIO,self).__init__(serial_port, sync_channel, sync_mode)
