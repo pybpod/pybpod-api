@@ -23,7 +23,7 @@ class BpodIO(BpodCOMProtocolModules):
     """
     def __init__(self, serial_port=None, workspace_path=None, session_name=None, sync_channel=None, sync_mode=None):
         self.workspace_path = workspace_path if workspace_path  is not None else settings.PYBPOD_SESSION_PATH
-        self.session_name  = session_name  if session_name   is not None else settings.PYBPOD_SESSION_NAME
+        self.session_name   = session_name   if session_name    is not None else settings.PYBPOD_SESSION
 
         super(BpodIO,self).__init__(serial_port, sync_channel, sync_mode)
         
@@ -33,7 +33,7 @@ class BpodIO(BpodCOMProtocolModules):
         self.session += SessionInfo( Session.INFO_SESSION_STARTED,  self.session.start_timestamp )
         
     def create_session(self):
-        return Session(os.path.join(self.workspace_path, self.session_name)) if self.workspace_path else  Session()
+        return Session( os.path.join(self.workspace_path, self.session_name)+'.csv' ) if self.workspace_path else  Session()
         
     
     def close(self):
