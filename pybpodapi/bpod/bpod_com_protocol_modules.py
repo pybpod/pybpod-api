@@ -48,7 +48,7 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 
 
 		self._arcom.write_char(SendMessageHeader.GET_MODULES)
-		time.sleep(0.1)
+		time.sleep(0.3)
 
 		modules_requested_events = np.array([0] * n_modules)
 
@@ -74,17 +74,22 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 
 					module_name  = name_string + str(names[name_string])
 					
-					while self._arcom.read_uint8()==1: #has more info to be read
+					flag = self._arcom.read_uint8()
+					while flag==1: #has more info to be read
 						param_type = self._arcom.read_uint8()
+						
 						if  param_type == ReceiveMessageHeader.MODULE_REQUESTED_EVENT:
 							modules_requested_events[i] = self._arcom.read_uint8()
+
 						elif param_type == ReceiveMessageHeader.MODULE_EVENT_NAMES:
+
 							n_event_names = self._arcom.read_uint8()
 							for j in range(n_event_names):
 								n_chars    = self._arcom.read_uint8()
-								event_name = self._arcom.read_char_array(name_length)
-								events_names.append(event_name)
+								event_name = self._arcom.read_char_array(n_chars)
+								events_names.append( ''.join(event_name) )
 
+						flag = self._arcom.read_uint8()
 
 				bpod_modules += BpodModules.create_module(connected, module_name, firmware_version, events_names, n_serial_events, serial_port=i+1)
 				
@@ -125,6 +130,10 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 		return bpod_modules
 
 
+
+
+
+
 	def _bpodcom_activate_module_relay(self, module_index):
 		self._arcom.write_array([ord(SendMessageHeader.SET_MODULE_RELAY), module_index, 1])
 
@@ -132,10 +141,14 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 		self._arcom.write_array([ord(SendMessageHeader.SET_MODULE_RELAY), module_index, 0])
 
 
+
+
 	def _bpodcom_clean_any_data_in_the_buffer(self):
 		n_bytes_available = self.bytes_available()
 		if n_bytes_available > 0:
 			self._arcom.read_uint8_array(n_bytes_available)
+
+
 
 
 	def _bpodcom_module_write(self, module_index, message, dtype=None):
@@ -172,6 +185,6 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 		elif dtype==ArduinoTypes.UINT32:
 			return self._arcom.read_uint32_array(size)
 		elif dtype==ArduinoTypes.FLOAT:
-			return self._arcom.read_float_array(size)
+			return self._arcom.read_float32_array(size)
 		else:
 			return None

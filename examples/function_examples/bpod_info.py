@@ -12,7 +12,7 @@ from pyforms import conf
 
 my_bpod = Bpod()
 
-my_bpod.stop()
+my_bpod.close()
 
 print("Target Bpod firmware version: ", conf.TARGET_BPOD_FIRMWARE_VERSION)
 print("Firmware version (read from device): ", my_bpod.hardware.firmware_version)

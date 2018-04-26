@@ -4,6 +4,7 @@
 import logging
 import serial
 import numpy as np
+import struct
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,9 @@ class ArduinoTypes(object):
 	INT16 	= DataType('int16', 2)
 	UINT16 	= DataType('uint16', 2)
 	UINT32 	= DataType('uint32', 4)
-	FLOAT 	= DataType('float', 4)
+	UINT64 	= DataType('uint64', 8)
+	FLOAT32 = DataType('float32', 4)
+	FLOAT64 = DataType('float64', 8)
 
 	@staticmethod
 	def get_array(array, dtype):
@@ -52,6 +55,14 @@ class ArduinoTypes(object):
 	@staticmethod
 	def get_uint32_array(array):
 		return np.array(array, dtype=str(ArduinoTypes.UINT32)).tobytes()
+
+	@staticmethod
+	def cvt_float32(message_bytes):
+		return struct.unpack('<f',message_bytes)[0]
+
+	@staticmethod
+	def cvt_float64(message_bytes):
+		return struct.unpack('<d',message_bytes)[0]
 
 
 class ArCOM(object):
@@ -94,6 +105,7 @@ class ArCOM(object):
 	def write_char(self, value):
 		self.serial_object.write(str.encode(value))
 
+
 	def write_array(self, array):
 		self.serial_object.write(array)
 
@@ -135,13 +147,17 @@ class ArCOM(object):
 		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 
-	def read_float(self):
-		message_bytes = self.serial_object.read(ArduinoTypes.FLOAT.size)
+	def read_uint64(self):
+		message_bytes = self.serial_object.read(ArduinoTypes.UINT64.size)
 		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
-		message = float.from_bytes(message_bytes, byteorder='little')
+		message = int.from_bytes(message_bytes, byteorder='little')
 		return message
 
-
+	def read_float32(self):
+		message_bytes = self.serial_object.read(ArduinoTypes.FLOAT32.size)
+		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
+		message = struct.unpack('<f',message_bytes)
+		return message[0]
 
 
 
@@ -190,10 +206,10 @@ class ArCOM(object):
 
 		return message_array
 
-	def read_float_array(self, array_len=1):
+	def read_float32_array(self, array_len=1):
 		message_array = []
 		for pos in range(0, array_len):
-			message_bytes = self.read_float()
+			message_bytes = self.read_float32()
 			message_array.append(message_bytes)
 
 		return message_array

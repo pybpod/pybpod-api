@@ -95,6 +95,6 @@ for i in range(nTrials):  # Main loop
 
     print("Current trial info: {0}".format(my_bpod.session.current_trial))
 
-my_bpod.stop()
-cam.stop()
+my_bpod.close()
+cam.close()
 print('EXECUTION TIME', timeit.default_timer() - START_APP)

@@ -142,7 +142,7 @@ Finally, after the loop finishes, we can stop Bpod execution.
 	:linenos:
 	:lineno-start: 56
 
-	my_bpod.stop()  # Disconnect Bpod and perform post-run actions
+	my_bpod.close()  # Disconnect Bpod and perform post-run actions
 
 .. seealso::
 

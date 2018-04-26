@@ -84,7 +84,7 @@ for i in range(nTrials):  # Main loop
 
 	print("Current trial info: {0}".format(my_bpod.session.current_trial))
 
-my_bpod.stop()  # Disconnect Bpod
+my_bpod.close()  # Disconnect Bpod
 
 
 

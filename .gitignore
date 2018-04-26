@@ -45,3 +45,7 @@ uninstall-requirements-dev-*.txt
 examples/BPOD-WORKSPACE/
 
 
+
+pybpodapi/bpod/hardware/\.DS_Store
+
+pybpodapi/\.DS_Store

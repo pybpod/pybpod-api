@@ -69,4 +69,4 @@ for i in range(nTrials):
 
 print("Trial lenght mean: {0}".format(reduce(lambda x, y: x + y, timestamps) / len(timestamps)))
 
-my_bpod.stop()
+my_bpod.close()

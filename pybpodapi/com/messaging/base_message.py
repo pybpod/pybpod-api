@@ -39,7 +39,8 @@ class BaseMessage(object):
 			self.pc_timestamp,
 			self.host_timestamp,
 			None, #reserved to store the host end timestamp
-			self.content
+			self.content,
+			None
 		]
 
 	@classmethod
