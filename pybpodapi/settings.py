@@ -25,7 +25,7 @@ TARGET_BPOD_FIRMWARE_VERSION  = "21"
 
 SERIAL_PORT     = None
 NET_PORT        = None
-PROTOCOL_NAME   = None
+PYBPOD_SESSION_NAME   = None
 BAUDRATE        = 1312500
 SYNC_CHANNEL    = 255
 SYNC_MODE       = 1
@@ -43,6 +43,7 @@ PYBPOD_PROJECT          = ''
 PYBPOD_EXPERIMENT       = ''
 PYBPOD_BOARD            = ''
 PYBPOD_SETUP            = ''
+PYBPOD_TASK             = ''
 PYBPOD_SESSION          = ''
 PYBPOD_SESSION_PATH     = ''
 PYBPOD_BPODGUI_VERSION  = ''

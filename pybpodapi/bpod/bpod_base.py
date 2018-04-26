@@ -120,7 +120,7 @@ class BpodBase(object):
 
         :param str serial_port: serial port to connect
         :param str workspace_path: path for bpod output files (no folders will be created)
-        :param str protocol_name: this name will be used for output files
+        :param str session_name: this name will be used for output files
         :param int baudrate [optional]: baudrate for serial connection
         :param int sync_channel [optional]: Serial synchronization channel: 255 = no sync, otherwise set to a hardware channel number
         :param int sync_mode [optional]: Serial synchronization mode: 0 = flip logic every trial, 1 = every state

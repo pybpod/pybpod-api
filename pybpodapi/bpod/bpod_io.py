@@ -21,19 +21,19 @@ class BpodIO(BpodCOMProtocolModules):
     """
     Bpod I/O logic.
     """
-    def __init__(self, serial_port=None, workspace_path=None, protocol_name=None, sync_channel=None, sync_mode=None):
+    def __init__(self, serial_port=None, workspace_path=None, session_name=None, sync_channel=None, sync_mode=None):
         self.workspace_path = workspace_path if workspace_path  is not None else settings.PYBPOD_SESSION_PATH
-        self.protocol_name  = protocol_name  if protocol_name   is not None else settings.PROTOCOL_NAME
+        self.session_name  = session_name  if session_name   is not None else settings.PYBPOD_SESSION_NAME
 
         super(BpodIO,self).__init__(serial_port, sync_channel, sync_mode)
         
         self.session += SessionInfo("This is a PYBPOD file. Find more info at http://pybpod.readthedocs.io")
         self.session += SessionInfo( Session.INFO_BPODAPI_VERSION, pybpodapi.__version__)
-        self.session += SessionInfo( Session.INFO_PROTOCOL_NAME,    self.protocol_name )
+        self.session += SessionInfo( Session.INFO_PYBPOD_SESSION_NAME,    self.session_name )
         self.session += SessionInfo( Session.INFO_SESSION_STARTED,  self.session.start_timestamp )
         
     def create_session(self):
-        return Session(os.path.join(self.workspace_path, self.protocol_name)) if self.workspace_path else  Session()
+        return Session(os.path.join(self.workspace_path, self.session_name)) if self.workspace_path else  Session()
         
     
     def close(self):
@@ -57,9 +57,9 @@ class BpodIO(BpodCOMProtocolModules):
         self._workspace_path = value  # type: str
 
     @property
-    def protocol_name(self):
-        return self._protocol_name  # type: str
+    def session_name(self):
+        return self._session_name  # type: str
 
-    @protocol_name.setter
-    def protocol_name(self, value):
-        self._protocol_name = value  # type: str
+    @session_name.setter
+    def session_name(self, value):
+        self._session_name = value  # type: str

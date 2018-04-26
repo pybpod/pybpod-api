@@ -7,7 +7,7 @@ PYBPOD_API_LOG_FILE  = 'pybpod-api.log'
 
 PYBPOD_SESSION_PATH 	= 'PYBPOD_SESSION_PATH'
 
-PROTOCOL_NAME 	= datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+PYBPOD_SESSION_NAME 	= datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
 SERIAL_PORT 	= '/dev/ttyACM0'
 #SERIAL_PORT 	= '/dev/tty.usbmodem3174431'
