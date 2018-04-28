@@ -278,8 +278,6 @@ class BpodBase(object):
 
         logger.info("Running state machine, trial %s", len(self.session.trials) )
 
-        state_change_indexes = []
-
 
         self._bpodcom_run_state_machine()
         if self._new_sma_sent:
@@ -293,7 +291,11 @@ class BpodBase(object):
 
         
         #####################################################
+        
+        #create a list of executed states
+        state_change_indexes = []
 
+        # flag used to stop a trial
         interrupt_task = False
 
         sma.is_running = True
@@ -566,9 +568,9 @@ class BpodBase(object):
         current_trial.trial_start_timestamp = self.trial_start_timestamp  # start timestamp of first trial
         current_trial.bpod_start_timestamp  = self.trial_start_timestamp
 
+
         trial_end_timestamp, discrepancy    = self._bpodcom_read_timestamps()
 
-        print('discrepancy', discrepancy)
         if discrepancy>1:
             self.session += WarningMessage( "Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy) )
 
@@ -577,20 +579,20 @@ class BpodBase(object):
             timestamps = self.session_timestamps
         else:    
             timestamps = self._bpodcom_read_alltimestamps()
+            timestamps = [float(t)*self._hardware.times_scale_factor for t in timestamps]
 
-
-        current_trial.event_timestamps = [i / float(self._hardware.cycle_frequency) for i in timestamps]
+        current_trial.event_timestamps = timestamps
         
         # update the timestamps of the events #############################################################
-        for event, timestamp in zip(current_trial.events_occurrences, current_trial.event_timestamps):
+        for event, timestamp in zip(current_trial.events_occurrences, timestamps):
             event.host_timestamp = timestamp
             e = EventResume(event.event_id, event.event_name, host_timestamp=timestamp)
             self.session += e
         ###################################################################################################
 
-        current_trial.state_timestamps += current_trial.event_timestamps[:len(state_change_indexes)]
-        current_trial.state_timestamps += [current_trial.event_timestamps[-1]]
-
+        #update the states timestamps
+        current_trial.state_timestamps += [timestamps[i] for i in state_change_indexes]
+        current_trial.state_timestamps += timestamps[-1:]
     #########################################
     ############## PROPERTIES ###############
     #########################################

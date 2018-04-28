@@ -64,6 +64,10 @@ class ArduinoTypes(object):
 	def cvt_float64(message_bytes):
 		return struct.unpack('<d',message_bytes)[0]
 
+	@staticmethod
+	def cvt_int64(message_bytes):
+		return int.from_bytes(message_bytes, byteorder='little')
+
 
 class ArCOM(object):
 	"""
@@ -158,9 +162,6 @@ class ArCOM(object):
 		# logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
 		message = struct.unpack('<f',message_bytes)
 		return message[0]
-
-
-
 
 
 	##############################################################

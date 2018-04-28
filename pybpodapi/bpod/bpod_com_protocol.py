@@ -335,7 +335,8 @@ class BpodCOMProtocol(BpodBase):
         self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
 
     def _bpodcom_get_trial_timestamp_start(self):
-        self.trial_start_micros = float(self._arcom.read_uint64())
+        data = self._arcom.read_bytes_array(8)
+        self.trial_start_micros = ArduinoTypes.cvt_float64(b''.join(data))
         return self.trial_start_micros / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
 
     def _bpodcom_read_trial_start_timestamp_seconds(self):
@@ -345,14 +346,14 @@ class BpodCOMProtocol(BpodBase):
         :return: trial start timestamp in milliseconds
         :rtype: float
         """
-        response = self._arcom.read_float32()  # type: int
+        response = self._arcom.read_uint32()  # type: int
 
-        print('response', response)
-        logger.debug("Received start trial timestamp in millseconds: %s", response)
+        #print('response', response)
+        #logger.debug("Received start trial timestamp in millseconds: %s", response)
 
-        trial_start_timestamp = response / 1000.0
+        #trial_start_timestamp = response / 1000.0
 
-        return trial_start_timestamp
+        return response * self.hardware.times_scale_factor
 
     def _bpodcom_read_timestamps(self):
 
@@ -442,8 +443,8 @@ class BpodCOMProtocol(BpodBase):
         return current_events
 
     def _bpodcom_read_event_timestamp(self):
-        v = self._arcom.read_float32()
-        return v*self.hardware.times_scale_factor
+        v = self._arcom.read_uint32()
+        return float(v) * self.hardware.times_scale_factor
 
     def _bpodcom_load_serial_message(self, serial_channel, message_id, serial_message, n_messages):
         """
