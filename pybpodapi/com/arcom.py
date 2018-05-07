@@ -68,6 +68,11 @@ class ArduinoTypes(object):
 	def cvt_int64(message_bytes):
 		return int.from_bytes(message_bytes, byteorder='little')
 
+	@staticmethod
+	def cvt_uint64(message_bytes):
+		return struct.unpack('<Q',message_bytes)[0]
+
+
 
 class ArCOM(object):
 	"""

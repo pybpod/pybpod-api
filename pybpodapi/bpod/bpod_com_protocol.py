@@ -336,7 +336,7 @@ class BpodCOMProtocol(BpodBase):
 
     def _bpodcom_get_trial_timestamp_start(self):
         data = self._arcom.read_bytes_array(8)
-        self.trial_start_micros = ArduinoTypes.cvt_float64(b''.join(data))
+        self.trial_start_micros = ArduinoTypes.cvt_uint64(b''.join(data))
         return self.trial_start_micros / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
 
     def _bpodcom_read_trial_start_timestamp_seconds(self):
@@ -360,7 +360,7 @@ class BpodCOMProtocol(BpodBase):
         data = self._arcom.read_bytes_array(12)
 
         n_hw_timer_cyles        = ArduinoTypes.cvt_float32(b''.join(data[:4]))
-        trial_end_micros        = ArduinoTypes.cvt_float64(b''.join(data[4:12]))# / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
+        trial_end_micros        = ArduinoTypes.cvt_uint64(b''.join(data[4:12]))# / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
         trial_time_from_micros  = trial_end_micros - self.trial_start_micros
         trial_time_from_cycles  = n_hw_timer_cyles/self.hardware.cycle_frequency
         discrepancy             = abs(trial_time_from_micros - trial_time_from_cycles)*1000

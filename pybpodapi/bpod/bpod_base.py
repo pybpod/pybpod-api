@@ -67,6 +67,7 @@ class BpodBase(object):
         self.net_port       = net_port       if net_port        is not None else settings.NET_PORT
         self._hardware      = Hardware()    # type: Hardware
         self.bpod_modules   = None          # type: BpodModules
+        self.bpod_start_timestamp = None
 
         self._new_sma_sent  = False         # type: bool
 
@@ -287,6 +288,10 @@ class BpodBase(object):
                 raise BpodErrorException('Error: The last state machine sent was not acknowledged by the Bpod device.', self)
 
         self.trial_start_timestamp = self._bpodcom_get_trial_timestamp_start()
+
+        if self.bpod_start_timestamp is None:
+            self.bpod_start_timestamp = self.trial_start_timestamp
+
 
 
         
@@ -566,10 +571,10 @@ class BpodBase(object):
 
         current_trial                       = self.session.current_trial
         current_trial.trial_start_timestamp = self.trial_start_timestamp  # start timestamp of first trial
-        current_trial.bpod_start_timestamp  = self.trial_start_timestamp
-
-
+        current_trial.bpod_start_timestamp  = self.bpod_start_timestamp
+        
         trial_end_timestamp, discrepancy    = self._bpodcom_read_timestamps()
+        current_trial.trial_end_timestamp   = trial_end_timestamp
 
         if discrepancy>1:
             self.session += WarningMessage( "Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy) )

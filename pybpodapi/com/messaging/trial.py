@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Trial(BaseMessage):
 	"""
-	:ivar float bpod_start_timestamp: None
+	:ivar float trial_start_timestamp: None
 	:ivar StateMachine sma: sma
 	:ivar list(StateOccurrence) states_occurrences: list of state occurrences
 	:ivar list(EventOccurrence) events_occurrences: list of event occurrences 
@@ -25,7 +25,7 @@ class Trial(BaseMessage):
 
 	def __init__(self, sma=None):
 		super(Trial,self).__init__('New trial')
-		self.bpod_start_timestamp = None
+		self.trial_start_timestamp = None
 		self.sma = sma  			  # type: StateMachine
 		self.states_occurrences = []  # type: list(StateOccurrence)
 		self.events_occurrences = []  # type: list(EventOccurrence)
@@ -109,6 +109,8 @@ class Trial(BaseMessage):
 	
 	def export(self):
 		return {'Bpod start timestamp': self.bpod_start_timestamp,
+				'Trial start timestamp': self.trial_start_timestamp,
+				'Trial end timestamp': self.trial_end_timestamp,
 				'States timestamps': self.states_durations,
 				'Events timestamps': self.get_all_timestamps_by_event()}
 	
