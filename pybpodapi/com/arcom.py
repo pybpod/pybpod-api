@@ -69,6 +69,11 @@ class ArduinoTypes(object):
 		return int.from_bytes(message_bytes, byteorder='little')
 
 	@staticmethod
+	def cvt_uint32(message_bytes):
+		return struct.unpack('<L',message_bytes)[0]
+
+
+	@staticmethod
 	def cvt_uint64(message_bytes):
 		return struct.unpack('<Q',message_bytes)[0]
 
