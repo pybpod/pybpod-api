@@ -215,6 +215,8 @@ class BpodCOMProtocol(BpodBase):
         outputs = self._arcom.read_char_array(array_len=n_outputs)  # type: list(str)
         logger.debug("Read outputs: %s", outputs)
 
+        print('max_states', max_states)
+        print('----------------------')
         hardware.max_states         = max_states
         hardware.cycle_period       = cycle_period
         hardware.max_serial_events  = max_serial_events

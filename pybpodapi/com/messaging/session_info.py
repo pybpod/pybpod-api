@@ -15,16 +15,17 @@ class SessionInfo(BaseMessage):
 	MESSAGE_TYPE_ALIAS = 'INFO'
 	MESSAGE_COLOR 	   = (150,150,255)
 
-	def __init__(self, infoname, infovalue=None):
-		super(SessionInfo, self).__init__(infoname)
+	def __init__(self, infoname, infovalue=None, start_time=None, end_time=None):
+		super(SessionInfo, self).__init__(infoname, host_timestamp=start_time)
 		self._infovalue = infovalue
+		self._endtime   = end_time
 
 	def tolist(self):
 		return [
 			self.MESSAGE_TYPE_ALIAS, 
 			self.pc_timestamp,
 			self.host_timestamp,
-			None,
+			self._endtime,
 			self.content,
 			self._infovalue
 		]

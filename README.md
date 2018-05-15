@@ -38,7 +38,7 @@ This is Open Source software. We use the `GNU General Public License version 3 <
 
 1. Duplicate *user_settings.py.template* and save it as *user_settings.py*
 
-        Define the SERIAL_PORT attribute with your machine serial port where Bpod is connected to
+        Define the PYBPOD_SERIAL_PORT attribute with your machine serial port where Bpod is connected to
         Define the API_LOG_LEVEL with logging.DEBUG if you want detailed logging for the API
 
 2. On the project root folder run:

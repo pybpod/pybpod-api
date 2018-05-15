@@ -29,7 +29,7 @@ class BpodIO(BpodCOMProtocolModules):
         
         self.session += SessionInfo("This is a PYBPOD file. Find more info at http://pybpod.readthedocs.io")
         self.session += SessionInfo( Session.INFO_BPODAPI_VERSION, pybpodapi.__version__)
-        self.session += SessionInfo( Session.INFO_PYBPOD_SESSION_NAME,    self.session_name )
+        self.session += SessionInfo( Session.INFO_SESSION_NAME,    self.session_name )
         self.session += SessionInfo( Session.INFO_SESSION_STARTED,  self.session.start_timestamp )
         
     def create_session(self):

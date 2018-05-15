@@ -23,11 +23,11 @@ Example of  *'examples/user_settings.py'*  file:
 
 	PYBPOD_API_LOG_LEVEL = None
 	
-	WORKSPACE_PATH  = 'BPOD-WORKSPACE'
+	PYBPOD_SESSION_PATH  = 'SESSION-WORKSPACE'
 
-	# if you do not define the next variable, the PROTOCOL_NAME 
+	# if you do not define the next variable, the PYBPOD_SESSION 
 	# will assume the current datetime value.
-	PROTOCOL_NAME   = 'PROTOCOL-NAME' 
+	PYBPOD_SESSION = 'SESSION-NAME' 
 
 	SERIAL_PORT   = '/dev/ttyACM0'
 

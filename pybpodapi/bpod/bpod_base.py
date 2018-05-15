@@ -60,11 +60,11 @@ class BpodBase(object):
     def __init__(self, serial_port=None, sync_channel=None, sync_mode=None, net_port=None):
         self._session = self.create_session()
         
-        self.serial_port    = serial_port    if serial_port     is not None else settings.SERIAL_PORT
-        self.baudrate       = settings.BAUDRATE
-        self.sync_channel   = sync_channel   if sync_channel    is not None else settings.SYNC_CHANNEL
-        self.sync_mode      = sync_mode      if sync_mode       is not None else settings.SYNC_MODE
-        self.net_port       = net_port       if net_port        is not None else settings.NET_PORT
+        self.serial_port    = serial_port    if serial_port     is not None else settings.PYBPOD_SERIAL_PORT
+        self.baudrate       = settings.PYBPOD_BAUDRATE
+        self.sync_channel   = sync_channel   if sync_channel    is not None else settings.PYBPOD_SYNC_CHANNEL
+        self.sync_mode      = sync_mode      if sync_mode       is not None else settings.PYBPOD_SYNC_MODE
+        self.net_port       = net_port       if net_port        is not None else settings.PYBPOD_NET_PORT
         self._hardware      = Hardware()    # type: Hardware
         self.bpod_modules   = None          # type: BpodModules
         self.bpod_start_timestamp = None
@@ -73,21 +73,21 @@ class BpodBase(object):
 
         self.session_timestamps = [] #Store the session timestamps in case bpod is using live_timestamps
 
-
         self._hardware.sync_channel = self.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
         self._hardware.sync_mode    = self.sync_mode    # 0 = flip logic every trial, 1 = every state
         
-        self.session += SessionInfo( self.session.INFO_SERIAL_PORT, self.serial_port )
-        if self.net_port:
-            self.session += SessionInfo( self.session.INFO_NET_PORT,    self.net_port )
-        
-        self.session += SessionInfo(self.session.INFO_CREATOR_NAME, settings.PYBPOD_CREATOR)
-        self.session += SessionInfo(self.session.INFO_PROJECT_NAME, settings.PYBPOD_PROJECT)
+        self.session += SessionInfo(self.session.INFO_SERIAL_PORT,     self.serial_port )
+        self.session += SessionInfo(self.session.INFO_PROTOCOL_NAME,   settings.PYBPOD_PROTOCOL)
+        self.session += SessionInfo(self.session.INFO_CREATOR_NAME,    settings.PYBPOD_CREATOR)
+        self.session += SessionInfo(self.session.INFO_PROJECT_NAME,    settings.PYBPOD_PROJECT)
         self.session += SessionInfo(self.session.INFO_EXPERIMENT_NAME, settings.PYBPOD_EXPERIMENT)
-        self.session += SessionInfo(self.session.INFO_BOARD_NAME, settings.PYBPOD_BOARD)
-        self.session += SessionInfo(self.session.INFO_SETUP_NAME, settings.PYBPOD_SETUP)
+        self.session += SessionInfo(self.session.INFO_BOARD_NAME,      settings.PYBPOD_BOARD)
+        self.session += SessionInfo(self.session.INFO_SETUP_NAME,      settings.PYBPOD_SETUP)
         self.session += SessionInfo(self.session.INFO_BPODGUI_VERSION, settings.PYBPOD_BPODGUI_VERSION)
 
+        if self.net_port:
+            self.session += SessionInfo( self.session.INFO_NET_PORT, self.net_port )
+        
         for subject_name in settings.PYBPOD_SUBJECTS: 
             self.session += SessionInfo(self.session.INFO_SUBJECT_NAME, subject_name)
 
@@ -147,8 +147,8 @@ class BpodBase(object):
         if firmware_version > int(settings.TARGET_BPOD_FIRMWARE_VERSION):
             raise BpodErrorException('Error: Future firmware detected. Please update the Bpod python software.')
 
-        self._hardware.firmware_version     = firmware_version
-        self._hardware.machine_type         = machine_type
+        self._hardware.firmware_version = firmware_version
+        self._hardware.machine_type     = machine_type
         #########################################################
         
         
@@ -575,6 +575,14 @@ class BpodBase(object):
         
         trial_end_timestamp, discrepancy    = self._bpodcom_read_timestamps()
         current_trial.trial_end_timestamp   = trial_end_timestamp
+
+        self.session += SessionInfo(
+            self.session.INFO_TRIAL_BPODTIME,
+            trial_end_timestamp-self.trial_start_timestamp, 
+            start_time=self.trial_start_timestamp,
+            end_time  =trial_end_timestamp
+        )
+
 
         if discrepancy>1:
             self.session += WarningMessage( "Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy) )
