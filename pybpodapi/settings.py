@@ -8,7 +8,8 @@ PYBPOD_API_LOG_LEVEL = None
 PYBPOD_API_LOG_FILE  = 'pybpod-api.log'
 
 PYBPOD_API_MODULES = [
-    'pybpod_rotaryencoder_module'
+    'pybpod_rotaryencoder_module',
+    'pybpod_analogoutput_module'
 ]
 
 # stream the session file to the stdin (terminal)
