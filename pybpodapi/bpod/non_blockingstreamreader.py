@@ -33,8 +33,9 @@ class NonBlockingStreamReader:
                 while True:
                     if self.event.is_set(): break
                     line = self.stream.readline()
-                    if line: self.queue.put(line)
-                    
+                    if line:
+                        self.queue.put(line)
+                        lines = None
                     self.event.wait(0.01)
                
 

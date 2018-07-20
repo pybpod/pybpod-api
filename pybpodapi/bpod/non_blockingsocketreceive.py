@@ -34,7 +34,9 @@ class NonBlockingSocketReceive:
                             if not data: self.event.set()
                         except socket.timeout:
                             pass
-                        if data:     self.queue.put(data)
+                        if data:
+                            self.queue.put(data)
+                            data = None
 
                         self.event.wait(0.01)
 

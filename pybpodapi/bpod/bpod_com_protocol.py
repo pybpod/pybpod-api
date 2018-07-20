@@ -296,12 +296,12 @@ class BpodCOMProtocol(BpodBase):
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.ECHO_SOFTCODE), softcode])
         self._arcom.write_array(bytes2send)  
 
-    def _bpodcom_manual_override_exec_event(self, state_index, event): 
+    def _bpodcom_manual_override_exec_event(self, event_index, event_data): 
         """ 
         Send soft code 
         """ 
         logger.debug("Manual override execute virtual event") 
-        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), ord(state_index), ord(event)])
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), event_index, event_data])
         self._arcom.write_array(bytes2send) 
  
     def _bpodcom_send_softcode(self, softcode): 
@@ -333,6 +333,7 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Requesting state machine run (%s)", SendMessageHeader.RUN_STATE_MACHINE)
 
         self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
+        print('run--')
 
     def _bpodcom_get_trial_timestamp_start(self):
         data = self._arcom.read_bytes_array(8)

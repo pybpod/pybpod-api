@@ -71,8 +71,6 @@ class BpodBase(object):
 
         self._new_sma_sent  = False         # type: bool
 
-        self.session_timestamps = [] #Store the session timestamps in case bpod is using live_timestamps
-
         self._hardware.sync_channel = self.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
         self._hardware.sync_mode    = self.sync_mode    # 0 = flip logic every trial, 1 = every state
         
@@ -165,8 +163,6 @@ class BpodBase(object):
 
 
         self._hardware.setup(self.bpod_modules)
-
-        self.session_timestamps = []
 
         # initialise the server to handle commands
         if self.net_port is not None:
@@ -279,6 +275,7 @@ class BpodBase(object):
 
         logger.info("Running state machine, trial %s", len(self.session.trials) )
 
+        self.trial_timestamps = [] #Store the trial timestamps in case bpod is using live_timestamps
 
         self._bpodcom_run_state_machine()
         if self._new_sma_sent:
@@ -323,11 +320,18 @@ class BpodBase(object):
                     elif inline.startswith('SoftCode'):
                         softcode = int(inline[-1])-1
                         self.trigger_softcode(softcode)
+                    elif inline.startswith('trigger:'):
+                        tdata    = inline.split(':')
+                        evt_name = tdata[1]
+                        evt_data = int(tdata[2])
+                        event_index = sma.hardware.channels.event_names.index(evt_name)
+                        self.trigger_event(event_index, event_data)
             #####################################################
 
             # read commands from a net socket ###################
             if self.socketin is not None:
                 inline = self.socketin.readline()
+                
                 if inline is not None:
                     inline = inline.decode().strip()
                     if inline.startswith('pause-trial'):
@@ -343,6 +347,12 @@ class BpodBase(object):
                     elif inline.startswith('SoftCode'):
                         softcode = int(inline[-1])-1
                         self.trigger_softcode(softcode)
+                    elif inline.startswith('trigger:'):
+                        tdata    = inline.split(':')
+                        evt_name = tdata[1]
+                        evt_data = int(tdata[2])
+                        event_index = sma.hardware.channels.event_names.index(evt_name)
+                        self.trigger_event(event_index, evt_data)
             #####################################################
             
 
@@ -440,8 +450,8 @@ class BpodBase(object):
     def echo_softcode(self, softcode): 
         return self._bpodcom_echo_softcode(softcode) 
  
-    def trigger_event(self, state_index, event): 
-        return self._bpodcom_manual_override_exec_event(state_index, event) 
+    def trigger_event(self, event_index, event_data):
+        return self._bpodcom_manual_override_exec_event(event_index, event_data) 
  
     def trigger_softcode(self, softcode): 
         return self._bpodcom_send_softcode(softcode) 
@@ -475,7 +485,7 @@ class BpodBase(object):
 
             if self.hardware.live_timestamps:
                 event_timestamp = self._bpodcom_read_event_timestamp()
-                self.session_timestamps.append(event_timestamp)
+                self.trial_timestamps.append(event_timestamp)
             else:
                 event_timestamp = None
             
@@ -583,13 +593,11 @@ class BpodBase(object):
             end_time  =trial_end_timestamp
         )
 
-
         if discrepancy>1:
             self.session += WarningMessage( "Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy) )
 
-
         if self.hardware.live_timestamps:
-            timestamps = self.session_timestamps
+            timestamps = self.trial_timestamps
         else:    
             timestamps = self._bpodcom_read_alltimestamps()
             timestamps = [float(t)*self._hardware.times_scale_factor for t in timestamps]
@@ -603,7 +611,6 @@ class BpodBase(object):
             self.session += e
         ###################################################################################################
 
-        #update the states timestamps
         current_trial.state_timestamps += [timestamps[i] for i in state_change_indexes]
         current_trial.state_timestamps += timestamps[-1:]
     #########################################
