@@ -28,6 +28,7 @@ from pybpodapi.com.messaging.softcode_occurrence import SoftcodeOccurrence
 from pybpodapi.com.messaging.session_info        import SessionInfo
 from pybpodapi.com.messaging.warning             import WarningMessage
 from pybpodapi.com.messaging.value               import ValueMessage
+from pybpodapi.com.messaging.state_transition    import StateTransition
 
 from pybpodapi.session import Session
 
@@ -493,7 +494,11 @@ class BpodBase(object):
                 if event_id == 255:
                     sma.is_running = False
                 else:
-                    self._session += EventOccurrence(event_id, sma.hardware.channels.get_event_name(event_id), event_timestamp )
+                    self._session += EventOccurrence(
+                        event_id,
+                        sma.hardware.channels.get_event_name(event_id),
+                        event_timestamp
+                    )
                     
                     # input matrix
                     if not transition_event_found:
@@ -512,6 +517,7 @@ class BpodBase(object):
                                     logger.debug("adding states input matrix")
                                     current_trial.states.append(sma.current_state)
                                     state_change_indexes.append(len(current_trial.events_occurrences) - 1)
+
                                 transition_event_found = True
 
                     # state timer matrix
@@ -566,6 +572,10 @@ class BpodBase(object):
                          
                 logger.debug("States indexes: %s", current_trial.states)
 
+            if transition_event_found and not math.isnan(sma.current_state):
+                state_name = sma.state_names[sma.current_state]
+                self._session += StateTransition( state_name, event_timestamp )
+
         elif opcode == 2:  # Handle soft code
             self._session += SoftcodeOccurrence(data)
             self.softcode_handler_function(data)
@@ -602,14 +612,16 @@ class BpodBase(object):
             timestamps = self._bpodcom_read_alltimestamps()
             timestamps = [float(t)*self._hardware.times_scale_factor for t in timestamps]
 
+            # update the timestamps of the events #############################################################
+            for event, timestamp in zip(current_trial.events_occurrences, timestamps):
+                event.host_timestamp = timestamp
+                e = EventResume(event.event_id, event.event_name, host_timestamp=timestamp)
+                self.session += e
+            ###################################################################################################
+
         current_trial.event_timestamps = timestamps
         
-        # update the timestamps of the events #############################################################
-        for event, timestamp in zip(current_trial.events_occurrences, timestamps):
-            event.host_timestamp = timestamp
-            e = EventResume(event.event_id, event.event_name, host_timestamp=timestamp)
-            self.session += e
-        ###################################################################################################
+        
 
         current_trial.state_timestamps += [timestamps[i] for i in state_change_indexes]
         current_trial.state_timestamps += timestamps[-1:]

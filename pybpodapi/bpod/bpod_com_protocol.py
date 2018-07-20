@@ -333,7 +333,6 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Requesting state machine run (%s)", SendMessageHeader.RUN_STATE_MACHINE)
 
         self._arcom.write_char(SendMessageHeader.RUN_STATE_MACHINE)
-        print('run--')
 
     def _bpodcom_get_trial_timestamp_start(self):
         data = self._arcom.read_bytes_array(8)
