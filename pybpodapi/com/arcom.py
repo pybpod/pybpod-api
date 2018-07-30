@@ -57,6 +57,10 @@ class ArduinoTypes(object):
 		return np.array(array, dtype=str(ArduinoTypes.UINT32)).tobytes()
 
 	@staticmethod
+	def get_float(value):
+		return struct.pack('<f',value)
+
+	@staticmethod
 	def cvt_float32(message_bytes):
 		return struct.unpack('<f',message_bytes)[0]
 
