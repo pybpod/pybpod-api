@@ -486,7 +486,6 @@ class BpodBase(object):
 
             if self.hardware.live_timestamps:
                 event_timestamp = self._bpodcom_read_event_timestamp()
-                self.trial_timestamps.append(event_timestamp)
             else:
                 event_timestamp = None
             
@@ -499,6 +498,7 @@ class BpodBase(object):
                         sma.hardware.channels.get_event_name(event_id),
                         event_timestamp
                     )
+                    self.trial_timestamps.append(event_timestamp)
                     
                     # input matrix
                     if not transition_event_found:
