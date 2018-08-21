@@ -3,7 +3,7 @@
 
 import logging
 
-from pyforms import conf as bpod_settings
+from confapp import conf as bpod_settings
 
 from pybpodapi.bpod.hardware.channels import Channels
 

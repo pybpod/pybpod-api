@@ -10,7 +10,7 @@ __email__ 		= ['ricardojvr@gmail.com', 'cajomferro@gmail.com', 'joshua21@gmail.c
 __status__ 		= "Development"
 
 
-from pyforms import conf
+from confapp import conf
 import loggingbootstrap
 
 #load the user settings

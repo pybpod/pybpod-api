@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging, uuid
-from pyforms import conf
+from confapp import conf
 from datetime import datetime as datetime_now
 
 import pybpodapi

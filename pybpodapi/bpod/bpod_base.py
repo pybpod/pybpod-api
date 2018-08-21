@@ -8,7 +8,7 @@ import socket
 import os
 import sys
 
-from pyforms import conf as settings
+from confapp import conf as settings
 from datetime import datetime as datetime_now
 from pybpodapi.bpod.hardware.hardware        import Hardware
 from pybpodapi.bpod.hardware.channels        import ChannelType

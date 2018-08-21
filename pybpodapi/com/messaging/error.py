@@ -1,6 +1,6 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
-from pyforms import conf
+from confapp import conf
 from pybpodapi.com.messaging.base_message import BaseMessage
 
 
