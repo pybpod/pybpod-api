@@ -625,6 +625,15 @@ class BpodBase(object):
 
         current_trial.state_timestamps += [timestamps[i] for i in state_change_indexes]
         current_trial.state_timestamps += timestamps[-1:]
+
+
+    def find_module_by_name(self, name):
+        """
+        Search for a module by name
+        """
+        for m in self.modules:
+            if m.name == name: return m
+        return None
     #########################################
     ############## PROPERTIES ###############
     #########################################
