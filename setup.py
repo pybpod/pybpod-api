@@ -11,6 +11,7 @@ if not version:
 	raise RuntimeError('Cannot find version information')
 
 requirements = [
+	'confapp',
 	'pyserial',
 	'logging-bootstrap',
 ]
@@ -25,5 +26,5 @@ setup(
 	url='https://bitbucket.org/fchampalimaud/pybpod-api',
 	include_package_data=True,
 	packages=find_packages(exclude=['contrib', 'docs', 'tests', 'examples', 'deploy', 'reports']),
-	# install_requires=requirements,
+	install_requires=requirements,
 )
