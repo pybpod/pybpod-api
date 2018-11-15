@@ -326,7 +326,7 @@ class BpodBase(object):
                         evt_name = tdata[1]
                         evt_data = int(tdata[2])
                         event_index = sma.hardware.channels.event_names.index(evt_name)
-                        self.trigger_event(event_index, event_data)
+                        self.trigger_event(event_index, evt_data)
             #####################################################
 
             # read commands from a net socket ###################
