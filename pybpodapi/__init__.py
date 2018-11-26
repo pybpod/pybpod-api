@@ -1,12 +1,12 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__version__ 	= "1.6.1"
-__author__ 		= ['Ricardo Ribeiro', 'Carlos Mão de Ferro', 'Joshua Sanders']
-__credits__ 	= ["Ricardo Ribeiro", "Carlos Mao de Ferro"]
+__version__ 	= "1.6.2"
+__author__ 		= ['Ricardo Ribeiro', 'Carlos Mão de Ferro', 'Joshua Sanders', 'Luís Teixeira']
+__credits__ 	= ["Ricardo Ribeiro", "Carlos Mao de Ferro", 'Luís Teixeira']
 __license__ 	= "Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>"
-__maintainer__ 	= ['Ricardo Ribeiro', 'Carlos Mão de Ferro','Joshua Sanders']
-__email__ 		= ['ricardojvr@gmail.com', 'cajomferro@gmail.com', 'joshua21@gmail.com']
+__maintainer__ 	= ['Ricardo Ribeiro', 'Carlos Mão de Ferro','Joshua Sanders', 'Luís Teixeira']
+__email__ 		= ['ricardojvr@gmail.com', 'cajomferro@gmail.com', 'joshua21@gmail.com', 'micboucinha@gmail.com']
 __status__ 		= "Development"
 
 
