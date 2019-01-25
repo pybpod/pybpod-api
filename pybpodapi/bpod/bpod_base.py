@@ -369,10 +369,9 @@ class BpodBase(object):
 
         self.session += EndTrial('The trial ended')
 
-        self.__update_timestamps(sma, state_change_indexes)
-
-        self.session.add_trial_events()
-
+        if not interrupt_task:
+            self.__update_timestamps(sma, state_change_indexes)
+            self.session.add_trial_events()
 
         logger.info("Publishing Bpod trial")
 
