@@ -61,10 +61,10 @@ class BpodCOMProtocol(BpodBase):
         :param int value: value to write on channel
         """
         if channel_type == ChannelType.INPUT:
-            # TODO: this might require extra checks depending on the channel_type
-            input_channel_name_number = self.hardware.inputs.index(channel_name)
+            input_channel_name = channel_name + str(channel_number)
+            channel_number = self.hardware.channels.input_channel_names.index(input_channel_name)
             try:
-                self._bpodcom_override_input_state(channel_name, input_channel_name_number, value)
+                self._bpodcom_override_input_state(channel_name[0], channel_number, value)
             except:
                 raise BpodErrorException(
                     'Error using manual_override: {name} is not a valid channel name.'.format(name=channel_name))
