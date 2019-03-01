@@ -359,6 +359,13 @@ class BpodBase(object):
             evt_data = int(tdata[2])
             event_index = sma.hardware.channels.event_names.index(evt_name)
             self.trigger_event(event_index, evt_data)
+        elif inline.startswith('trigger_input:'):
+            tdata = inline.split(':')
+            chn_name = tdata[1]
+            chn_number = tdata[2]
+            evt_data = tdata[3]
+            self.trigger_input(chn_name, chn_number, evt_data)
+
         return interrupt_task
 
     def load_serial_message(self, serial_channel, message_ID, serial_message):
@@ -398,6 +405,9 @@ class BpodBase(object):
  
     def trigger_event(self, event_index, event_data):
         return self._bpodcom_manual_override_exec_event(event_index, event_data) 
+
+    def trigger_input(self, channel_name, channel_number, value):
+        return self._bpodcom_override_input_state(channel_name, channel_number, value)
  
     def trigger_softcode(self, softcode): 
         return self._bpodcom_send_softcode(softcode) 
