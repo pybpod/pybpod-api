@@ -327,9 +327,10 @@ class BpodCOMProtocol(BpodBase):
         :param int channel_number: number of Bpod port
         :param int value: value to be written
         """
-        logger.debug("Override input state") 
+        logger.debug("Override input state")
+
         bytes2send = ArduinoTypes.get_uint8_array(
-            [ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), ord(channel_name), channel_number, value])
+            [ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), channel_number, value])
         self._arcom.write_array(bytes2send)
  
     def _bpodcom_send_softcode(self, softcode): 
