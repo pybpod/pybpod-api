@@ -159,7 +159,7 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Resetting clock") 
 
         self._arcom.write_char(SendMessageHeader.RESET_CLOCK) 
-        return self._arcom.read_byte()==byte(1) 
+        return self._arcom.read_byte() == bytes(1)
 
     def _bpodcom_stop_trial(self): 
         """ 
