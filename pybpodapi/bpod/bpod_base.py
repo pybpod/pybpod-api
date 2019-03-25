@@ -346,18 +346,10 @@ class BpodBase(object):
             self.stop_trial()
         elif inline.startswith('close'):
             self.stop_trial()
-            sma.is_running = False
             interrupt_task = True
         elif inline.startswith('SoftCode'):
             softcode = int(inline[-1]) - 1
             self.trigger_softcode(softcode)
-        elif inline.startswith('trigger:'):
-            tdata = inline.split(':')
-            evt_name = tdata[1]
-            evt_data = int(tdata[2])
-            # TODO: surround this call in a try except to capture calls with unavailable event names
-            event_index = sma.hardware.channels.event_names.index(evt_name)
-            self.trigger_event(event_index, evt_data)
         elif inline.startswith('trigger_input:'):
             tdata = inline.split(':')
             chn_name = tdata[1]
@@ -372,6 +364,17 @@ class BpodBase(object):
             # TODO: surround this call in a try except to capture calls with unavailable channel names
             channel_number = sma.hardware.channels.output_channel_names.index(chn_name)
             self.trigger_output(channel_number, evt_data)
+        elif inline.startswith('message:'):
+            tdata = inline.split(':')
+            module_index = int(tdata[1])
+            msg = tdata[2]
+            final_msg = []
+            msg_elems = msg.split()
+            if msg_elems[0].startswith('\''):
+                final_msg.append(ord(msg_elems[0][1]))
+            for x in msg_elems[1:]:
+                final_msg.append(int(x))
+            self.load_message(module_index, final_msg)
 
         return interrupt_task
 
@@ -383,7 +386,7 @@ class BpodBase(object):
         :param int message_ID: Unique id for the message. Should be between 1 and 255
         :param list(int) serial_message: Message to send. The message should be bigger than 3 bytes. 
         """
-        response = self._bpodcom_load_serial_message(serial_channel, message_ID, serial_message, 1);
+        response = self._bpodcom_load_serial_message(serial_channel, message_ID, serial_message, 1)
 
         if not response:
             raise BpodErrorException('Error: Failed to set serial message.')
@@ -420,7 +423,14 @@ class BpodBase(object):
         return self._bpodcom_override_digital_hardware_state(channel_number, value)
  
     def trigger_softcode(self, softcode): 
-        return self._bpodcom_send_softcode(softcode) 
+        return self._bpodcom_send_softcode(softcode)
+
+    def load_message(self, module_index, msg):
+        # get module reference
+        module = [x for x in self.modules if x.serial_port == module_index]
+        # call module_write. on module reference
+        if module:
+            self._bpodcom_module_write(module_index, msg)
 
     #########################################
     ############ PRIVATE METHODS ############
