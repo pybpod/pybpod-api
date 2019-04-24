@@ -12,4 +12,4 @@ elif TARGET_BPOD_FIRMWARE_VERSION == '13':
 elif TARGET_BPOD_FIRMWARE_VERSION == '9':
 	from pybpodapi.bpod.hardware.events.bpod0_7_5_fw9 import EventName
 else:
-	from pybpodapi.bpod.hardware.events.bpod0_7_5_fw9 import EventName
+	from pybpodapi.bpod.hardware.events.bpod0_7_9_fw20 import EventName
