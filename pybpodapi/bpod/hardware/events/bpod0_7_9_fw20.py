@@ -881,7 +881,38 @@ class EventName(BaseEventName):
 	#: Condition5
 	Condition5 = 'Condition5'
 
-	
+	#: Condition6
+	Condition6 = 'Condition6'
+
+	#: Condition7
+	Condition7 = 'Condition7'
+
+	#: Condition8
+	Condition8 = 'Condition8'
+
+	#: Condition9
+	Condition9 = 'Condition9'
+
+	#: Condition10
+	Condition10 = 'Condition10'
+
+	#: Condition11
+	Condition11 = 'Condition11'
+
+	#: Condition12
+	Condition12 = 'Condition12'
+
+	#: Condition13
+	Condition13 = 'Condition13'
+
+	#: Condition14
+	Condition14 = 'Condition14'
+
+	#: Condition15
+	Condition15 = 'Condition15'
+
+	#: Condition16
+	Condition16 = 'Condition16'
 
 	#: Tup
 	Tup = 'Tup'
