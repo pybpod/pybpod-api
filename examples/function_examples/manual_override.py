@@ -19,6 +19,33 @@ my_bpod = Bpod()
 
 wait_active_time_ms = 2
 
+### INPUTS - BNC (1, 2) ###
+print("Set BNC1 (Input) to a value")
+my_bpod.manual_override(Bpod.ChannelTypes.INPUT, Bpod.ChannelNames.BNC, channel_number=1, value=12)
+time.sleep(wait_active_time_ms)
+
+print("Set BNC2 (Input) to a value")
+my_bpod.manual_override(Bpod.ChannelTypes.INPUT, Bpod.ChannelNames.BNC, channel_number=2, value=15)
+time.sleep(wait_active_time_ms)
+
+### INPUTS - PWM (1..4) ###
+print("Set PWM1 (Input) to a value")
+my_bpod.manual_override(Bpod.ChannelTypes.INPUT, 'Port', channel_number=1, value=12)
+time.sleep(wait_active_time_ms)
+
+print("Set PWM2 (Input) to a value")
+my_bpod.manual_override(Bpod.ChannelTypes.INPUT, 'Port', channel_number=2, value=13)
+time.sleep(wait_active_time_ms)
+
+print("Set PWM3 (Input) to a value")
+my_bpod.manual_override(Bpod.ChannelTypes.INPUT, 'Port', channel_number=3, value=14)
+time.sleep(wait_active_time_ms)
+
+print("Set PWM3 (Input) to a value")
+my_bpod.manual_override(Bpod.ChannelTypes.INPUT, 'Port', channel_number=4, value=15)
+time.sleep(wait_active_time_ms)
+
+
 ### PORT 1 LED ###
 
 print("Set LED of port 1 to max intensity")

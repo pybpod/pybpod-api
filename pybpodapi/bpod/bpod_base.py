@@ -3,9 +3,7 @@
 
 import logging
 import math
-import time
 import socket
-import os
 import sys
 
 from confapp import conf as settings
@@ -290,12 +288,9 @@ class BpodBase(object):
         if self.bpod_start_timestamp is None:
             self.bpod_start_timestamp = self.trial_start_timestamp
 
-
-
-        
         #####################################################
         
-        #create a list of executed states
+        # create a list of executed states
         state_change_indexes = []
 
         # flag used to stop a trial
@@ -308,25 +303,7 @@ class BpodBase(object):
             if self.stdin is not None:
                 inline = self.stdin.readline()
                 if inline is not None:
-                    if inline.startswith('pause-trial'):
-                        self.pause()
-                    elif inline.startswith('resume-trial'):
-                        self.resume()
-                    elif inline.startswith('stop-trial'):
-                        self.stop_trial()
-                    elif inline.startswith('close'):
-                        self.stop_trial()
-                        sma.is_running = False
-                        interrupt_task = True
-                    elif inline.startswith('SoftCode'):
-                        softcode = int(inline[-1])-1
-                        self.trigger_softcode(softcode)
-                    elif inline.startswith('trigger:'):
-                        tdata    = inline.split(':')
-                        evt_name = tdata[1]
-                        evt_data = int(tdata[2])
-                        event_index = sma.hardware.channels.event_names.index(evt_name)
-                        self.trigger_event(event_index, evt_data)
+                    interrupt_task = self.handle_inline(inline, sma)
             #####################################################
 
             # read commands from a net socket ###################
@@ -335,44 +312,23 @@ class BpodBase(object):
                 
                 if inline is not None:
                     inline = inline.decode().strip()
-                    if inline.startswith('pause-trial'):
-                        self.pause()
-                    elif inline.startswith('resume-trial'):
-                        self.resume()
-                    elif inline.startswith('stop-trial'):
-                        self.stop_trial()
-                    elif inline.startswith('close'):
-                        self.stop_trial()
-                        sma.is_running = False
-                        interrupt_task = True
-                    elif inline.startswith('SoftCode'):
-                        softcode = int(inline[-1])-1
-                        self.trigger_softcode(softcode)
-                    elif inline.startswith('trigger:'):
-                        tdata    = inline.split(':')
-                        evt_name = tdata[1]
-                        evt_data = int(tdata[2])
-                        event_index = sma.hardware.channels.event_names.index(evt_name)
-                        self.trigger_event(event_index, evt_data)
+                    interrupt_task = self.handle_inline(inline, sma)
             #####################################################
-            
 
             if self.data_available():
                 opcode, data = self._bpodcom_read_opcode_message()
                 self.__process_opcode(sma, opcode, data, state_change_indexes)
 
-            
             self.loop_handler()
             
-            if interrupt_task: break
+            if interrupt_task:
+                break
         
-
         self.session += EndTrial('The trial ended')
 
-        self.__update_timestamps(sma, state_change_indexes)
-
-        self.session.add_trial_events()
-
+        if not interrupt_task:
+            self.__update_timestamps(sma, state_change_indexes)
+            self.session.add_trial_events()
 
         logger.info("Publishing Bpod trial")
 
@@ -380,41 +336,47 @@ class BpodBase(object):
             self.close()
             exit(0)
 
-    
-    def manual_override(self, channel_type, channel_name, channel_number, value):
-        """
-        Manually override a Bpod channel
+    def handle_inline(self, inline, sma):
+        interrupt_task = False
+        if inline.startswith('pause-trial'):
+            self.pause()
+        elif inline.startswith('resume-trial'):
+            self.resume()
+        elif inline.startswith('stop-trial'):
+            self.stop_trial()
+        elif inline.startswith('close'):
+            self.stop_trial()
+            interrupt_task = True
+        elif inline.startswith('SoftCode'):
+            softcode = int(inline[-1]) - 1
+            self.trigger_softcode(softcode)
+        elif inline.startswith('trigger_input:'):
+            tdata = inline.split(':')
+            chn_name = tdata[1]
+            evt_data = tdata[2]
+            # TODO: surround this call in a try except to capture calls with unavailable channel names
+            channel_number = sma.hardware.channels.input_channel_names.index(chn_name)
+            self.trigger_input(channel_number, evt_data)
+        elif inline.startswith('trigger_output:'):
+            tdata = inline.split(':')
+            chn_name = tdata[1]
+            evt_data = tdata[2]
+            # TODO: surround this call in a try except to capture calls with unavailable channel names
+            channel_number = sma.hardware.channels.output_channel_names.index(chn_name)
+            self.trigger_output(channel_number, evt_data)
+        elif inline.startswith('message:'):
+            tdata = inline.split(':')
+            module_index = int(tdata[1])
+            msg = tdata[2]
+            final_msg = []
+            msg_elems = msg.split()
+            if msg_elems[0].startswith('\''):
+                final_msg.append(ord(msg_elems[0][1]))
+            for x in msg_elems[1:]:
+                final_msg.append(int(x))
+            self.load_message(module_index, final_msg)
 
-        :param ChannelType channel_type: channel type input or output
-        :param ChannelName channel_name: channel name like PWM, Valve, etc.
-        :param channel_number:
-        :param int value: value to write on channel
-        """
-        if channel_type == ChannelType.INPUT:
-            raise BpodErrorException('Manually overriding a Bpod input channel is not yet supported in Python.')
-        
-        elif channel_type == ChannelType.OUTPUT:
-            """
-            if channel_name == ChannelName.VALVE:
-                if value > 0:
-                    value = math.pow(2, channel_number - 1)
-                channel_number = self._hardware.channels.events_positions.output_VALVE
-                self._bpodcom_override_digital_hardware_state(channel_number, value)
-
-            el
-            """
-            if channel_name == 'Serial':
-                self._bpodcom_send_byte_to_hardware_serial(channel_number, value)
-
-            else:
-                try:
-                    output_channel_name = channel_name + str(channel_number)
-                    channel_number = self.hardware.channels.output_channel_names.index( output_channel_name )
-                    self._bpodcom_override_digital_hardware_state(channel_number, value)
-                except:
-                    raise BpodErrorException('Error using manual_override: ' + output_channel_name + ' is not a valid channel name.')
-        else:
-            raise BpodErrorException('Error using manualOverride: first argument must be "Input" or "Output".')
+        return interrupt_task
 
     def load_serial_message(self, serial_channel, message_ID, serial_message):
         """
@@ -424,7 +386,7 @@ class BpodBase(object):
         :param int message_ID: Unique id for the message. Should be between 1 and 255
         :param list(int) serial_message: Message to send. The message should be bigger than 3 bytes. 
         """
-        response = self._bpodcom_load_serial_message(serial_channel, message_ID, serial_message, 1);
+        response = self._bpodcom_load_serial_message(serial_channel, message_ID, serial_message, 1)
 
         if not response:
             raise BpodErrorException('Error: Failed to set serial message.')
@@ -453,9 +415,22 @@ class BpodBase(object):
  
     def trigger_event(self, event_index, event_data):
         return self._bpodcom_manual_override_exec_event(event_index, event_data) 
+
+    def trigger_input(self, channel_number, value):
+        return self._bpodcom_override_input_state(channel_number, value)
+    
+    def trigger_output(self, channel_number, value):
+        return self._bpodcom_override_digital_hardware_state(channel_number, value)
  
     def trigger_softcode(self, softcode): 
-        return self._bpodcom_send_softcode(softcode) 
+        return self._bpodcom_send_softcode(softcode)
+
+    def load_message(self, module_index, msg):
+        # get module reference
+        module = [x for x in self.modules if x.serial_port == module_index]
+        # call module_write. on module reference
+        if module:
+            self._bpodcom_module_write(module_index, msg)
 
     #########################################
     ############ PRIVATE METHODS ############

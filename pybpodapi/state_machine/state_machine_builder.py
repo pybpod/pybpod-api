@@ -210,7 +210,7 @@ class StateMachineBuilder(StateMachineBase):
         # GLOBAL_TIMER_CHANNELS
         tmp = []
         for i in range(self.highest_used_global_timer):
-            tmp += [self.global_timers.channels[i]-1]
+            tmp += [self.global_timers.channels[i]]
         message += tmp  
         logger.debug('GLOBAL_TIMER_CHANNELS: %s', tmp)
         

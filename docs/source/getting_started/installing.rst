@@ -18,7 +18,7 @@ Installing
    This project uses Python 3!
 
 Clone the project from Bitbucket
-================
+================================
 
 ::
 

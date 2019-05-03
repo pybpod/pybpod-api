@@ -15,8 +15,17 @@ class OutputChannel(object):
 	#: LED
 	LED = 'LED'
 
-	#: Valve
-	Valve = 'Valve'
+	#: Valve1
+	Valve1 = 'Valve1'
+
+	#: Valve2
+	Valve2 = 'Valve2'
+
+	#: Valve3
+	Valve3 = 'Valve3'
+
+	#: Valve4
+	Valve4 = 'Valve4'
 
 	#: Serial 1
 	Serial1 = 'Serial1'
@@ -27,29 +36,20 @@ class OutputChannel(object):
 	#: Serial 3
 	Serial3 = 'Serial3'
 
+	#: Serial 4
+	Serial4 = 'Serial4'
+
+	#: Serial 5
+	Serial5 = 'Serial5'
+
 	#: SoftCode
 	SoftCode = 'SoftCode'
-
-	#: ValveState
-	ValveState = 'ValveState'
 
 	#: BNC1
 	BNC1 = 'BNC1'
 
 	#: BNC2
 	BNC2 = 'BNC2'
-
-	#: Wire1
-	Wire1 = 'Wire1'
-
-	#: Wire2
-	Wire2 = 'Wire2'
-
-	#: Wire3
-	Wire3 = 'Wire3'
-
-	#: Wire3
-	Wire4 = 'Wire4'
 
 	#: PWM1
 	PWM1 = 'PWM1'
@@ -62,18 +62,6 @@ class OutputChannel(object):
 
 	#: PWM4
 	PWM4 = 'PWM4'
-
-	#: PWM5
-	PWM5 = 'PWM5'
-
-	#: PWM6
-	PWM6 = 'PWM6'
-
-	#: PWM7
-	PWM7 = 'PWM7'
-
-	#: PWM8
-	PWM8 = 'PWM8'
 
 	#: GlobalTimerTrig
 	GlobalTimerTrig = 'GlobalTimerTrig'

@@ -148,11 +148,9 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 		if n_bytes_available > 0:
 			self._arcom.read_uint8_array(n_bytes_available)
 
-
-
-
 	def _bpodcom_module_write(self, module_index, message, dtype=None):
-		if dtype==None: dtype = ArduinoTypes.UINT8
+		if dtype is None:
+			dtype = ArduinoTypes.UINT8
 		
 		if isinstance(message, str):
 			message = [ord(c) for c in message]
@@ -163,28 +161,27 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 
 		msg = ArduinoTypes.get_array(message, dtype)
 
-		if len(msg)>64:
-			raise BpodError('Error: module messages must be under 64 bytes per transmission')
+		if len(msg) > 64:
+			raise BpodErrorException('Error: module messages must be under 64 bytes per transmission')
 
-
-		to_send = [ord(SendMessageHeader.WRITE_TO_MODULE), module_index+1, len(msg)]
+		to_send = [ord(SendMessageHeader.WRITE_TO_MODULE), module_index, len(msg)]
 		to_send = ArduinoTypes.get_uint8_array(to_send)
 
 		self._arcom.write_array(to_send+msg)		
 
-
 	def _bpodcom_module_read(self, module_index, size, dtype=None):
-		if dtype==None: dtype = ArduinoTypes.UINT8   
+		if dtype is None:
+			dtype = ArduinoTypes.UINT8
 
-		if dtype==ArduinoTypes.CHAR:
+		if dtype == ArduinoTypes.CHAR:
 			return self._arcom.read_char_array(size)
-		elif dtype==ArduinoTypes.UINT8:
+		elif dtype == ArduinoTypes.UINT8:
 			return self._arcom.read_uint8_array(size)
-		elif dtype==ArduinoTypes.UINT16:
+		elif dtype == ArduinoTypes.UINT16:
 			return self._arcom.read_uint16_array(size)
-		elif dtype==ArduinoTypes.UINT32:
+		elif dtype == ArduinoTypes.UINT32:
 			return self._arcom.read_uint32_array(size)
-		elif dtype==ArduinoTypes.FLOAT:
+		elif dtype == ArduinoTypes.FLOAT32:
 			return self._arcom.read_float32_array(size)
 		else:
 			return None

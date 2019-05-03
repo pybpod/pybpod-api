@@ -1,19 +1,16 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import logging, time, numpy as np
+import logging
 
-from pybpodapi.com.arcom import ArCOM, ArduinoTypes
-
-from pybpodapi.bpod_modules.bpod_module      import BpodModule
-from pybpodapi.com.protocol.send_msg_headers import SendMessageHeader
-from pybpodapi.com.protocol.recv_msg_headers import ReceiveMessageHeader
-
-from pybpodapi.exceptions.bpod_error import BpodErrorException
-
-
-from pybpodapi.bpod.bpod_base import BpodBase
 from confapp import conf as settings
+from pybpodapi.bpod.bpod_base import BpodBase
+from pybpodapi.bpod.hardware.channels import ChannelType
+from pybpodapi.bpod_modules.bpod_module import BpodModule
+from pybpodapi.com.arcom import ArCOM, ArduinoTypes
+from pybpodapi.com.protocol.recv_msg_headers import ReceiveMessageHeader
+from pybpodapi.com.protocol.send_msg_headers import SendMessageHeader
+from pybpodapi.exceptions.bpod_error import BpodErrorException
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +50,39 @@ class BpodCOMProtocol(BpodBase):
             super(BpodCOMProtocol, self).close()
             self._arcom.close()
             self.bpod_com_ready = False
-            
+
+    def manual_override(self, channel_type, channel_name, channel_number, value):
+        """
+        Manually override a Bpod channel
+
+        :param ChannelType channel_type: channel type input or output
+        :param ChannelName channel_name: channel name like PWM, Valve, etc.
+        :param channel_number:
+        :param int value: value to write on channel
+        """
+        if channel_type == ChannelType.INPUT:
+            input_channel_name = channel_name + str(channel_number)
+            channel_number = self.hardware.channels.input_channel_names.index(input_channel_name)
+            try:
+                self._bpodcom_override_input_state(channel_number, value)
+            except:
+                raise BpodErrorException(
+                    'Error using manual_override: {name} is not a valid channel name.'.format(name=channel_name))
+
+        elif channel_type == ChannelType.OUTPUT:
+            if channel_name == 'Serial':
+                self._bpodcom_send_byte_to_hardware_serial(channel_number, value)
+
+            else:
+                try:
+                    output_channel_name = channel_name + str(channel_number)
+                    channel_number = self.hardware.channels.output_channel_names.index(output_channel_name)
+                    self._bpodcom_override_digital_hardware_state(channel_number, value)
+                except:
+                    raise BpodErrorException('Error using manual_override: {name} is not a valid channel name.'.format(
+                        name=output_channel_name))
+        else:
+            raise BpodErrorException('Error using manualOverride: first argument must be "Input" or "Output".')
     
     def _bpodcom_connect(self, serial_port, baudrate=115200, timeout=1):
         """
@@ -103,12 +132,6 @@ class BpodCOMProtocol(BpodBase):
 
         return True if response == ReceiveMessageHeader.HANDSHAKE_OK else False
 
-
-    
-
-
-
-
     def _bpodcom_firmware_version(self):
         """
         Request firmware and machine type from Bpod
@@ -129,16 +152,14 @@ class BpodCOMProtocol(BpodBase):
 
         return fw_version, machine_type
 
-
-     
-    def _bpodcom_reset_clock(self): 
+    def _bpodcom_reset_clock(self):
         """ 
         Reset session clock 
         """ 
         logger.debug("Resetting clock") 
 
         self._arcom.write_char(SendMessageHeader.RESET_CLOCK) 
-        return self._arcom.read_byte()==byte(1) 
+        return self._arcom.read_byte() == bytes(1)
 
     def _bpodcom_stop_trial(self): 
         """ 
@@ -147,8 +168,7 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Pausing trial")  
         self._arcom.write_char(SendMessageHeader.EXIT_AND_RETURN)
         
-
-    def _bpodcom_pause_trial(self): 
+    def _bpodcom_pause_trial(self):
         """ 
         Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
         """ 
@@ -172,8 +192,6 @@ class BpodCOMProtocol(BpodBase):
          
         self._arcom.write_char(SendMessageHeader.GET_TIMESTAMP_TRANSMISSION) 
         return self._arcom.read_byte() 
-
-
 
     def _bpodcom_hardware_description(self, hardware):
         """
@@ -225,8 +243,6 @@ class BpodCOMProtocol(BpodBase):
         hardware.outputs            = outputs #+ ['G', 'G', 'G']
 
         hardware.live_timestamps    = self._bpodcom_get_timestamp_transmission()
-
-
 
     def _bpodcom_enable_ports(self, hardware):
         """
@@ -302,7 +318,20 @@ class BpodCOMProtocol(BpodBase):
         """ 
         logger.debug("Manual override execute virtual event") 
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), event_index, event_data])
-        self._arcom.write_array(bytes2send) 
+        self._arcom.write_array(bytes2send)
+
+    def _bpodcom_override_input_state(self, channel_number, value):
+        """
+        Manually set digital value on channel
+
+        :param int channel_number: number of Bpod port
+        :param int value: value to be written
+        """
+        logger.debug("Override input state")
+
+        bytes2send = ArduinoTypes.get_uint8_array(
+            [ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), channel_number, value])
+        self._arcom.write_array(bytes2send)
  
     def _bpodcom_send_softcode(self, softcode): 
         """ 
@@ -311,7 +340,6 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Send softcode")
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.TRIGGER_SOFTCODE), softcode])
         self._arcom.write_array(bytes2send)
-
 
     def _bpodcom_send_state_machine(self, message):
         """
@@ -367,9 +395,6 @@ class BpodCOMProtocol(BpodBase):
         discrepancy             = abs(trial_time_from_micros - trial_time_from_cycles)*1000
 
         return trial_end_timestamp, discrepancy
-        
-
-
 
     def _bpodcom_state_machine_installation_status(self):
         """
@@ -408,10 +433,6 @@ class BpodCOMProtocol(BpodBase):
 
         return opcode, data
 
-    
-
-
-    
     def _bpodcom_read_alltimestamps(self):
         """
         A new incoming timestamps message is available.
@@ -467,7 +488,6 @@ class BpodCOMProtocol(BpodBase):
         if not (1 <= message_id <= 255):
             raise BpodErrorException('Error: Bpod can only store 255 serial messages (indexed 1-255). You used the message_id {0}'.format(message_id))
 
-
         message_container = [serial_channel-1, n_messages, message_id, len(serial_message)] + serial_message
 
         logger.debug("Requesting load serial message (%s)", SendMessageHeader.LOAD_SERIAL_MESSAGE)
@@ -522,8 +542,6 @@ class BpodCOMProtocol(BpodBase):
             [ord(SendMessageHeader.SEND_TO_HW_SERIAL), channel_number, value]
         )
         self._arcom.write_array(bytes2send)
-    
-
 
     @property
     def hardware(self):
@@ -534,9 +552,6 @@ class BpodCOMProtocol(BpodBase):
     def modules(self):
         #self.__bpodcom_check_com_ready()
         return BpodBase.modules.fget(self)
-
-    
-
 
     # @property
     # def inputs(self):

@@ -178,8 +178,9 @@ class Session(object):
 
         # Append one matrix for each unique state
         for i in range(len(current_trial.states)):
-            uniqueStateDataMatrices[uniqueStateIndexes[i]] += [
-                (current_trial.state_timestamps[i], current_trial.state_timestamps[i + 1])]
+            if len(current_trial.state_timestamps) > 1:
+                uniqueStateDataMatrices[uniqueStateIndexes[i]] += [
+                    (current_trial.state_timestamps[i], current_trial.state_timestamps[i + 1])]
 
         for i in range(nUniqueStates):
             thisStateName = sma.state_names[uniqueStates[i]]

@@ -1,11 +1,13 @@
-import sys, io
-from pybpodapi.com.messaging.base_message import BaseMessage
+import io
+import sys
+
 from pybpodapi.com.messaging.stdout import StdoutMessage
 
 
 class StdoutBuffer(io.StringIO):
 	
 	def __init__(self, session):
+		super().__init__()
 		self.session = session
 
 	def write(self, msg):
