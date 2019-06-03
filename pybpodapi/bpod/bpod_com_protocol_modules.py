@@ -164,7 +164,7 @@ class BpodCOMProtocolModules(BpodCOMProtocol):
 		if len(msg) > 64:
 			raise BpodErrorException('Error: module messages must be under 64 bytes per transmission')
 
-		to_send = [ord(SendMessageHeader.WRITE_TO_MODULE), module_index, len(msg)]
+		to_send = [ord(SendMessageHeader.WRITE_TO_MODULE), module_index + 1, len(msg)]
 		to_send = ArduinoTypes.get_uint8_array(to_send)
 
 		self._arcom.write_array(to_send+msg)		
