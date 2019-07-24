@@ -3,7 +3,9 @@ from queue import Queue, Empty
 from sys import platform
 
 if platform in ["linux", "linux2", "darwin"]:
-    import fcntl, os
+    import fcntl
+    import os
+
 
 class NonBlockingStreamReader:
 
@@ -26,31 +28,35 @@ class NonBlockingStreamReader:
                 Thread.__init__(self)
                 self.daemon = True
                 self.stream = stream
-                self.queue  = queue
-                self.event  = Event()
+                self.queue = queue
+                self.event = Event()
 
             def run(self):
                 while True:
-                    if self.event.is_set(): break
+                    if self.event.is_set():
+                        break
                     line = self.stream.readline()
                     if line:
                         self.queue.put(line)
                         lines = None
                     self.event.wait(0.01)
-               
 
         self._t = PopulateQueue(self._s, self._q)
         self._t.daemon = True
-        self._t.start() #start collecting lines from the stream
+        self._t.start()  # start collecting lines from the stream
 
-    def readline(self, timeout = None):
+    def readline(self, timeout=None):
         try:
-            return self._q.get(block = timeout is not None, timeout = timeout)
+            return self._q.get(block=timeout is not None, timeout=timeout)
         except Empty:
             return None
 
-    def close(self): self._t.event.set()
-        
-    def is_alive(self): return self._t.is_alive()
+    def close(self):
+        self._t.event.set()
 
-class UnexpectedEndOfStream(Exception): pass
+    def is_alive(self):
+        return self._t.is_alive()
+
+
+class UnexpectedEndOfStream(Exception):
+    pass

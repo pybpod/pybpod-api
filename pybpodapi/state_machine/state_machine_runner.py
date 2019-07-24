@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import math
 
 from pybpodapi.state_machine.state_machine_builder import StateMachineBuilder
 
@@ -10,40 +9,40 @@ logger = logging.getLogger(__name__)
 
 
 class StateMachineRunner(StateMachineBuilder):
-	"""
-	Extends state machine with running logic
-	
-	:ivar bool is_running: Whether this state machine is being run on bpod hardware
-	:ivar int current_state: Holds state machine current state while running
-	"""
+    """
+    Extends state machine with running logic
 
-	def __init__(self, bpod):
-		StateMachineBuilder.__init__(self, bpod)
+    :ivar bool is_running: Whether this state machine is being run on bpod hardware
+    :ivar int current_state: Holds state machine current state while running
+    """
 
-		self.is_running = False  # type: bool
+    def __init__(self, bpod):
+        StateMachineBuilder.__init__(self, bpod)
 
-		self.current_state = 0  # type: int
+        self.is_running = False  # type: bool
 
-	#########################################
-	############## PROPERTIES ###############
-	#########################################
+        self.current_state = 0  # type: int
 
-	@property
-	def is_running(self):
-		return self._is_running  # type: bool
+    #########################################
+    ############## PROPERTIES ###############
+    #########################################
 
-	@is_running.setter
-	def is_running(self, value):
-		self._is_running = value  # type: bool
+    @property
+    def is_running(self):
+        return self._is_running  # type: bool
 
-	@property
-	def current_state(self):
-		return self._current_state  # type: int
+    @is_running.setter
+    def is_running(self, value):
+        self._is_running = value  # type: bool
 
-	@current_state.setter
-	def current_state(self, value):
-		self._current_state = value  # type: int
+    @property
+    def current_state(self):
+        return self._current_state  # type: int
+
+    @current_state.setter
+    def current_state(self, value):
+        self._current_state = value  # type: int
 
 
 class StateMachineRunnerError(Exception):
-	pass
+    pass

@@ -1,18 +1,16 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
-from confapp import conf
 from pybpodapi.com.messaging.base_message import BaseMessage
 
 
 class ErrorMessage(BaseMessage):
-	"""
-	Stderr message from the server process
+    """
+    Stderr message from the server process
 
-	.. seealso::
+    .. seealso::
 
-		:py:class:`pybpodgui_plugin.com.messaging.board_message.BoardMessage`
+        :py:class:`pybpodgui_plugin.com.messaging.board_message.BoardMessage`
 
-	"""
-	MESSAGE_TYPE_ALIAS = 'error'
-	MESSAGE_COLOR = (240,0,0)
-	
+    """
+    MESSAGE_TYPE_ALIAS = 'error'
+    MESSAGE_COLOR = (240, 0, 0)

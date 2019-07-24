@@ -2,6 +2,7 @@ from threading import Thread, Event
 from queue import Queue, Empty
 import socket
 
+
 class NonBlockingSocketReceive:
 
     def __init__(self, sck):
@@ -14,24 +15,27 @@ class NonBlockingSocketReceive:
 
         class PopulateQueue(Thread):
 
-            def __init__(self,sck, queue):
+            def __init__(self, sck, queue):
                 Thread.__init__(self)
                 self.daemon = True
                 self.socket = sck
-                self.queue  = queue
-                self.event  = Event()
+                self.queue = queue
+                self.event = Event()
 
             def run(self):
                 try:
                     self.socket.settimeout(1.0)
                     data = None
                     while True:
-                        if self.event.is_set(): break
-                        
-                        if not self.socket: break
+                        if self.event.is_set():
+                            break
+
+                        if not self.socket:
+                            break
                         try:
                             data = self.socket.recv(64)
-                            if not data: self.event.set()
+                            if not data:
+                                self.event.set()
                         except socket.timeout:
                             pass
                         if data:
@@ -42,21 +46,23 @@ class NonBlockingSocketReceive:
 
                 except OSError:
                     self.event.set()
-                    
-               
+
         self._t = PopulateQueue(self._s, self._q)
         self._t.daemon = True
-        self._t.start() #start collecting lines from the stream
+        self._t.start()  # start collecting lines from the stream
 
-    def readline(self, timeout = None):
+    def readline(self, timeout=None):
         try:
-            return self._q.get(block = timeout is not None, timeout = timeout)
+            return self._q.get(block=timeout is not None, timeout=timeout)
         except Empty:
             return None
 
     def close(self):
         self._t.event.set()
-        
-    def is_alive(self): return self._t.is_alive()
 
-class UnexpectedEndOfStream(Exception): pass
+    def is_alive(self):
+        return self._t.is_alive()
+
+
+class UnexpectedEndOfStream(Exception):
+    pass

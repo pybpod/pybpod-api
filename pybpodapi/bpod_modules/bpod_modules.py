@@ -1,75 +1,73 @@
-import time, importlib
+import time
+import importlib
 from confapp import conf
 
+
 class BpodModules(object):
-	
-	LOADED_MODULES = []
 
-	def __init__(self, bpod):
-		self.modules = []
-		self.bpod 	 = bpod
-		
-	def __add__(self, module):
-		module.bpod_modules = self
-		self.modules.append(module)
-		return self
+    LOADED_MODULES = []
 
-	def __getitem__(self, index):
-		return self.modules[index]	
+    def __init__(self, bpod):
+        self.modules = []
+        self.bpod = bpod
 
-	def __len__(self):
-		return len(self.modules)
+    def __add__(self, module):
+        module.bpod_modules = self
+        self.modules.append(module)
+        return self
 
-	def __iter__(self):
-		return iter(self.modules)
+    def __getitem__(self, index):
+        return self.modules[index]
 
-	@staticmethod
-	def create_module(connected, module_name, firmware_version, events_names, n_serial_events, serial_port):
-		from pybpodapi.bpod_modules.bpod_module import BpodModule #solve issue related with circular imports
+    def __len__(self):
+        return len(self.modules)
 
-		if len(BpodModules.LOADED_MODULES)==0 and len(conf.PYBPOD_API_MODULES)>0:
-			
-			for module2import in conf.PYBPOD_API_MODULES:
-				m = importlib.import_module(module2import)
-				BpodModules.LOADED_MODULES.append(m.BpodModule)
+    def __iter__(self):
+        return iter(self.modules)
 
-			for mclass in BpodModules.LOADED_MODULES:
-				if mclass.check_module_type(module_name):
-					return mclass(connected, module_name, firmware_version, events_names, n_serial_events, serial_port)
-		
-		return BpodModule(connected, module_name, firmware_version, events_names, n_serial_events, serial_port)
+    @staticmethod
+    def create_module(connected, module_name, firmware_version, events_names, n_serial_events, serial_port):
+        from pybpodapi.bpod_modules.bpod_module import BpodModule  # solve issue related with circular imports
 
+        if len(BpodModules.LOADED_MODULES) == 0 and len(conf.PYBPOD_API_MODULES) > 0:
 
-	def activate_module_relay(self, module):
-		index = self.modules.index(module)
-		self.bpod._bpodcom_activate_module_relay(index)
+            for module2import in conf.PYBPOD_API_MODULES:
+                m = importlib.import_module(module2import)
+                BpodModules.LOADED_MODULES.append(m.BpodModule)
 
-	def deactivate_module_relay(self, module):
-		index = self.modules.index(module)
-		self.bpod._bpodcom_deactivate_module_relay(index)
+            for mclass in BpodModules.LOADED_MODULES:
+                if mclass.check_module_type(module_name):
+                    return mclass(connected, module_name, firmware_version, events_names, n_serial_events, serial_port)
 
-	def stop_modules_relay(self):
-		for m in self.modules:
-			m.deactivate_module_relay()
+        return BpodModule(connected, module_name, firmware_version, events_names, n_serial_events, serial_port)
 
-		time.sleep(0.1)
-		self.bpod._bpodcom_clean_any_data_in_the_buffer()
+    def activate_module_relay(self, module):
+        index = self.modules.index(module)
+        self.bpod._bpodcom_activate_module_relay(index)
 
+    def deactivate_module_relay(self, module):
+        index = self.modules.index(module)
+        self.bpod._bpodcom_deactivate_module_relay(index)
 
-	def module_write(self, module, message, dtype=None):
-		index = self.modules.index(module)
-		self.bpod._bpodcom_module_write(index, message, dtype)
+    def stop_modules_relay(self):
+        for m in self.modules:
+            m.deactivate_module_relay()
 
+        time.sleep(0.1)
+        self.bpod._bpodcom_clean_any_data_in_the_buffer()
 
-	def module_read(self, module, size, dtype=None):
-		index = self.modules.index(module)
-		return self.bpod._bpodcom_module_read(index, size, dtype)
+    def module_write(self, module, message, dtype=None):
+        index = self.modules.index(module)
+        self.bpod._bpodcom_module_write(index, message, dtype)
 
+    def module_read(self, module, size, dtype=None):
+        index = self.modules.index(module)
+        return self.bpod._bpodcom_module_read(index, size, dtype)
 
-	@property
-	def relay_is_active(self):
-		for m in self.modules:
-			if m.relay_active: 
-				return True
+    @property
+    def relay_is_active(self):
+        for m in self.modules:
+            if m.relay_active:
+                return True
 
-		return False
+        return False
