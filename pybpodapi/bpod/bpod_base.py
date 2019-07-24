@@ -430,7 +430,7 @@ class BpodBase(object):
         module = [x for x in self.modules if x.serial_port == module_index]
         # call module_write. on module reference
         if module:
-            self._bpodcom_module_write(module_index, msg)
+            self._bpodcom_module_write(module_index - 1, msg)
 
     #########################################
     ############ PRIVATE METHODS ############
