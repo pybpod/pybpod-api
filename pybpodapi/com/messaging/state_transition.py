@@ -1,8 +1,7 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
-
-import logging
-import dateutil
+import ciso8601
+import logging, dateutil
 from pybpodapi.com.messaging.base_message import BaseMessage
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,16 @@ class StateTransition(BaseMessage):
         )
         obj.pc_timestamp = dateutil.parser.parse(row[1])
 
-        return obj
+	@classmethod
+	def fromlist(cls, row):
+		"""
+		Returns True if the typestr represents the class
+		"""
+		obj = cls(
+			row[4],
+			float(row[2]) if row[2] else None
+		)
+		obj.pc_timestamp = ciso8601.parse_datetime(row[1])
 
     @property
     def state_name(self): return self.content

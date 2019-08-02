@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+import ciso8601
+import time
 import dateutil
 from datetime import datetime as datetime_now
 
@@ -50,3 +52,13 @@ class BaseMessage(object):
         obj.pc_timestamp = dateutil.parser.parse(row[1])
 
         return obj
+
+	@classmethod
+	def fromlist(cls, row):
+		"""
+		Returns True if the typestr represents the class
+		"""
+		obj = cls(row[4],float(row[2]) if row[2] else None)
+		obj.pc_timestamp = ciso8601.parse_datetime(row[1])
+
+		return obj

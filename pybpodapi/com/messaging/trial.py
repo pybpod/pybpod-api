@@ -1,9 +1,7 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
-
-import logging
-import pprint
-import dateutil
+import ciso8601
+import logging, pprint, dateutil
 
 from pybpodapi.com.messaging.event_occurrence import EventOccurrence
 from pybpodapi.com.messaging.state_occurrence import StateOccurrence
@@ -83,43 +81,11 @@ class Trial(BaseMessage):
 
         Example:
 
-        .. code-block:: python
-
-            {
-                'Tup': [429496.7295, 429496.7295],
-                'Port3In': [429496.7295, 429496.7295],
-                'Port2In': [429496.7295, 429496.7295],
-                'Port2Out': [429496.7295, 429496.7295],
-                'Port3Out': [429496.7295],
-                'Port1Out': [429496.7295]
-            }
-
-        :rtype: dict
-        """
-        all_timestamps = {}
-        for event_name in self.get_events_names():
-            all_timestamps[event_name] = self.get_timestamps_by_event_name(event_name)
-
-        return all_timestamps
-
-    def export(self):
-        return {'Bpod start timestamp': self.bpod_start_timestamp,
-                'Trial start timestamp': self.trial_start_timestamp,
-                'Trial end timestamp': self.trial_end_timestamp,
-                'States timestamps': self.states_durations,
-                'Events timestamps': self.get_all_timestamps_by_event()}
-
-    def pformat(self):
-        return pprint.pformat(self.export(), indent=4)
-
-    def __str__(self):
-        return str(self.export())
-
-    @classmethod
-    def fromlist(cls, row):
-        """
-        Returns True if the typestr represents the class
-        """
-        obj = cls()
-        obj.pc_timestamp = dateutil.parser.parse(row[1])
-        return obj
+	@classmethod
+	def fromlist(cls, row):
+		"""
+		Returns True if the typestr represents the class
+		"""
+		obj = cls()
+		obj.pc_timestamp = ciso8601.parse_datetime(row[1])
+		return obj

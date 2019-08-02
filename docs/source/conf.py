@@ -99,7 +99,7 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'default'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -160,8 +160,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-	(master_doc, 'pybpodapi.tex', 'pybpod-api Documentation',
-	 'Carlos Mão de Ferro', 'manual'),
+	(master_doc, 'pybpodapi.tex', 'pybpod-api Documentation', [author], 'manual'),
 ]
 
 
@@ -170,8 +169,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-	(master_doc, 'pybpodapi', 'pybpod-api Documentation',
-	 [author], 1)
+	(master_doc, 'pybpodapi', 'pybpod-api Documentation', [author], 1)
 ]
 
 
@@ -182,8 +180,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
 	(master_doc, 'pybpodapi', 'pybpod-api Documentation',
-	 author, 'pybpodapi', 'One line description of project.',
-	 'Miscellaneous'),
+	author, 'pybpodapi', 'One line description of project.',
+	'Miscellaneous'),
 ]
 
 

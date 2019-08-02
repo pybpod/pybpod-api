@@ -1,5 +1,6 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
+import ciso8601
 import dateutil
 from pybpodapi.com.messaging.base_message import BaseMessage
 
@@ -31,15 +32,19 @@ class SessionInfo(BaseMessage):
             self._infovalue
         ]
 
-    @classmethod
-    def fromlist(cls, row):
-        """
-        Returns True if the typestr represents the class
-        """
-        obj = cls(row[4],float(row[2]) if row[2] else None)
-        obj.pc_timestamp = dateutil.parser.parse(row[1])
-        obj._infovalue = row[5] if len(row) > 5 else None
-        return obj
+	@classmethod
+	def fromlist(cls, row):
+		"""
+		Returns True if the typestr represents the class
+		"""
+		obj = cls(row[4],float(row[2]) if row[2] else None)
+		obj.pc_timestamp = ciso8601.parse_datetime(row[1])
+		obj._infovalue = row[5] if len(row)>5 else None
+		return obj
+	
+	
+	@property
+	def infoname(self): return self.content
 
     @property
     def infoname(self):

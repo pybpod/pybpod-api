@@ -1,5 +1,7 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
+import ciso8601
+from confapp import conf
 from pybpodapi.com.messaging.base_message import BaseMessage
 import dateutil
 
@@ -56,3 +58,28 @@ class ValueMessage(BaseMessage):
         obj.pc_timestamp = dateutil.parser.parse(row[1])
 
         return obj
+
+	def tolist(self):
+		return [
+			self.MESSAGE_TYPE_ALIAS, 
+			str(self.pc_timestamp), 
+			self.host_timestamp,
+			None,
+			self.value_name,
+			self.value
+		]
+
+	@classmethod
+	def fromlist(cls, row):
+		"""
+		Returns True if the typestr represents the class
+		"""
+		obj = cls(
+			int(row[4]),
+			row[5],
+			float(row[2]) if row[2] else None
+		)
+		obj.pc_timestamp = ciso8601.parse_datetime(row[1])
+
+		return obj
+	

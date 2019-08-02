@@ -220,14 +220,15 @@ class StateMachineBase(object):
     def set_global_timer(self,
                          timer_id,
                          timer_duration,
-                         on_set_delay=0,
-                         channel=None,
-                         on_message=1,
-                         off_message=0,
-                         loop_mode=0,
-                         loop_intervals=0,
-                         send_events=0,
-                         oneset_triggers=None):
+                         on_set_delay    = 0,
+                         channel         = None,
+                         on_message      = 1,
+                         off_message     = 0,
+                         loop_mode       = 0,
+                         loop_intervals  = 0,
+                         send_events     = 0,
+                         onset_triggers = None
+                         ):
         """
         Sets the duration of a global timer. Unlike state timers, global timers can be triggered from any state (as an
         output action), and handled from any state (by causing a state change).
@@ -261,8 +262,9 @@ class StateMachineBase(object):
             for i in range(len(self.global_timers.onset_matrix), index+1):
                 self.global_timers.onset_matrix.append(0)
 
-        if oneset_triggers is not None:
-            self.global_timers.onset_matrix[index] = oneset_triggers
+        if onset_triggers is not None:
+            self.global_timers.onset_matrix[index]   = onset_triggers
+        
 
     def set_global_counter(self, counter_number=None, target_event=None, threshold=None):
         """
