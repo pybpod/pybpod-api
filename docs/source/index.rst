@@ -39,7 +39,8 @@ It is a family of open source hardware devices which includes also software and 
 
 Why a Python port?
 ------------------
-Python is one of the most popular programming languages today `[1] <https://pypl.github.io/PYPL.html>`_. This is special true for the science research community because it is an open language, easy to learn, with a strong support community and with a lot of libraries available.
+Python is one of the most popular programming languages today `[1] <https://pypl.github.io/PYPL.html>`_.
+This is special true for the science research community because it is an open language, easy to learn, with a strong support community and with a lot of libraries available.
 
 Questions?
 ==========
@@ -69,6 +70,7 @@ If you have any questions or want to report a problem with this library please f
    :caption: API reference
 
    api_reference/pybpodapi/index
+   api_reference/diagrams
 
 .. toctree::
    :hidden:
