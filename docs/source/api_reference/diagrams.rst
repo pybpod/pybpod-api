@@ -24,15 +24,15 @@ Sequence Diagrams
 
 **Start Bpod**
 
-.. image:: /_images/sd_bpod_start.svg
+.. image:: ../_images/sd_bpod_start.svg
    :scale: 100 %
 
 **Send state machine**
 
-.. image:: /_images/sd_bpod_send_sm.svg
+.. image:: ../_images/sd_bpod_send_sm.svg
    :scale: 100 %
 
 **Run state machine**
 
-.. image:: /_images/sd_bpod_run_sm.svg
+.. image:: ../_images/sd_bpod_run_sm.svg
    :scale: 100 %

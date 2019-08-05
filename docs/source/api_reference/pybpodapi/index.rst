@@ -1,5 +1,5 @@
 *************************************
-:mod:`pybpodapi`--- pybpod-api module
+pybpod-api
 *************************************
 
 .. module:: pybpodapi
@@ -14,11 +14,3 @@
    exceptions/index
    state_machine/index
    session
-   
-Communication module
----------------------
-
-.. toctree::
-   :titlesonly:
-
-   com/index
