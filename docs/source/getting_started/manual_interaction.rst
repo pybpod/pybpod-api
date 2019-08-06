@@ -4,7 +4,8 @@
 Manual control of Bpod
 **********************
 
-Using pybpod-api, you can directly interact with Bpod hardware. This may be useful for testing and debug purposes.
+Using pybpod-api, you can directly interact with the Bpod hardware.
+This may be useful for testing and debug purposes.
 
 After :ref:`installing <installing-label>` pybpod-api, open a python terminal and run the following commands:
 
@@ -32,7 +33,7 @@ After :ref:`installing <installing-label>` pybpod-api, open a python terminal an
 .. seealso::
     For more available commands, please refer to:
 
-        * :meth:`pybpodapi.bpod.bpod_base.BpodBase.manual_override`
+        * :meth:`pybpodapi.bpod.bpod_com_protocol.BpodCOMProtocol.manual_override`
 
         * :class:`pybpodapi.bpod.hardware.channels.ChannelType`
 
