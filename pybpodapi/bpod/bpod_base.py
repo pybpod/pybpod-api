@@ -235,9 +235,6 @@ class BpodBase(object):
         self._new_sma_sent = True
 
     def run_state_machine(self, sma):
-        if not self.bpod_com_ready:
-            raise Exception('Bpod connection is closed')
-
         """
 
         Adds a new trial to current session and runs state machine on Bpod box.
@@ -250,20 +247,16 @@ class BpodBase(object):
 
         .. seealso::
 
-            Add trial: :meth:`pybpodapi.model.session.Session.add_trial`.
+            Send command "run state machine": :meth:`pybpodapi.bpod.bpod_base.BpodBase.run_state_machine`.
 
-            Send command "run state machine": :meth:`pybpodapi.com.message_api.MessageAPI.run_state_machine`.
+            Process opcode: :meth:`pybpodapi.bpod.bpod_base.BpodBase._BpodBase__process_opcode`.
 
-            Process opcode: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._BpodBase__process_opcode`.
+            Update timestamps: :meth:`pybpodapi.bpod.bpod_base.BpodBase._BpodBase__update_timestamps`.
 
-            Update timestamps: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._BpodBase__update_timestamps`.
-
-            Add trial events: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._BpodBase__add_trial_events`.
-
-            Publish data: :meth:`pybpodapi.model.bpod.bpod_base.BpodBase._publish_data`.
-
-        :param pybpodapi.mode.state_machine sma: initialized state machine
+        :param (:class:`pybpodapi.state_machine.StateMachine`) sma: initialized state machine
         """
+        if not self.bpod_com_ready:
+            raise Exception('Bpod connection is closed')
 
         self.session += Trial(sma)
 
