@@ -31,6 +31,8 @@ Maintenance team
 
 The current and past members of the **pybpod-api** team.
 
+* `@cajomferro <https://github.com/cajomferro/>`_ Carlos Mão de Ferro
+* `@JBauto <https://github.com/JBauto>`_ João Baúto
 * `@UmSenhorQualquer <https://github.com/UmSenhorQualquer/>`_ Ricardo Ribeiro
 * `@sergio-copedo <https://bitbucket.org/sergio-copeto/>`_ Sérgio Copeto
 * `@MicBoucinha <https://github.com/MicBoucinha/>`_ Luís Teixeira
