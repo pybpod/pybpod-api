@@ -24,7 +24,7 @@ All examples and Bpod's state machine and communication logic were based on the 
 
 License
 =======
-This is Open Source software with an MIT license.
+This is Open Source software with a MIT license.
 
 Maintenance team
 ================
