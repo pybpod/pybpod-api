@@ -161,7 +161,7 @@ class BpodCOMProtocol(BpodBase):
 
     def _bpodcom_stop_trial(self):
         """
-        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+        Stops ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
         """
         logger.debug("Pausing trial")
         self._arcom.write_char(SendMessageHeader.EXIT_AND_RETURN)
@@ -176,7 +176,7 @@ class BpodCOMProtocol(BpodBase):
 
     def _bpodcom_resume_trial(self):
         """
-        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+        Resumes ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
         """
         logger.debug("Resume trial")
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.PAUSE_TRIAL), 1])
