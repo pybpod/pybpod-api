@@ -280,8 +280,9 @@ class BpodBase(object):
         # create a list of executed states
         state_change_indexes = []
 
-        # flag used to stop a trial
+        # flags used to stop a trial (or all trials)
         interrupt_task = False
+        kill_task = False
 
         sma.is_running = True
         while sma.is_running:
@@ -290,7 +291,7 @@ class BpodBase(object):
             if self.stdin is not None:
                 inline = self.stdin.readline()
                 if inline is not None:
-                    interrupt_task = self.handle_inline(inline, sma)
+                    interrupt_task, kill_task = self.handle_inline(inline, sma)
             #####################################################
 
             # read commands from a net socket ###################
@@ -299,7 +300,7 @@ class BpodBase(object):
 
                 if inline is not None:
                     inline = inline.decode().strip()
-                    interrupt_task = self.handle_inline(inline, sma)
+                    interrupt_task, kill_task = self.handle_inline(inline, sma)
             #####################################################
 
             if self.data_available():
@@ -319,12 +320,18 @@ class BpodBase(object):
 
         logger.info("Publishing Bpod trial")
 
-        if interrupt_task:
+        if interrupt_task and kill_task:
             self.close()
             exit(0)
 
+        if interrupt_task:
+            return False
+
+        return True
+
     def handle_inline(self, inline, sma):
         interrupt_task = False
+        kill_task = False
         if inline.startswith('pause-trial'):
             self.pause()
         elif inline.startswith('resume-trial'):
@@ -334,6 +341,9 @@ class BpodBase(object):
         elif inline.startswith('close'):
             self.stop_trial()
             interrupt_task = True
+        elif inline.startswith('kill'):
+            self.stop_trial()
+            interrupt_task = kill_task = True
         elif inline.startswith('SoftCode'):
             softcode = int(inline[-1]) - 1
             self.trigger_softcode(softcode)
@@ -363,7 +373,7 @@ class BpodBase(object):
                 final_msg.append(int(x))
             self.load_message(module_index, final_msg)
 
-        return interrupt_task
+        return interrupt_task, kill_task
 
     def load_serial_message(self, serial_channel, message_ID, serial_message):
         """
