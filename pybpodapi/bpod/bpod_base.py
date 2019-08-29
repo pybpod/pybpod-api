@@ -72,6 +72,7 @@ class BpodBase(object):
         self.bpod_start_timestamp = None
 
         self._new_sma_sent = False         # type: bool
+        self._skip_all_trials = False
 
         self._hardware.sync_channel = self.sync_channel  # 255 = no sync, otherwise set to a hardware channel number
         self._hardware.sync_mode = self.sync_mode    # 0 = flip logic every trial, 1 = every state
@@ -224,6 +225,9 @@ class BpodBase(object):
         if not self.bpod_com_ready:
             raise Exception('Bpod connection is closed')
 
+        if self._skip_all_trials is True:
+            return
+
         logger.info("Sending state machine")
 
         sma.update_state_numbers()
@@ -257,6 +261,9 @@ class BpodBase(object):
         """
         if not self.bpod_com_ready:
             raise Exception('Bpod connection is closed')
+
+        if self._skip_all_trials is True:
+            return False
 
         self.session += Trial(sma)
 
@@ -309,7 +316,8 @@ class BpodBase(object):
 
             self.loop_handler()
 
-            if interrupt_task:
+            if interrupt_task or kill_task:
+                self._skip_all_trials = True
                 break
 
         self.session += EndTrial('The trial ended')
@@ -616,6 +624,10 @@ class BpodBase(object):
     @property
     def modules(self):
         return [m for m in self.bpod_modules if m.connected]
+
+    @property
+    def skip_all_trials(self) -> bool:
+        return self._skip_all_trials
 
     # @property
     # def inputs(self):
