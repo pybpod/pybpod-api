@@ -3,11 +3,11 @@
 
 import logging
 import pprint
-import dateutil
 
 from pybpodapi.com.messaging.event_occurrence import EventOccurrence
 from pybpodapi.com.messaging.state_occurrence import StateOccurrence
 from pybpodapi.com.messaging.base_message import BaseMessage
+from pybpodapi.utils import date_parser
 
 logger = logging.getLogger(__name__)
 
@@ -121,5 +121,5 @@ class Trial(BaseMessage):
         Returns True if the typestr represents the class
         """
         obj = cls()
-        obj.pc_timestamp = dateutil.parser.parse(row[1])
+        obj.pc_timestamp = date_parser.parse(row[1])
         return obj

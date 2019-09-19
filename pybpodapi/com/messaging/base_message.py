@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import dateutil
 from datetime import datetime as datetime_now
+from pybpodapi.utils import date_parser
 
 
 class BaseMessage(object):
@@ -47,6 +47,6 @@ class BaseMessage(object):
         Returns True if the typestr represents the class
         """
         obj = cls(row[4], float(row[2]) if row[2] else None)
-        obj.pc_timestamp = dateutil.parser.parse(row[1])
+        obj.pc_timestamp = date_parser.parse(row[1])
 
         return obj

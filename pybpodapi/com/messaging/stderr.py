@@ -1,9 +1,8 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import dateutil
 from pybpodapi.com.messaging.base_message import BaseMessage
-
+from pybpodapi.utils import date_parser
 
 class StderrMessage(BaseMessage):
     """
@@ -42,6 +41,6 @@ class StderrMessage(BaseMessage):
         Returns True if the typestr represents the class
         """
         obj = cls(row[3], float(row[2]) if row[2] else None)
-        obj.pc_timestamp = dateutil.parser.parse(row[1])
+        obj.pc_timestamp = date_parser.parse(row[1])
 
         return obj
