@@ -44,7 +44,7 @@ This is special true for the science research community because it is an open la
 
 Questions?
 ==========
-If you have any questions or want to report a problem with this library please fill in an issue `here <https://bitbucket.org/fchampalimaud/pybpod/issues>`_.
+If you have any questions or want to report a problem with this library please fill in an issue `here <https://github.com/pybpod/pybpod/issues>`_.
 
 .. high level toc tree
 
