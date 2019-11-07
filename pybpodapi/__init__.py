@@ -3,10 +3,10 @@
 from confapp import conf
 import loggingbootstrap
 
-__version__ = "1.6.4"
+__version__ = "1.8.0"
 __author__ = ['Ricardo Ribeiro', 'Carlos Mão de Ferro', 'Joshua Sanders', 'Luís Teixeira']
 __credits__ = ["Ricardo Ribeiro", "Carlos Mao de Ferro", 'Luís Teixeira']
-__license__ = "Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>"
+__license__ = "MIT"
 __maintainer__ = ['Ricardo Ribeiro', 'Carlos Mão de Ferro', 'Joshua Sanders', 'Luís Teixeira']
 __email__ = ['ricardojvr@gmail.com', 'cajomferro@gmail.com', 'joshua21@gmail.com', 'micboucinha@gmail.com']
 __status__ = "Development"
