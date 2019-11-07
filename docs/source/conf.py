@@ -24,8 +24,8 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../../pybpodapi'))
-sys.path.insert(0, os.path.abspath('../../'))
+#sys.path.insert(0, os.path.abspath('../../pybpodapi'))
+#sys.path.insert(0, os.path.abspath('../../'))
 
 import pybpodapi
 
@@ -74,7 +74,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pybpod-api'
-copyright = '2017, CF Scientific Software Platform'
+copyright = '2017-2019, CF Scientific Software Platform'
 author = 'Carlos Mão de Ferro'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -99,7 +99,7 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'default'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -127,7 +127,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['_images']
 
 
 # -- Options for HTMLHelp output ------------------------------------------

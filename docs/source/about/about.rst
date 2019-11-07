@@ -24,22 +24,19 @@ All examples and Bpod's state machine and communication logic were based on the 
 
 License
 =======
-This is Open Source software. We use the `GNU General Public License version 3 <https://www.gnu.org/licenses/gpl.html>`_.
+This is Open Source software with a MIT license.
 
 Maintenance team
 ================
 
 The current and past members of the **pybpod-api** team.
 
+* `@cajomferro <https://github.com/cajomferro/>`_ Carlos Mão de Ferro
+* `@JBauto <https://github.com/JBauto>`_ João Baúto
 * `@UmSenhorQualquer <https://github.com/UmSenhorQualquer/>`_ Ricardo Ribeiro
 * `@sergio-copedo <https://bitbucket.org/sergio-copeto/>`_ Sérgio Copeto
+* `@MicBoucinha <https://github.com/MicBoucinha/>`_ Luís Teixeira
 
 Questions?
 ==========
-If you have any questions or want to report a problem with this library please fill a issue `here <https://bitbucket.org/fchampalimaud/pybpod/issues>`_.
-
-
-.. Changes log
-.. -----------
-
-.. TODO
+If you have any questions or want to report a problem with this library please fill a issue `here <https://github.com/pybpod/pybpod-api/issues>`_.

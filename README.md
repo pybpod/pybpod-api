@@ -25,6 +25,7 @@ We typical work on computer vision / tracking, behavioral experiments, image reg
 * [@cajomferro](https://github.com/cajomferro/) Carlos Mão de Ferro
 * [@JBauto](https://github.com/JBauto) João Baúto
 * [@UmSenhorQualquer](https://github.com/UmSenhorQualquer/) Ricardo Ribeiro
+* [@MicBoucinha](https://github.com/MicBoucinha/) Luís Teixeira
 
 ## Bpod project
 **pybpod-api** is a python port of the [Bpod Matlab project](https://github.com/sanworks/Bpod). 
@@ -32,7 +33,7 @@ We typical work on computer vision / tracking, behavioral experiments, image reg
 All examples and Bpod's state machine and communication logic were based on the original version made available by [Josh Sanders](https://github.com/sanworks).
 
 ## License
-This is Open Source software. We use the `GNU General Public License version 3 <https://www.gnu.org/licenses/gpl.html>`_.
+This is Open Source software with an MIT license.
 
 ## Running examples
 

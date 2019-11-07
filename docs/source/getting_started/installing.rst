@@ -10,37 +10,43 @@ Installing
 **********
 
 .. note::
-    
+
     To install the **full pybpod package**, please follow the instructions located @ `Pybpod <http://pybpod.readthedocs.org>`_.
 
-
-.. warning::
-   This project uses Python 3!
-
-Clone the project from Bitbucket
+Installing for using the library
 ================================
 
-::
-
-    git clone https://bitbucket.org/fchampalimaud/pybpod-api
-
-Install files
-=============
-
-On the project root folder (where *'setup.py'* is located) run the following commands:
+The library is available through PyPI so you just have to do
 
 ::
 
-    pip3 install -r requirements.txt --upgrade # installs dependencies
-    pip3 install . --upgrade # installs this API
+    pip install pybpod-api
 
+
+Installing for making changes to the library
+============================================
+1. Clone the repository
+
+    ::
+
+        git clone https://github.com/pybpod/pybpod-api
+
+
+2. On the project root folder (where *'setup.py'* is located) run the following command
+
+    ::
+
+        pip install -e . # installs this API in development mode
+
+
+3. Use your code editor of choice to make your changes.
 
 Settings file
 =============
 
 ::
 
-    # list of python libraries to interfaces bpod modules. 
+    # list of python libraries to interface with bpod modules.
     PYBPOD_API_MODULES = [
         'pybpod_rotaryencoder_module'
     ]

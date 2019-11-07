@@ -1,28 +1,22 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import logging, uuid
+import logging
 from confapp import conf
 from datetime import datetime as datetime_now
 
 import pybpodapi
-#from pybpodapi.state_machine import StateMachine
-from pybpodapi.com.messaging.trial                  import Trial
-from pybpodapi.com.messaging.event_occurrence       import EventOccurrence
-from pybpodapi.com.messaging.state_occurrence       import StateOccurrence
-from pybpodapi.com.messaging.softcode_occurrence    import SoftcodeOccurrence
-from pybpodapi.com.messaging.session_info           import SessionInfo
+from pybpodapi.com.messaging.trial import Trial
+from pybpodapi.com.messaging.state_occurrence import StateOccurrence
 
 from sca.formats import csv
 
-import io
 import sys
-import pickle
-import base64
 from pybpodapi.com.stdout_buffer import StdoutBuffer
 from pybpodapi.com.stderr_buffer import StderrBuffer
 
 logger = logging.getLogger(__name__)
+
 
 class StreamsWrapper(object):
 
@@ -41,12 +35,12 @@ class StreamsWrapper(object):
         for stream in self.streams:
             stream.flush()
             stream.close()
-  
+
 
 class Session(object):
     """
     Stores information about bpod run, including the list of trials.
-    
+
     :ivar list(Trial) trials: a list of trials
     :ivar int firmware_version: firmware version of Bpod when experiment was run
     :ivar int bpod_version: version of Bpod hardware when experiment was run
@@ -84,7 +78,6 @@ class Session(object):
 
     INFO_TRIAL_BPODTIME = 'TRIAL-BPOD-TIME'
 
-
     def __init__(self, path=None):
         self.ostdout = sys.stdout
         self.ostderr = sys.stderr
@@ -93,24 +86,24 @@ class Session(object):
         # should be written.
         streams = []
 
-        self.history           = []                 # type: list[Trial]
-        self.trials            = []                 # type: list[Trial]
-        self.firmware_version  = None               # type: int
-        self.bpod_version      = None               # type: int
-        self.start_timestamp   = datetime_now.now() # type: datetime
+        self.history = []                           # type: list[Trial]
+        self.trials = []                            # type: list[Trial]
+        self.firmware_version = None                # type: int
+        self.bpod_version = None                    # type: int
+        self.start_timestamp = datetime_now.now()   # type: datetime
 
-        self.csvwriter  = None
-        self._path      = path
+        self.csvwriter = None
+        self._path = path
 
         # stream data to a file.
-        if path: 
-            streams   += [open(path, 'w')]
+        if path:
+            streams += [open(path, 'w')]
 
         # stream data to the stdout.
-        if conf.PYBPOD_API_STREAM2STDOUT: 
+        if conf.PYBPOD_API_STREAM2STDOUT:
             sys.stdout = StdoutBuffer(self)
             sys.stderr = StderrBuffer(self)
-            streams   += [self.ostdout]
+            streams += [self.ostdout]
 
         self.csvstream = StreamsWrapper(streams)
         self.csvwriter = csv.writer(
@@ -121,14 +114,12 @@ class Session(object):
             def_text='This file contains data recorded during a session from the PyBpod system'
         )
 
-       
     def __del__(self):
 
         self.csvstream.close()
-        
+
         sys.stdout = self.ostdout
         sys.stderr = self.ostderr
-
 
     def __add__(self, msg):
         """
@@ -137,26 +128,23 @@ class Session(object):
         :param pybpodapi.model.state_machine sma: state machine associated with this trial
         """
 
-        if isinstance(msg, Trial): 
+        if isinstance(msg, Trial):
             self.trials.append(msg)
-        elif self.current_trial is not None: 
+        elif self.current_trial is not None:
             self.current_trial += msg
 
         self.history.append(msg)
 
-        
-        if self.csvwriter: 
-            self.csvwriter.writerow( msg.tolist() )
+        if self.csvwriter:
+            self.csvwriter.writerow(msg.tolist())
             self.csvwriter.flush()
 
         return self
 
-
     def add_trial_events(self):
 
         current_trial = self.current_trial  # type: Trial
-        sma           = current_trial.sma
-
+        sma = current_trial.sma
 
         visitedStates = [0] * current_trial.sma.total_states_added
         # determine unique states while preserving visited order
@@ -186,19 +174,19 @@ class Session(object):
             thisStateName = sma.state_names[uniqueStates[i]]
 
             for state_dur in uniqueStateDataMatrices[i]:
-                self += StateOccurrence(thisStateName, state_dur[0], state_dur[1] )
-                
+                self += StateOccurrence(thisStateName, state_dur[0], state_dur[1])
+
         logger.debug("State names: %s", sma.state_names)
         logger.debug("nPossibleStates: %s", sma.total_states_added)
         for i in range(sma.total_states_added):
             thisStateName = sma.state_names[i]
             if not visitedStates[i]:
-                self += StateOccurrence(thisStateName, float('NaN'), float('NaN') )
-                
+                self += StateOccurrence(thisStateName, float('NaN'), float('NaN'))
+
         logger.debug("Trial states: %s", [str(state) for state in current_trial.states_occurrences])
 
         # save events occurrences on trial
-        #current_trial.events_occurrences = sma.raw_data.events_occurrences  # type: list
+        # current_trial.events_occurrences = sma.raw_data.events_occurrences  # type: list
 
         logger.debug("Trial events: %s", [str(event) for event in current_trial.events_occurrences])
 
@@ -208,17 +196,16 @@ class Session(object):
     def current_trial(self):
         """
         Get current trial
-        
-        :rtype: Trial 
-        """
-        return self.trials[-1] if len(self.trials)>0 else None
 
+        :rtype: Trial
+        """
+        return self.trials[-1] if len(self.trials) > 0 else None
 
     @current_trial.setter
     def current_trial(self, value):
         """
         Get current trial
-        
-        :rtype: Trial 
+
+        :rtype: Trial
         """
         self.trials[-1] = value

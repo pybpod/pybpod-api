@@ -1,3 +1,4 @@
 
 
-class BpodErrorException(Exception): pass
+class BpodErrorException(Exception):
+    pass

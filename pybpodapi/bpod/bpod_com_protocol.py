@@ -33,13 +33,14 @@ class BpodCOMProtocol(BpodBase):
     def __init__(self, serial_port=None, sync_channel=None, sync_mode=None):
         super(BpodCOMProtocol, self).__init__(serial_port, sync_channel, sync_mode)
 
-        self._arcom         = None  # type: ArCOM
+        self._arcom = None  # type: ArCOM
         self.bpod_com_ready = False
 
-        self.msg_id_list = [False for i in range(255)]#used to keep the list of msg ids sent using the load_serial_message function
+        # used to keep the list of msg ids sent using the load_serial_message function
+        self.msg_id_list = [False for i in range(255)]
 
-        if self.serial_port: self.open()        
-
+        if self.serial_port:
+            self.open()
 
     def open(self):
         super(BpodCOMProtocol, self).open()
@@ -83,7 +84,7 @@ class BpodCOMProtocol(BpodBase):
                         name=output_channel_name))
         else:
             raise BpodErrorException('Error using manualOverride: first argument must be "Input" or "Output".')
-    
+
     def _bpodcom_connect(self, serial_port, baudrate=115200, timeout=1):
         """
         Connect to Bpod using serial connection
@@ -95,7 +96,6 @@ class BpodCOMProtocol(BpodBase):
         logger.debug("Connecting on port: %s", serial_port)
         self._arcom = ArCOM().open(serial_port, baudrate, timeout)
 
-
     def _bpodcom_disconnect(self):
         """
         Signal Bpod device to disconnect now
@@ -104,15 +104,13 @@ class BpodCOMProtocol(BpodBase):
 
         self._arcom.write_char(SendMessageHeader.DISCONNECT)
 
-        res = self._arcom.read_byte()==b'1'
+        res = self._arcom.read_byte() == b'1'
 
-        logger.debug("Disconnect result (%s)", str(res) )
+        logger.debug("Disconnect result (%s)", str(res))
         return res
 
-
-    #def __bpodcom_check_com_ready(self):
+    # def __bpodcom_check_com_ready(self):
     #    if not self.bpod_com_ready: self.open()
-
 
     def _bpodcom_handshake(self):
         """
@@ -144,60 +142,60 @@ class BpodCOMProtocol(BpodBase):
 
         self._arcom.write_char(SendMessageHeader.FIRMWARE_VERSION)
 
-        fw_version   = self._arcom.read_uint16()  # type: int
+        fw_version = self._arcom.read_uint16()  # type: int
         machine_type = self._arcom.read_uint16()  # type: int
 
         logger.debug("Firmware version: %s", fw_version)
-        logger.debug("Machine type: %s",     machine_type)
+        logger.debug("Machine type: %s", machine_type)
 
         return fw_version, machine_type
 
     def _bpodcom_reset_clock(self):
-        """ 
-        Reset session clock 
-        """ 
-        logger.debug("Resetting clock") 
+        """
+        Reset session clock
+        """
+        logger.debug("Resetting clock")
 
-        self._arcom.write_char(SendMessageHeader.RESET_CLOCK) 
+        self._arcom.write_char(SendMessageHeader.RESET_CLOCK)
         return self._arcom.read_byte() == bytes(1)
 
-    def _bpodcom_stop_trial(self): 
-        """ 
-        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
-        """ 
-        logger.debug("Pausing trial")  
+    def _bpodcom_stop_trial(self):
+        """
+        Stops ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+        """
+        logger.debug("Pausing trial")
         self._arcom.write_char(SendMessageHeader.EXIT_AND_RETURN)
-        
+
     def _bpodcom_pause_trial(self):
-        """ 
-        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
-        """ 
-        logger.debug("Pausing trial")  
+        """
+        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+        """
+        logger.debug("Pausing trial")
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.PAUSE_TRIAL), 0])
         self._arcom.write_array(bytes2send)
 
-    def _bpodcom_resume_trial(self): 
-        """ 
-        Pause ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform) 
-        """ 
-        logger.debug("Resume trial")  
+    def _bpodcom_resume_trial(self):
+        """
+        Resumes ongoing trial (We recommend using computer-side pauses between trials, to keep data uniform)
+        """
+        logger.debug("Resume trial")
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.PAUSE_TRIAL), 1])
         self._arcom.write_array(bytes2send)
 
-    def _bpodcom_get_timestamp_transmission(self): 
-        """ 
-        Return timestamp transmission scheme 
-        """ 
-        logger.debug("Get timestamp transmission") 
-         
-        self._arcom.write_char(SendMessageHeader.GET_TIMESTAMP_TRANSMISSION) 
-        return self._arcom.read_byte() 
+    def _bpodcom_get_timestamp_transmission(self):
+        """
+        Return timestamp transmission scheme
+        """
+        logger.debug("Get timestamp transmission")
+
+        self._arcom.write_char(SendMessageHeader.GET_TIMESTAMP_TRANSMISSION)
+        return self._arcom.read_byte()
 
     def _bpodcom_hardware_description(self, hardware):
         """
         Request hardware description from Bpod
 
-        :param Hardware hardware: hardware 
+        :param Hardware hardware: hardware
         """
 
         logger.debug("Requesting hardware description (%s)...", SendMessageHeader.HARDWARE_DESCRIPTION)
@@ -233,16 +231,16 @@ class BpodCOMProtocol(BpodBase):
         outputs = self._arcom.read_char_array(array_len=n_outputs)  # type: list(str)
         logger.debug("Read outputs: %s", outputs)
 
-        hardware.max_states         = max_states
-        hardware.cycle_period       = cycle_period
-        hardware.max_serial_events  = max_serial_events
-        hardware.n_global_timers    = n_global_timers
-        hardware.n_global_counters  = n_global_counters
-        hardware.n_conditions       = n_conditions
-        hardware.inputs             = inputs
-        hardware.outputs            = outputs #+ ['G', 'G', 'G']
+        hardware.max_states = max_states
+        hardware.cycle_period = cycle_period
+        hardware.max_serial_events = max_serial_events
+        hardware.n_global_timers = n_global_timers
+        hardware.n_global_counters = n_global_counters
+        hardware.n_conditions = n_conditions
+        hardware.inputs = inputs
+        hardware.outputs = outputs  # + ['G', 'G', 'G']
 
-        hardware.live_timestamps    = self._bpodcom_get_timestamp_transmission()
+        hardware.live_timestamps = self._bpodcom_get_timestamp_transmission()
 
     def _bpodcom_enable_ports(self, hardware):
         """
@@ -254,18 +252,17 @@ class BpodCOMProtocol(BpodBase):
 
         ###### set inputs enabled or disabled #######################################################
         hardware.inputs_enabled = [0] * len(hardware.inputs)
-        ports_found             = False
+        ports_found = False
 
-        for j, i in enumerate(hardware.bnc_inputports_indexes): 
+        for j, i in enumerate(hardware.bnc_inputports_indexes):
             hardware.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
 
-        for j, i in enumerate(hardware.wired_inputports_indexes): 
+        for j, i in enumerate(hardware.wired_inputports_indexes):
             hardware.inputs_enabled[i] = settings.BPOD_WIRED_PORTS_ENABLED[j]
 
-        for j, i in enumerate(hardware.behavior_inputports_indexes): 
+        for j, i in enumerate(hardware.behavior_inputports_indexes):
             hardware.inputs_enabled[i] = settings.BPOD_BEHAVIOR_PORTS_ENABLED[j]
         #############################################################################################
-
 
         logger.debug("Requesting ports enabling (%s)", SendMessageHeader.ENABLE_PORTS)
         logger.debug("Inputs enabled (%s): %s", len(hardware.inputs_enabled), hardware.inputs_enabled)
@@ -301,22 +298,22 @@ class BpodCOMProtocol(BpodBase):
 
         return True if response == ReceiveMessageHeader.SYNC_CHANNEL_MODE_OK else False
 
-    def _bpodcom_echo_softcode(self, softcode): 
-        """ 
-        Send soft code 
-        """ 
-        logger.debug("Echo softcode") 
-        self._arcom.write_char(SendMessageHeader.ECHO_SOFTCODE) 
-        self._arcom.write_char(softcode) 
-        
-        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.ECHO_SOFTCODE), softcode])
-        self._arcom.write_array(bytes2send)  
+    def _bpodcom_echo_softcode(self, softcode):
+        """
+        Send soft code
+        """
+        logger.debug("Echo softcode")
+        self._arcom.write_char(SendMessageHeader.ECHO_SOFTCODE)
+        self._arcom.write_char(softcode)
 
-    def _bpodcom_manual_override_exec_event(self, event_index, event_data): 
-        """ 
-        Send soft code 
-        """ 
-        logger.debug("Manual override execute virtual event") 
+        bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.ECHO_SOFTCODE), softcode])
+        self._arcom.write_array(bytes2send)
+
+    def _bpodcom_manual_override_exec_event(self, event_index, event_data):
+        """
+        Send soft code
+        """
+        logger.debug("Manual override execute virtual event")
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), event_index, event_data])
         self._arcom.write_array(bytes2send)
 
@@ -332,11 +329,11 @@ class BpodCOMProtocol(BpodBase):
         bytes2send = ArduinoTypes.get_uint8_array(
             [ord(SendMessageHeader.MANUAL_OVERRIDE_EXEC_EVENT), channel_number, value])
         self._arcom.write_array(bytes2send)
- 
-    def _bpodcom_send_softcode(self, softcode): 
-        """ 
-        Send soft code 
-        """ 
+
+    def _bpodcom_send_softcode(self, softcode):
+        """
+        Send soft code
+        """
         logger.debug("Send softcode")
         bytes2send = ArduinoTypes.get_uint8_array([ord(SendMessageHeader.TRIGGER_SOFTCODE), softcode])
         self._arcom.write_array(bytes2send)
@@ -348,15 +345,15 @@ class BpodCOMProtocol(BpodBase):
         :param list(int) message: TODO
         :param list(int) ThirtyTwoBitMessage: TODO
         """
-        #self.__bpodcom_check_com_ready()
-        
+        # self.__bpodcom_check_com_ready()
+
         self._arcom.write_array(message)
 
     def _bpodcom_run_state_machine(self):
         """
         Request to run state machine now
         """
-        #self.__bpodcom_check_com_ready()
+        # self.__bpodcom_check_com_ready()
 
         logger.debug("Requesting state machine run (%s)", SendMessageHeader.RUN_STATE_MACHINE)
 
@@ -376,10 +373,10 @@ class BpodCOMProtocol(BpodBase):
         """
         response = self._arcom.read_uint32()  # type: int
 
-        #print('response', response)
-        #logger.debug("Received start trial timestamp in millseconds: %s", response)
+        # print('response', response)
+        # logger.debug("Received start trial timestamp in millseconds: %s", response)
 
-        #trial_start_timestamp = response / 1000.0
+        # trial_start_timestamp = response / 1000.0
 
         return response * self.hardware.times_scale_factor
 
@@ -387,12 +384,12 @@ class BpodCOMProtocol(BpodBase):
 
         data = self._arcom.read_bytes_array(12)
 
-        n_hw_timer_cyles        = ArduinoTypes.cvt_uint32(b''.join(data[:4]))
-        trial_end_micros        = ArduinoTypes.cvt_uint64(b''.join(data[4:12]))# / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
-        trial_end_timestamp     = trial_end_micros / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
-        trial_time_from_micros  = trial_end_timestamp - self.trial_start_timestamp
-        trial_time_from_cycles  = n_hw_timer_cyles/self.hardware.cycle_frequency
-        discrepancy             = abs(trial_time_from_micros - trial_time_from_cycles)*1000
+        n_hw_timer_cyles = ArduinoTypes.cvt_uint32(b''.join(data[:4]))
+        trial_end_micros = ArduinoTypes.cvt_uint64(b''.join(data[4:12]))  # / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
+        trial_end_timestamp = trial_end_micros / float(self.hardware.DEFAULT_FREQUENCY_DIVIDER)
+        trial_time_from_micros = trial_end_timestamp - self.trial_start_timestamp
+        trial_time_from_cycles = n_hw_timer_cyles/self.hardware.cycle_frequency
+        discrepancy = abs(trial_time_from_micros - trial_time_from_cycles)*1000
 
         return trial_end_timestamp, discrepancy
 
@@ -402,7 +399,7 @@ class BpodCOMProtocol(BpodBase):
 
         :rtype: bool
         """
-        #self.__bpodcom_check_com_ready()
+        # self.__bpodcom_check_com_ready()
 
         response = self._arcom.read_uint8()  # type: int
 
@@ -426,8 +423,8 @@ class BpodCOMProtocol(BpodBase):
         :rtype: tuple(int, int)
         """
         response = self._arcom.read_uint8_array(array_len=2)
-        opcode   = response[0]
-        data     = response[1]
+        opcode = response[0]
+        data = response[1]
 
         logger.debug("Received opcode message: opcode=%s, data=%s", opcode, data)
 
@@ -475,7 +472,7 @@ class BpodCOMProtocol(BpodBase):
         :param TODO
         :rtype: bool
         """
-        #self.__bpodcom_check_com_ready()
+        # self.__bpodcom_check_com_ready()
 
         if isinstance(serial_channel, BpodModule):
             serial_channel = serial_channel.serial_port
@@ -545,24 +542,24 @@ class BpodCOMProtocol(BpodBase):
 
     @property
     def hardware(self):
-        #self.__bpodcom_check_com_ready()
+        # self.__bpodcom_check_com_ready()
         return BpodBase.hardware.fget(self)  # type: Hardware
 
     @property
     def modules(self):
-        #self.__bpodcom_check_com_ready()
+        # self.__bpodcom_check_com_ready()
         return BpodBase.modules.fget(self)
 
     # @property
     # def inputs(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.inputs.fget(self)
-    
+
     # @property
     # def outputs(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.outputs.fget(self)
-    
+
     # @property
     # def channels(self):
     #   self.__bpodcom_check_com_ready()
@@ -572,37 +569,37 @@ class BpodCOMProtocol(BpodBase):
     # def max_states(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.max_states.fget(self)
-    
+
     # @property
     # def max_serial_events(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.max_serial_events.fget(self)
-        
+
     # @property
     # def inputs_enabled(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.inputs_enabled.fget(self)
-    
+
     # @property
     # def cycle_period(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.cycle_period.fget(self)
-        
+
     # @property
     # def n_global_timers(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.n_global_timers.fget(self)
-    
+
     # @property
     # def n_global_counters(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.n_global_counters.fget(self)
-    
+
     # @property
     # def n_conditions(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.n_conditions.fget(self)
-    
+
     # @property
     # def n_uart_channels(self):
     #   self.__bpodcom_check_com_ready()
@@ -611,7 +608,7 @@ class BpodCOMProtocol(BpodBase):
     # @property
     # def firmware_version(self):
     #   return BpodBase.firmware_version.fget(self)
-    
+
     # @property
     # def machine_type(self):
     #   self.__bpodcom_check_com_ready()

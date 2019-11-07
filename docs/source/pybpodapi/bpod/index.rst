@@ -25,7 +25,7 @@ Inheritance
 ~~~~~~~~~~~~~~~~~~
 
 .. inheritance-diagram:: pybpodapi.bpod.Bpod
-	:parts: 1
+    :parts: 1
 
 |
 |
