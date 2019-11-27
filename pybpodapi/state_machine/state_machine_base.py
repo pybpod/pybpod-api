@@ -226,7 +226,7 @@ class StateMachineBase(object):
                          off_message=0,
                          loop_mode=0,
                          loop_intervals=0,
-                         send_events=0,
+                         send_events=1,
                          oneset_triggers=None):
         """
         Sets the duration of a global timer. Unlike state timers, global timers can be triggered from any state (as an
