@@ -196,8 +196,10 @@ class StateMachineBase(object):
             if action_name == OutputChannel.GlobalCounterReset:
                 self.global_counters.reset_matrix[output_value] = 1
 
+            # For backwards compatability, integers specifying global timers convert to equivalent binary decimals. 
+            # To specify binary, use a string of bits.
             if output_code == self.hardware.channels.events_positions.globalTimerTrigger:
-                self.global_timers.triggers_matrix[output_value-1] = 1
+                self.global_timers.triggers_matrix[state_name_idx] = 2**(output_value-1)
 
             if output_code == self.hardware.channels.events_positions.globalTimerCancel:
                 self.global_timers.cancels_matrix[output_value-1] = 1
@@ -226,7 +228,7 @@ class StateMachineBase(object):
                          off_message=0,
                          loop_mode=0,
                          loop_intervals=0,
-                         send_events=0,
+                         send_events=1,
                          oneset_triggers=None):
         """
         Sets the duration of a global timer. Unlike state timers, global timers can be triggered from any state (as an
