@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 class GlobalTimers(object):
-
     def __init__(self, max_states, n_global_timers):
 
         self.start_matrix = [[] for i in range(max_states)]
@@ -36,7 +35,7 @@ class GlobalTimers(object):
         self.max_size = n_global_timers
 
     def get_max_index_used(self):
-        for i in range(self.max_size-1, -1, -1):
+        for i in range(self.max_size - 1, -1, -1):
             if self.timers[i] != 0:
                 return i
         return None
