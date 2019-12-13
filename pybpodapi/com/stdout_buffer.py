@@ -5,7 +5,6 @@ from pybpodapi.com.messaging.stdout import StdoutMessage
 
 
 class StdoutBuffer(io.StringIO):
-
     def __init__(self, session):
         super().__init__()
         self.session = session

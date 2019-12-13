@@ -14,19 +14,20 @@ class DataType(object):
         self.name = name
         self.size = size
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return self.name
 
 
 class ArduinoTypes(object):
-    BYTE = DataType('byte', 1)
-    CHAR = DataType('char', 1)
-    UINT8 = DataType('uint8', 1)
-    INT16 = DataType('int16', 2)
-    UINT16 = DataType('uint16', 2)
-    UINT32 = DataType('uint32', 4)
-    UINT64 = DataType('uint64', 8)
-    FLOAT32 = DataType('float32', 4)
-    FLOAT64 = DataType('float64', 8)
+    BYTE = DataType("byte", 1)
+    CHAR = DataType("char", 1)
+    UINT8 = DataType("uint8", 1)
+    INT16 = DataType("int16", 2)
+    UINT16 = DataType("uint16", 2)
+    UINT32 = DataType("uint32", 4)
+    UINT64 = DataType("uint64", 8)
+    FLOAT32 = DataType("float32", 4)
+    FLOAT64 = DataType("float64", 8)
 
     @staticmethod
     def get_array(array, dtype):
@@ -57,27 +58,27 @@ class ArduinoTypes(object):
 
     @staticmethod
     def get_float(value):
-        return struct.pack('<f', value)
+        return struct.pack("<f", value)
 
     @staticmethod
     def cvt_float32(message_bytes):
-        return struct.unpack('<f', message_bytes)[0]
+        return struct.unpack("<f", message_bytes)[0]
 
     @staticmethod
     def cvt_float64(message_bytes):
-        return struct.unpack('<d', message_bytes)[0]
+        return struct.unpack("<d", message_bytes)[0]
 
     @staticmethod
     def cvt_int64(message_bytes):
-        return int.from_bytes(message_bytes, byteorder='little')
+        return int.from_bytes(message_bytes, byteorder="little")
 
     @staticmethod
     def cvt_uint32(message_bytes):
-        return struct.unpack('<L', message_bytes)[0]
+        return struct.unpack("<L", message_bytes)[0]
 
     @staticmethod
     def cvt_uint64(message_bytes):
-        return struct.unpack('<Q', message_bytes)[0]
+        return struct.unpack("<Q", message_bytes)[0]
 
 
 class ArCOM(object):
@@ -92,7 +93,9 @@ class ArCOM(object):
         :param baudRate:
         :return:
         """
-        self.serial_object = serial.Serial(serial_port, baudrate=baudrate, timeout=timeout)
+        self.serial_object = serial.Serial(
+            serial_port, baudrate=baudrate, timeout=timeout
+        )
 
         return self
 
@@ -136,31 +139,31 @@ class ArCOM(object):
     def read_uint8(self):
         message_bytes = self.serial_object.read(ArduinoTypes.UINT8.size)
         # logger.debug("Read %s bytes: %s", len(message_bytes), message_bytes)
-        message = int.from_bytes(message_bytes, byteorder='little')
+        message = int.from_bytes(message_bytes, byteorder="little")
         return message
 
     def read_uint16(self):
         message_bytes = self.serial_object.read(ArduinoTypes.UINT16.size)
         # logger.debug("Read %s bytes: %s", ArduinoTypes.UINT16.size, message_bytes)
-        message = int.from_bytes(message_bytes, byteorder='little')
+        message = int.from_bytes(message_bytes, byteorder="little")
         return message
 
     def read_uint32(self):
         message_bytes = self.serial_object.read(ArduinoTypes.UINT32.size)
         # logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
-        message = int.from_bytes(message_bytes, byteorder='little')
+        message = int.from_bytes(message_bytes, byteorder="little")
         return message
 
     def read_uint64(self):
         message_bytes = self.serial_object.read(ArduinoTypes.UINT64.size)
         # logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
-        message = int.from_bytes(message_bytes, byteorder='little')
+        message = int.from_bytes(message_bytes, byteorder="little")
         return message
 
     def read_float32(self):
         message_bytes = self.serial_object.read(ArduinoTypes.FLOAT32.size)
         # logger.debug("Read %s bytes: %s", ArduinoTypes.UINT32.size, message_bytes)
-        message = struct.unpack('<f', message_bytes)
+        message = struct.unpack("<f", message_bytes)
         return message[0]
 
     ##############################################################
