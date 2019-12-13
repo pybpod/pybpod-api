@@ -8,12 +8,11 @@ if platform in ["linux", "linux2", "darwin"]:
 
 
 class NonBlockingStreamReader:
-
     def __init__(self, stream):
-        '''
+        """
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
-        '''
+        """
         self._s = stream
         self._q = Queue()
 
@@ -23,7 +22,6 @@ class NonBlockingStreamReader:
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
         class PopulateQueue(Thread):
-
             def __init__(self, stream, queue):
                 Thread.__init__(self)
                 self.daemon = True

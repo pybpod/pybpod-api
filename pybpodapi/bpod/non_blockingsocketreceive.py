@@ -4,17 +4,15 @@ import socket
 
 
 class NonBlockingSocketReceive:
-
     def __init__(self, sck):
-        '''
+        """
         stream: the stream to read from.
                 Usually a process' stdout or stderr.
-        '''
+        """
         self._s = sck
         self._q = Queue()
 
         class PopulateQueue(Thread):
-
             def __init__(self, sck, queue):
                 Thread.__init__(self)
                 self.daemon = True
