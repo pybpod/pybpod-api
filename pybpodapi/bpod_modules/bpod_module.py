@@ -3,8 +3,15 @@ from pybpodapi.com.arcom import ArduinoTypes
 
 
 class BpodModule(object):
-
-    def __init__(self, connected=False, module_name='', firmware_version=0, events_names=[], n_serial_events=0, serial_port=None):
+    def __init__(
+        self,
+        connected=False,
+        module_name="",
+        firmware_version=0,
+        events_names=[],
+        n_serial_events=0,
+        serial_port=None,
+    ):
         self.name = module_name
         self.serial_port = serial_port
         self.connected = connected
@@ -17,7 +24,9 @@ class BpodModule(object):
         self.bpod_modules = None
 
     def __str__(self):
-        return "{0} (connected: {1})(firmware: {2})".format(self.name, self.connected, self.firmware_version)
+        return "{0} (connected: {1})(firmware: {2})".format(
+            self.name, self.connected, self.firmware_version
+        )
 
     def load_message(self, msg, msg_id=None):
         """
@@ -29,7 +38,7 @@ class BpodModule(object):
         if msg_id is None:
             for i in range(255):
                 if not self.bpod_modules.bpod.msg_id_list[i]:
-                    msg_id = i+1
+                    msg_id = i + 1
                     break
 
         self.bpod_modules.bpod.load_serial_message(self.serial_port, msg_id, msg)
@@ -40,7 +49,9 @@ class BpodModule(object):
             self.bpod_modules.activate_module_relay(self)
             self.relay_active = True
         else:
-            raise BpodErrorException('Error: You must disable the active module relay before starting another one.')
+            raise BpodErrorException(
+                "Error: You must disable the active module relay before starting another one."
+            )
 
     def stop_module_relay(self):
         self.bpod_modules.deactivate_module_relay(self)
@@ -48,7 +59,9 @@ class BpodModule(object):
 
     def __read(self, size=None, dtype=None):
         if not self.relay_active:
-            raise BpodErrorException('Error: you must start the module relay with start_moule_relay() before you can read bytes from a module')
+            raise BpodErrorException(
+                "Error: you must start the module relay with start_moule_relay() before you can read bytes from a module"
+            )
 
         if size is None:
             size = self.bpod_modules.bpod.data_available()
