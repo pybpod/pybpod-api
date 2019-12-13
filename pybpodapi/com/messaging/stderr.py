@@ -4,6 +4,7 @@
 from pybpodapi.com.messaging.base_message import BaseMessage
 from pybpodapi.utils import date_parser
 
+
 class StderrMessage(BaseMessage):
     """
     Stderr message from the server process
@@ -13,7 +14,8 @@ class StderrMessage(BaseMessage):
         :py:class:`pybpodgui_plugin.com.messaging.base_message.BoardMessage`
 
     """
-    MESSAGE_TYPE_ALIAS = 'stderr'
+
+    MESSAGE_TYPE_ALIAS = "stderr"
     MESSAGE_COLOR = (255, 0, 0)
 
     def __init__(self, content, host_timestamp=None):
@@ -21,9 +23,10 @@ class StderrMessage(BaseMessage):
 
     def __str__(self):
         return "host-time:{0} pc-time:{1} {2}".format(
-            self.host_timestamp if self.host_timestamp is not None else '',
-            self.pc_timestamp.strftime('%Y%m%d%H%M%S') if self.pc_timestamp else '',
-            self.content)
+            self.host_timestamp if self.host_timestamp is not None else "",
+            self.pc_timestamp.strftime("%Y%m%d%H%M%S") if self.pc_timestamp else "",
+            self.content,
+        )
 
     def tolist(self):
         return [
@@ -32,7 +35,7 @@ class StderrMessage(BaseMessage):
             self.host_timestamp,
             self.content,
             None,
-            None
+            None,
         ]
 
     @classmethod

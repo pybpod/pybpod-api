@@ -16,7 +16,7 @@ class StateTransition(BaseMessage):
     :ivar list(StateDuration) timestamps: a list of timestamps (start and end) that corresponds to occurrences of this state
     """
 
-    MESSAGE_TYPE_ALIAS = 'TRANSITION'
+    MESSAGE_TYPE_ALIAS = "TRANSITION"
     MESSAGE_COLOR = (0, 200, 0)
 
     def __init__(self, state_name, host_timestamp):
@@ -33,7 +33,7 @@ class StateTransition(BaseMessage):
             self.host_timestamp,
             None,
             self.content,
-            None
+            None,
         ]
 
     @classmethod
@@ -41,13 +41,11 @@ class StateTransition(BaseMessage):
         """
         Returns True if the typestr represents the class
         """
-        obj = cls(
-            row[4],
-            float(row[2]) if row[2] else None
-        )
+        obj = cls(row[4], float(row[2]) if row[2] else None)
         obj.pc_timestamp = date_parser.parse(row[1])
 
         return obj
 
     @property
-    def state_name(self): return self.content
+    def state_name(self):
+        return self.content

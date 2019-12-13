@@ -19,11 +19,12 @@ class Trial(BaseMessage):
     :ivar list(StateOccurrence) states_occurrences: list of state occurrences
     :ivar list(EventOccurrence) events_occurrences: list of event occurrences
     """
-    MESSAGE_TYPE_ALIAS = 'TRIAL'
+
+    MESSAGE_TYPE_ALIAS = "TRIAL"
     MESSAGE_COLOR = (0, 0, 255)
 
     def __init__(self, sma=None):
-        super(Trial, self).__init__('New trial')
+        super(Trial, self).__init__("New trial")
         self.trial_start_timestamp = None
         self.sma = sma  # type: StateMachine
         self.states_occurrences = []  # type: list(StateOccurrence)
@@ -31,7 +32,7 @@ class Trial(BaseMessage):
 
         self.states = [0]
         self.state_timestamps = [0]
-        self.event_timestamps = []  	# see also BpodBase.__update_timestamps
+        self.event_timestamps = []  # see also BpodBase.__update_timestamps
 
         self.states_durations = {}
 
@@ -42,7 +43,9 @@ class Trial(BaseMessage):
             self.states_occurrences.append(msg)
             if msg.state_name not in self.states_durations:
                 self.states_durations[msg.state_name] = []
-            self.states_durations[msg.state_name].append((msg.start_timestamp, msg.end_timestamp))
+            self.states_durations[msg.state_name].append(
+                (msg.start_timestamp, msg.end_timestamp)
+            )
 
         return self
 
@@ -103,11 +106,13 @@ class Trial(BaseMessage):
         return all_timestamps
 
     def export(self):
-        return {'Bpod start timestamp': self.bpod_start_timestamp,
-                'Trial start timestamp': self.trial_start_timestamp,
-                'Trial end timestamp': self.trial_end_timestamp,
-                'States timestamps': self.states_durations,
-                'Events timestamps': self.get_all_timestamps_by_event()}
+        return {
+            "Bpod start timestamp": self.bpod_start_timestamp,
+            "Trial start timestamp": self.trial_start_timestamp,
+            "Trial end timestamp": self.trial_end_timestamp,
+            "States timestamps": self.states_durations,
+            "Events timestamps": self.get_all_timestamps_by_event(),
+        }
 
     def pformat(self):
         return pprint.pformat(self.export(), indent=4)

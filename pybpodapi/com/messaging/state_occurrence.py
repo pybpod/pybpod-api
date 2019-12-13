@@ -16,7 +16,7 @@ class StateOccurrence(BaseMessage):
     :ivar list(StateDuration) timestamps: a list of timestamps (start and end) that corresponds to occurrences of this state
     """
 
-    MESSAGE_TYPE_ALIAS = 'STATE'
+    MESSAGE_TYPE_ALIAS = "STATE"
     MESSAGE_COLOR = (0, 100, 0)
 
     def __init__(self, state_name, host_timestamp, end_timestamp):
@@ -36,7 +36,7 @@ class StateOccurrence(BaseMessage):
             self.start_timestamp,
             self.end_timestamp,
             self.content,
-            self.end_timestamp-self.start_timestamp
+            self.end_timestamp - self.start_timestamp,
         ]
 
     @classmethod
@@ -45,9 +45,7 @@ class StateOccurrence(BaseMessage):
         Returns True if the typestr represents the class
         """
         obj = cls(
-            row[4],
-            float(row[2]) if row[2] else None,
-            float(row[3]) if row[3] else None
+            row[4], float(row[2]) if row[2] else None, float(row[3]) if row[3] else None
         )
         obj.pc_timestamp = date_parser.parse(row[1])
 

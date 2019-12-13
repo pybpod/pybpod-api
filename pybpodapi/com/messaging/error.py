@@ -12,5 +12,6 @@ class ErrorMessage(BaseMessage):
         :py:class:`pybpodgui_plugin.com.messaging.board_message.BoardMessage`
 
     """
-    MESSAGE_TYPE_ALIAS = 'error'
+
+    MESSAGE_TYPE_ALIAS = "error"
     MESSAGE_COLOR = (240, 0, 0)

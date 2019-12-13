@@ -12,7 +12,8 @@ class SoftcodeOccurrence(BaseMessage):
     :ivar float board_timestamp: timestamp associated with this event (from bpod)
 
     """
-    MESSAGE_TYPE_ALIAS = 'SOFTCODE'
+
+    MESSAGE_TYPE_ALIAS = "SOFTCODE"
     MESSAGE_COLOR = (40, 30, 30)
 
     def __init__(self, softcode, host_timestamp=None):

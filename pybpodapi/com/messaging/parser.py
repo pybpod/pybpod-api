@@ -10,14 +10,14 @@ logger = logging.getLogger(__name__)
 
 class MessageParser(object):
 
-    COLUMN_SEPARATOR = ';'
+    COLUMN_SEPARATOR = ";"
 
     MESSAGES_TYPES_CLASSES = [
         ErrorMessage,
         DebugMessage,
         StderrMessage,
         StdoutMessage,
-        WarningMessage
+        WarningMessage,
     ]
 
     def fromlist(self, row):
@@ -34,7 +34,7 @@ class MessageParser(object):
         :rtype: list(BaseMessage)
         """
         if row is None or len(row) == 0:
-            return ErrorMessage('Parse error: line is empty')
+            return ErrorMessage("Parse error: line is empty")
 
         msg = None
         try:
@@ -45,7 +45,9 @@ class MessageParser(object):
                     msg = msgtype_class.fromlist(row)
                     break
         except Exception:
-            logger.warning("Could not parse bpod message: {0}".format(str(row)), exc_info=True)
+            logger.warning(
+                "Could not parse bpod message: {0}".format(str(row)), exc_info=True
+            )
             return ErrorMessage(row)  # default case
 
         return msg

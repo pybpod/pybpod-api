@@ -3,6 +3,7 @@
 from pybpodapi.com.messaging.base_message import BaseMessage
 from pybpodapi.utils import date_parser
 
+
 class EventResume(BaseMessage):
     """
     Message from board that represents state change (an event)
@@ -12,7 +13,8 @@ class EventResume(BaseMessage):
     :ivar float board_timestamp: timestamp associated with this event (from bpod)
 
     """
-    MESSAGE_TYPE_ALIAS = 'EVENT-SUMMARY'
+
+    MESSAGE_TYPE_ALIAS = "EVENT-SUMMARY"
 
     def __init__(self, event_id, event_name, host_timestamp=None):
         """
@@ -29,13 +31,15 @@ class EventResume(BaseMessage):
         """
         Returns True if the typestr represents the class
         """
-        return typestr == cls.MESSAGE_TYPE_ALIAS or typestr == 'EVENT-RESUME'
+        return typestr == cls.MESSAGE_TYPE_ALIAS or typestr == "EVENT-RESUME"
 
     @property
-    def event_name(self): return self.content
+    def event_name(self):
+        return self.content
 
     @property
-    def event_id(self): return self._event_id
+    def event_id(self):
+        return self._event_id
 
     def tolist(self):
         return [
@@ -44,7 +48,7 @@ class EventResume(BaseMessage):
             self.host_timestamp,
             None,
             self.event_id,
-            self.event_name
+            self.event_name,
         ]
 
     @classmethod
@@ -52,11 +56,7 @@ class EventResume(BaseMessage):
         """
         Returns True if the typestr represents the class
         """
-        obj = cls(
-            int(row[4]),
-            row[5],
-            float(row[2]) if row[2] else None
-        )
+        obj = cls(int(row[4]), row[5], float(row[2]) if row[2] else None)
         obj.pc_timestamp = date_parser.parse(row[1])
 
         return obj

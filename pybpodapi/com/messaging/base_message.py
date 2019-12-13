@@ -10,7 +10,7 @@ class BaseMessage(object):
     It may have been originated from the board of from pc
     """
 
-    MESSAGE_TYPE_ALIAS = 'MESSAGE'
+    MESSAGE_TYPE_ALIAS = "MESSAGE"
     MESSAGE_COLOR = (200, 200, 200)
 
     def __init__(self, content, host_timestamp=None):
@@ -20,9 +20,10 @@ class BaseMessage(object):
 
     def __str__(self):
         return "host-time:{0} pc-time:{1} {2}".format(
-            self.host_timestamp if self.host_timestamp is not None else '',
-            self.pc_timestamp.strftime('%Y%m%d%H%M%S') if self.pc_timestamp else '',
-            self.content)
+            self.host_timestamp if self.host_timestamp is not None else "",
+            self.pc_timestamp.strftime("%Y%m%d%H%M%S") if self.pc_timestamp else "",
+            self.content,
+        )
 
     @classmethod
     def check_type(cls, typestr):
@@ -38,7 +39,7 @@ class BaseMessage(object):
             self.host_timestamp,
             None,  # reserved to store the host end timestamp
             self.content,
-            None
+            None,
         ]
 
     @classmethod

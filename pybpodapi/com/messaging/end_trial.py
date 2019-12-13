@@ -12,5 +12,6 @@ class EndTrial(BaseMessage):
         :py:class:`pybpodgui_plugin.com.messaging.board_message.BoardMessage`
 
     """
-    MESSAGE_TYPE_ALIAS = 'END-TRIAL'
+
+    MESSAGE_TYPE_ALIAS = "END-TRIAL"
     MESSAGE_COLOR = (0, 100, 200)
