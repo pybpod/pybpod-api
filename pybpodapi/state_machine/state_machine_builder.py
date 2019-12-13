@@ -70,17 +70,24 @@ class StateMachineBuilder(StateMachineBase):
                 self.conditions.matrix[j] = inputTransitions
 
         # Check to make sure all states in manifest exist
-        logger.debug("Total states added: %s | Manifested sates: %s", self.total_states_added, len(self.manifest))
+        logger.debug(
+            "Total states added: %s | Manifested sates: %s",
+            self.total_states_added,
+            len(self.manifest),
+        )
         if len(self.manifest) > self.total_states_added:
             raise StateMachineBuilderError(
-                'Error: some states were referenced by name, but not subsequently declared.')
+                "Error: some states were referenced by name, but not subsequently declared."
+            )
 
     def build_header(self, run_asap=None, statemachine_body_size=0):
         message = [ord(SendMessageHeader.NEW_STATE_MATRIX)]
         message += [0 if run_asap is None else 1]
         message += [1 if self.use_255_back_signal else 0]
 
-        return ArduinoTypes.get_uint8_array(message) + ArduinoTypes.get_uint16_array([statemachine_body_size])
+        return ArduinoTypes.get_uint8_array(message) + ArduinoTypes.get_uint16_array(
+            [statemachine_body_size]
+        )
 
     def build_message(self):
         """
@@ -92,25 +99,41 @@ class StateMachineBuilder(StateMachineBase):
         self.highest_used_global_timer = self.global_timers.get_max_index_used()
         self.highest_used_global_condition = self.conditions.get_max_index_used()
 
-        self.highest_used_global_counter = 0 if self.highest_used_global_counter is None else self.highest_used_global_counter + 1
-        self.highest_used_global_timer = 0 if self.highest_used_global_timer is None else self.highest_used_global_timer + 1
-        self.highest_used_global_condition = 0 if self.highest_used_global_condition is None else self.highest_used_global_condition + 1
+        self.highest_used_global_counter = (
+            0
+            if self.highest_used_global_counter is None
+            else self.highest_used_global_counter + 1
+        )
+        self.highest_used_global_timer = (
+            0
+            if self.highest_used_global_timer is None
+            else self.highest_used_global_timer + 1
+        )
+        self.highest_used_global_condition = (
+            0
+            if self.highest_used_global_condition is None
+            else self.highest_used_global_condition + 1
+        )
 
         message = [
             self.total_states_added,
             self.highest_used_global_timer,
             self.highest_used_global_counter,
-            self.highest_used_global_condition
+            self.highest_used_global_condition,
         ]
 
         # STATE TIMER MATRIX
         # Send state timer transitions (for all states)
         tmp = []
         for i in range(self.total_states_added):
-            tmp += [self.total_states_added if math.isnan(self.state_timer_matrix[i]) else self.state_timer_matrix[i]]
+            tmp += [
+                self.total_states_added
+                if math.isnan(self.state_timer_matrix[i])
+                else self.state_timer_matrix[i]
+            ]
 
         message += tmp
-        logger.debug('STATE TIMER MATRIX: %s', tmp)
+        logger.debug("STATE TIMER MATRIX: %s", tmp)
 
         # INPUT MATRIX
         # Send event-triggered transitions (where they are different from default)
@@ -123,22 +146,28 @@ class StateMachineBuilder(StateMachineBase):
             for transition in state_transitions:
                 tmp += [transition[0]]
                 dest_state = transition[1]
-                tmp += [self.total_states_added if math.isnan(dest_state) else dest_state]
+                tmp += [
+                    self.total_states_added if math.isnan(dest_state) else dest_state
+                ]
         message += tmp
-        logger.debug('INPUT MATRIX: %s', tmp)
+        logger.debug("INPUT MATRIX: %s", tmp)
 
         # OUTPUT MATRIX
         # Send hardware states (where they are different from default)
         tmp = []
         for i in range(self.total_states_added):
             hw_state = self.output_matrix[i]
-            hw_state = [evt for evt in hw_state if evt[0] < self.hardware.channels.events_positions.globalTimerTrigger]
+            hw_state = [
+                evt
+                for evt in hw_state
+                if evt[0] < self.hardware.channels.events_positions.globalTimerTrigger
+            ]
             n_differences = len(hw_state)
             tmp += [n_differences]
             for hw_conf in hw_state:
                 tmp += hw_conf[:2]
         message += tmp
-        logger.debug('OUTPUT MATRIX: %s', tmp)
+        logger.debug("OUTPUT MATRIX: %s", tmp)
 
         # GLOBAL_TIMER_START_MATRIX
         # Send global timer-start triggered transitions (where they are different from default)
@@ -149,10 +178,15 @@ class StateMachineBuilder(StateMachineBase):
             tmp += [n_transitions]
             for transition in state_transitions:
                 dest_state = transition[1]
-                tmp += [transition[0] - self.hardware.channels.events_positions.globalTimerStart]
-                tmp += [self.total_states_added if math.isnan(dest_state) else dest_state]
+                tmp += [
+                    transition[0]
+                    - self.hardware.channels.events_positions.globalTimerStart
+                ]
+                tmp += [
+                    self.total_states_added if math.isnan(dest_state) else dest_state
+                ]
         message += tmp
-        logger.debug('GLOBAL_TIMER_START_MATRIX: %s', tmp)
+        logger.debug("GLOBAL_TIMER_START_MATRIX: %s", tmp)
 
         # GLOBAL_TIMER_END_MATRIX
         # Send global timer-end triggered transitions (where they are different from default)
@@ -163,10 +197,15 @@ class StateMachineBuilder(StateMachineBase):
             tmp += [n_transitions]
             for transition in state_transitions:
                 dest_state = transition[1]
-                tmp += [transition[0] - self.hardware.channels.events_positions.globalTimerEnd]
-                tmp += [self.total_states_added if math.isnan(dest_state) else dest_state]
+                tmp += [
+                    transition[0]
+                    - self.hardware.channels.events_positions.globalTimerEnd
+                ]
+                tmp += [
+                    self.total_states_added if math.isnan(dest_state) else dest_state
+                ]
         message += tmp
-        logger.debug('GLOBAL_TIMER_END_MATRIX: %s', tmp)
+        logger.debug("GLOBAL_TIMER_END_MATRIX: %s", tmp)
 
         # GLOBAL_COUNTER_MATRIX
         # Send global counter triggered transitions (where they are different from default)
@@ -177,10 +216,15 @@ class StateMachineBuilder(StateMachineBase):
             tmp += [n_transitions]
             for transition in state_transitions:
                 dest_state = transition[1]
-                tmp += [transition[0] - self.hardware.channels.events_positions.globalCounter]
-                tmp += [self.total_states_added if math.isnan(dest_state) else dest_state]
+                tmp += [
+                    transition[0]
+                    - self.hardware.channels.events_positions.globalCounter
+                ]
+                tmp += [
+                    self.total_states_added if math.isnan(dest_state) else dest_state
+                ]
         message += tmp
-        logger.debug('GLOBAL_COUNTER_MATRIX: %s', tmp)
+        logger.debug("GLOBAL_COUNTER_MATRIX: %s", tmp)
 
         # CONDITION_MATRIX
         # Send condition triggered transitions (where they are different from default)
@@ -191,18 +235,22 @@ class StateMachineBuilder(StateMachineBase):
             tmp += [n_transitions]
             for transition in state_transitions:
                 dest_state = transition[1]
-                tmp += [transition[0] - self.hardware.channels.events_positions.condition]
-                tmp += [self.total_states_added if math.isnan(dest_state) else dest_state]
+                tmp += [
+                    transition[0] - self.hardware.channels.events_positions.condition
+                ]
+                tmp += [
+                    self.total_states_added if math.isnan(dest_state) else dest_state
+                ]
 
         message += tmp
-        logger.debug('CONDITION_MATRIX: %s', tmp)
+        logger.debug("CONDITION_MATRIX: %s", tmp)
 
         # GLOBAL_TIMER_CHANNELS
         tmp = []
         for i in range(self.highest_used_global_timer):
             tmp += [self.global_timers.channels[i]]
         message += tmp
-        logger.debug('GLOBAL_TIMER_CHANNELS: %s', tmp)
+        logger.debug("GLOBAL_TIMER_CHANNELS: %s", tmp)
 
         # GLOBAL_TIMER_ON_MESSAGES
         tmp = []
@@ -210,7 +258,7 @@ class StateMachineBuilder(StateMachineBase):
             v = self.global_timers.on_messages[i]
             tmp += [255 if v == 0 else v]
         message += tmp
-        logger.debug('GLOBAL_TIMER_ON_MESSAGES: %s', tmp)
+        logger.debug("GLOBAL_TIMER_ON_MESSAGES: %s", tmp)
 
         # GLOBAL_TIMER_OFF_MESSAGES
         tmp = []
@@ -218,51 +266,51 @@ class StateMachineBuilder(StateMachineBase):
             v = self.global_timers.off_messages[i]
             tmp += [255 if v == 0 else v]
         message += tmp
-        logger.debug('GLOBAL_TIMER_OFF_MESSAGES: %s', tmp)
+        logger.debug("GLOBAL_TIMER_OFF_MESSAGES: %s", tmp)
 
         # GLOBAL_TIMER_LOOP_MODE
         tmp = []
         for i in range(self.highest_used_global_timer):
             tmp += [self.global_timers.loop_mode[i]]
         message += tmp
-        logger.debug('GLOBAL_TIMER_LOOP_MODE: %s', tmp)
+        logger.debug("GLOBAL_TIMER_LOOP_MODE: %s", tmp)
 
         # GLOBAL_TIMER_EVENTS
         tmp = []
         for i in range(self.highest_used_global_timer):
             tmp += [self.global_timers.send_events[i]]
         message += tmp
-        logger.debug('GLOBAL_TIMER_EVENTS: %s', tmp)
+        logger.debug("GLOBAL_TIMER_EVENTS: %s", tmp)
 
         # GLOBAL_COUNTER_ATTACHED_EVENTS
         tmp = []
         for i in range(self.highest_used_global_counter):
             tmp += [self.global_counters.attached_events[i]]
         message += tmp
-        logger.debug('GLOBAL_COUNTER_ATTACHED_EVENTS: %s', tmp)
+        logger.debug("GLOBAL_COUNTER_ATTACHED_EVENTS: %s", tmp)
 
         # CONDITIONS_CHANNELS
         tmp = []
         for i in range(self.highest_used_global_condition):
             tmp += [self.conditions.channels[i]]
         message += tmp
-        logger.debug('CONDITIONS_CHANNELS: %s', tmp)
+        logger.debug("CONDITIONS_CHANNELS: %s", tmp)
 
         # CONDITIONS VALUES
         tmp = []
         for i in range(self.highest_used_global_condition):
             tmp += [self.conditions.values[i]]
         message += tmp
-        logger.debug('CONDITIONS VALUES: %s', tmp)
+        logger.debug("CONDITIONS VALUES: %s", tmp)
 
         # GLOBAL_COUNTER_RESETS
         tmp = []
         for i in range(self.total_states_added):
             tmp += [self.global_counters.reset_matrix[i]]
         message += tmp
-        logger.debug('GLOBAL_COUNTER_RESETS: %s', tmp)
+        logger.debug("GLOBAL_COUNTER_RESETS: %s", tmp)
 
-        self.state_timers = self.state_timers[:self.total_states_added]
+        self.state_timers = self.state_timers[: self.total_states_added]
 
         return ArduinoTypes.get_uint8_array(message)
 
@@ -304,11 +352,22 @@ class StateMachineBuilder(StateMachineBase):
         used_timers = range(self.highest_used_global_timer)
         used_counters = range(self.highest_used_global_counter)
 
-        thirty_two_bit_message = [t * self.hardware.cycle_frequency for t in self.state_timers] + \
-                                 [self.global_timers.timers[i] * self.hardware.cycle_frequency for i in used_timers] + \
-                                 [self.global_timers.on_set_delays[i] * self.hardware.cycle_frequency for i in used_timers] + \
-                                 [self.global_timers.loop_intervals[i] * self.hardware.cycle_frequency for i in used_timers] + \
-                                 [self.global_counters.thresholds[i] for i in used_counters]
+        thirty_two_bit_message = (
+            [t * self.hardware.cycle_frequency for t in self.state_timers]
+            + [
+                self.global_timers.timers[i] * self.hardware.cycle_frequency
+                for i in used_timers
+            ]
+            + [
+                self.global_timers.on_set_delays[i] * self.hardware.cycle_frequency
+                for i in used_timers
+            ]
+            + [
+                self.global_timers.loop_intervals[i] * self.hardware.cycle_frequency
+                for i in used_timers
+            ]
+            + [self.global_counters.thresholds[i] for i in used_counters]
+        )
 
         return ArduinoTypes.get_uint32_array(thirty_two_bit_message)
 

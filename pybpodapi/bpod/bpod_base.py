@@ -234,7 +234,7 @@ class BpodBase(object):
 
         state_machine_body = sma.build_message() + sma.build_message_global_timer() + sma.build_message_32_bits()
 
-        self._bpodcom_send_state_machine( sma.build_header(run_asap, len(state_machine_body)) + state_machine_body)
+        self._bpodcom_send_state_machine(sma.build_header(run_asap, len(state_machine_body)) + state_machine_body)
 
         self._new_sma_sent = True
 
@@ -332,10 +332,7 @@ class BpodBase(object):
             self.close()
             exit(0)
 
-        if interrupt_task:
-            return False
-
-        return True
+        return not interrupt_task
 
     def handle_inline(self, inline, sma):
         interrupt_task = False
@@ -425,7 +422,7 @@ class BpodBase(object):
     def trigger_output(self, channel_number, value):
         return self._bpodcom_override_digital_hardware_state(channel_number, value)
 
-    def trigger_softcode(self, softcode): 
+    def trigger_softcode(self, softcode):
         return self._bpodcom_send_softcode(softcode)
 
     def load_message(self, module_index, msg):

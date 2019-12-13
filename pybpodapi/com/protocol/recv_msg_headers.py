@@ -14,7 +14,7 @@ class ReceiveMessageHeader(object):
     """
 
     #: Success code from HANDSHAKE command
-    HANDSHAKE_OK = '5'
+    HANDSHAKE_OK = "5"
 
     #: Success code from ENABLE_PORTS command
     ENABLE_PORTS_OK = 1
@@ -32,7 +32,7 @@ class ReceiveMessageHeader(object):
     RESET_SERIAL_MESSAGES = 1
 
     #: Module requested event
-    MODULE_REQUESTED_EVENT = ord('#')
+    MODULE_REQUESTED_EVENT = ord("#")
 
     #: Module events names
-    MODULE_EVENT_NAMES = ord('E')
+    MODULE_EVENT_NAMES = ord("E")

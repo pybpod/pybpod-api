@@ -54,9 +54,15 @@ class StateMachineBase(object):
 
         # state change conditions
         self.state_timer_matrix = [0] * self.hardware.max_states
-        self.conditions = Conditions(self.hardware.max_states, self.hardware.n_conditions)
-        self.global_counters = GlobalCounters(self.hardware.max_states, self.hardware.n_global_counters)
-        self.global_timers = GlobalTimers(self.hardware.max_states, self.hardware.n_global_timers)
+        self.conditions = Conditions(
+            self.hardware.max_states, self.hardware.n_conditions
+        )
+        self.global_counters = GlobalCounters(
+            self.hardware.max_states, self.hardware.n_global_counters
+        )
+        self.global_timers = GlobalTimers(
+            self.hardware.max_states, self.hardware.n_global_timers
+        )
         self.input_matrix = [[] for i in range(self.hardware.max_states)]
 
         # should be incremented whenever the user uses a timer
@@ -82,7 +88,9 @@ class StateMachineBase(object):
 
         self.is_running = False
 
-    def add_state(self, state_name, state_timer=0, state_change_conditions={}, output_actions=()):
+    def add_state(
+        self, state_name, state_timer=0, state_change_conditions={}, output_actions=()
+    ):
         """
         Adds a state to an existing state matrix.
 
@@ -121,15 +129,21 @@ class StateMachineBase(object):
                 event_code = self.hardware.channels.event_names.index(event_name)
                 logger.debug("Event code: %s", event_code)
             except:
-                raise SMAError('Error creating state: ' + state_name + '. ' + event_name + ' is an invalid event name.')
+                raise SMAError(
+                    "Error creating state: "
+                    + state_name
+                    + ". "
+                    + event_name
+                    + " is an invalid event name."
+                )
 
             if event_state_transition in self.manifest:
                 destination_state_number = self.manifest.index(event_state_transition)
             else:
-                if event_state_transition in ['exit', '>exit']:
-                    destination_state_number = float('NaN')
+                if event_state_transition in ["exit", ">exit"]:
+                    destination_state_number = float("NaN")
 
-                elif event_state_transition in ['back', '>back']:
+                elif event_state_transition in ["back", ">back"]:
                     self.use_255_back_signal = True
                     destination_state_number = 255
                 else:  # Send to an undeclared state (replaced later with actual state in myBpod.sendStateMachine)
@@ -140,10 +154,14 @@ class StateMachineBase(object):
                 self.state_timer_matrix[state_name_idx] = destination_state_number
 
             elif EventName.is_condition(event_name):
-                self.conditions.matrix[state_name_idx].append((event_code, destination_state_number))
+                self.conditions.matrix[state_name_idx].append(
+                    (event_code, destination_state_number)
+                )
 
             elif EventName.is_global_counter_end(event_name):
-                self.global_counters.matrix[state_name_idx].append((event_code, destination_state_number))
+                self.global_counters.matrix[state_name_idx].append(
+                    (event_code, destination_state_number)
+                )
 
             elif EventName.is_global_timer_trigger(event_name):
 
@@ -163,17 +181,25 @@ class StateMachineBase(object):
                 self.global_timers.end_matrix[state_name_idx] = v
 
             elif EventName.is_global_timer_end(event_name):
-                self.global_timers.end_matrix[state_name_idx].append((event_code, destination_state_number))
+                self.global_timers.end_matrix[state_name_idx].append(
+                    (event_code, destination_state_number)
+                )
 
             elif EventName.is_global_timer_start(event_name):
-                self.global_timers.start_matrix[state_name_idx].append((event_code, destination_state_number))
+                self.global_timers.start_matrix[state_name_idx].append(
+                    (event_code, destination_state_number)
+                )
 
             else:
-                self.input_matrix[state_name_idx].append((event_code, destination_state_number))
+                self.input_matrix[state_name_idx].append(
+                    (event_code, destination_state_number)
+                )
 
         for action_name, action_value in output_actions:
-            if action_name == 'Valve':
-                output_code = self.hardware.channels.output_channel_names.index(OutputChannel.Valve+str(action_value))
+            if action_name == "Valve":
+                output_code = self.hardware.channels.output_channel_names.index(
+                    OutputChannel.Valve + str(action_value)
+                )
                 output_value = 1
 
                 """
@@ -182,31 +208,44 @@ class StateMachineBase(object):
                     output_value = math.pow(2, action_value - 1)
                 """
             elif action_name == OutputChannel.LED:
-                output_code = self.hardware.channels.output_channel_names.index(ChannelName.PWM + str(action_value))
+                output_code = self.hardware.channels.output_channel_names.index(
+                    ChannelName.PWM + str(action_value)
+                )
                 output_value = 255
 
             else:
                 try:
-                    output_code = self.hardware.channels.output_channel_names.index(action_name)
+                    output_code = self.hardware.channels.output_channel_names.index(
+                        action_name
+                    )
                 except:
-                    raise SMAError('Error creating state: ' + state_name + '. ' + action_name + ' is an invalid output name.')
+                    raise SMAError(
+                        "Error creating state: "
+                        + state_name
+                        + ". "
+                        + action_name
+                        + " is an invalid output name."
+                    )
 
                 output_value = action_value
 
             if action_name == OutputChannel.GlobalCounterReset:
                 self.global_counters.reset_matrix[output_value] = 1
 
-            # For backwards compatability, integers specifying global timers convert to equivalent binary decimals. 
+            # For backwards compatability, integers specifying global timers convert to equivalent binary decimals.
             # To specify binary, use a string of bits.
-            if output_code == self.hardware.channels.events_positions.globalTimerTrigger:
-                self.global_timers.triggers_matrix[state_name_idx] = 2**(output_value-1)
+            if (
+                output_code
+                == self.hardware.channels.events_positions.globalTimerTrigger
+            ):
+                self.global_timers.triggers_matrix[state_name_idx] = 2 ** (
+                    output_value - 1
+                )
 
             if output_code == self.hardware.channels.events_positions.globalTimerCancel:
-                self.global_timers.cancels_matrix[output_value-1] = 1
+                self.global_timers.cancels_matrix[output_value - 1] = 1
 
-            self.output_matrix[state_name_idx].append(
-                (output_code, output_value)
-            )
+            self.output_matrix[state_name_idx].append((output_code, output_value))
 
         self.total_states_added += 1
 
@@ -219,17 +258,19 @@ class StateMachineBase(object):
         """
         self.global_timers.timers[timer_id - 1] = timer_duration
 
-    def set_global_timer(self,
-                         timer_id,
-                         timer_duration,
-                         on_set_delay=0,
-                         channel=None,
-                         on_message=1,
-                         off_message=0,
-                         loop_mode=0,
-                         loop_intervals=0,
-                         send_events=1,
-                         oneset_triggers=None):
+    def set_global_timer(
+        self,
+        timer_id,
+        timer_duration,
+        on_set_delay=0,
+        channel=None,
+        on_message=1,
+        off_message=0,
+        loop_mode=0,
+        loop_intervals=0,
+        send_events=1,
+        oneset_triggers=None,
+    ):
         """
         Sets the duration of a global timer. Unlike state timers, global timers can be triggered from any state (as an
         output action), and handled from any state (by causing a state change).
@@ -243,9 +284,13 @@ class StateMachineBase(object):
         timer_channel_idx = 255
         if channel is not None:
             try:
-                timer_channel_idx = self.hardware.channels.output_channel_names.index(channel)  # type: int
+                timer_channel_idx = self.hardware.channels.output_channel_names.index(
+                    channel
+                )  # type: int
             except:
-                raise SMAError('Error: {0} is an invalid output channel name.'.format(channel))
+                raise SMAError(
+                    "Error: {0} is an invalid output channel name.".format(channel)
+                )
 
         index = timer_id - 1
 
@@ -260,13 +305,15 @@ class StateMachineBase(object):
         self.global_timers.send_events[index] = send_events
 
         if len(self.global_timers.onset_matrix) < index:
-            for i in range(len(self.global_timers.onset_matrix), index+1):
+            for i in range(len(self.global_timers.onset_matrix), index + 1):
                 self.global_timers.onset_matrix.append(0)
 
         if oneset_triggers is not None:
             self.global_timers.onset_matrix[index] = oneset_triggers
 
-    def set_global_counter(self, counter_number=None, target_event=None, threshold=None):
+    def set_global_counter(
+        self, counter_number=None, target_event=None, threshold=None
+    ):
         """
         Sets the threshold and monitored event for one of the 5 global counters. Global counters can count instances of
         events, and handle when the count exceeds a threshold from any state (by triggering a state change).
@@ -287,7 +334,9 @@ class StateMachineBase(object):
         :param str condition_channel:
         :param int channel_value:
         """
-        channel_code = self.hardware.channels.input_channel_names.index(condition_channel)
+        channel_code = self.hardware.channels.input_channel_names.index(
+            condition_channel
+        )
         self.conditions.channels[condition_number - 1] = channel_code
         self.conditions.values[condition_number - 1] = channel_value
 
