@@ -1,16 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import re
 from setuptools import setup, find_packages
 
-version = ""
-with open("pybpodapi/__init__.py", "r") as fd:
-    version = re.search(
-        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
-    ).group(1)
-
-if not version:
-    raise RuntimeError("Cannot find version information")
+current_version = "1.8.1"
 
 requirements = [
     "confapp",
@@ -20,7 +12,7 @@ requirements = [
 
 setup(
     name="pybpod-api",
-    version=version,
+    version=current_version,
     description="""BPod Python API""",
     author=[
         "Joshua Sanders",
