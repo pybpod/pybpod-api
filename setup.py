@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 
-current_version = "1.8.1"
+current_version = "1.8.2"
 
 requirements = [
     "confapp",
