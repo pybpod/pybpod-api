@@ -252,7 +252,6 @@ class BpodCOMProtocol(BpodBase):
 
         ###### set inputs enabled or disabled #######################################################
         hardware.inputs_enabled = [0] * len(hardware.inputs)
-        ports_found = False
 
         for j, i in enumerate(hardware.bnc_inputports_indexes):
             hardware.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
@@ -615,6 +614,6 @@ class BpodCOMProtocol(BpodBase):
     #   return BpodBase.machine_type.fget(self)
 
     # @property
-    # def cycle_frequency(self): 
+    # def cycle_frequency(self):
     #   self.__bpodcom_check_com_ready()
     #   return BpodBase.cycle_frequency.fget(self)

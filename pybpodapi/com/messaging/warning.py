@@ -8,5 +8,5 @@ class WarningMessage(BaseMessage):
 
     """ Message that represents an error """
 
-    MESSAGE_TYPE_ALIAS = 'warning'
+    MESSAGE_TYPE_ALIAS = "warning"
     MESSAGE_COLOR = (255, 100, 0)

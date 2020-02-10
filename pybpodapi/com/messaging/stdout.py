@@ -13,5 +13,6 @@ class StdoutMessage(BaseMessage):
         :py:class:`pybpodgui_plugin.com.messaging.base_message.BoardMessage`
 
     """
-    MESSAGE_TYPE_ALIAS = 'stdout'
+
+    MESSAGE_TYPE_ALIAS = "stdout"
     MESSAGE_COLOR = (150, 150, 150)
