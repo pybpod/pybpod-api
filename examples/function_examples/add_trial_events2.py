@@ -48,7 +48,7 @@ for i in range(nTrials):  # Main loop
 		state_name='FlashStimulus',
 		state_timer=0.1,
 		state_change_conditions={Bpod.Events.Tup: 'WaitForResponse'},
-		output_actions=[(stimulus, 255, Bpod.OutputChannels.GlobalTimerTrig, 1)])
+		output_actions=[(stimulus, 255), (Bpod.OutputChannels.GlobalTimerTrig, 1)])
 
 	sma.add_state(
 		state_name='WaitForResponse',
