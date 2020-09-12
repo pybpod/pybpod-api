@@ -11,7 +11,7 @@ import time
 
 from pybpodapi.protocol import Bpod
 
-import examples.settings as settings
+import examples.user_settings as settings
 
 
 
