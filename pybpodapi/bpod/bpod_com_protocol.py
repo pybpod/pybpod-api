@@ -30,8 +30,8 @@ class BpodCOMProtocol(BpodBase):
 
     """
 
-    def __init__(self, serial_port=None, sync_channel=None, sync_mode=None):
-        super(BpodCOMProtocol, self).__init__(serial_port, sync_channel, sync_mode)
+    def __init__(self, serial_port=None, sync_channel=None, sync_mode=None, emulator_mode=False):
+        super(BpodCOMProtocol, self).__init__(serial_port, sync_channel, sync_mode, emulator_mode=emulator_mode)
 
         self._arcom = None  # type: ArCOM
         self.bpod_com_ready = False
@@ -39,7 +39,7 @@ class BpodCOMProtocol(BpodBase):
         # used to keep the list of msg ids sent using the load_serial_message function
         self.msg_id_list = [False for i in range(255)]
 
-        if self.serial_port:
+        if self.serial_port and not emulator_mode:
             self.open()
 
     def open(self):
@@ -63,27 +63,32 @@ class BpodCOMProtocol(BpodBase):
         """
         if channel_type == ChannelType.INPUT:
             input_channel_name = channel_name + str(channel_number)
-            channel_number = self.hardware.channels.input_channel_names.index(input_channel_name)
             try:
-                self._bpodcom_override_input_state(channel_number, value)
+                channel_number = self.hardware.channels.input_channel_names.index(
+                    input_channel_name)
+                self.trigger_input(channel_number, value)
             except:
                 raise BpodErrorException(
                     'Error using manual_override: {name} is not a valid channel name.'.format(name=channel_name))
 
         elif channel_type == ChannelType.OUTPUT:
-            if channel_name == 'Serial':
-                self._bpodcom_send_byte_to_hardware_serial(channel_number, value)
-
+            if channel_name == 'SoftCode':
+                self.trigger_softcode(value)
+            elif channel_name == 'Serial':
+                self.trigger_serial(channel_number, value)
             else:
+                output_channel_name = channel_name + \
+                    str(channel_number)
                 try:
-                    output_channel_name = channel_name + str(channel_number)
-                    channel_number = self.hardware.channels.output_channel_names.index(output_channel_name)
-                    self._bpodcom_override_digital_hardware_state(channel_number, value)
+                    channel_number = self.hardware.channels.output_channel_names.index(
+                        output_channel_name)
+                    self.trigger_output(channel_number, value)
                 except:
                     raise BpodErrorException('Error using manual_override: {name} is not a valid channel name.'.format(
                         name=output_channel_name))
         else:
-            raise BpodErrorException('Error using manualOverride: first argument must be "Input" or "Output".')
+            raise BpodErrorException(
+                'Error using manualOverride: first argument must be "Input" or "Output".')
 
     def _bpodcom_connect(self, serial_port, baudrate=115200, timeout=1):
         """
@@ -250,18 +255,7 @@ class BpodCOMProtocol(BpodBase):
         :rtype: bool
         """
 
-        ###### set inputs enabled or disabled #######################################################
-        hardware.inputs_enabled = [0] * len(hardware.inputs)
-
-        for j, i in enumerate(hardware.bnc_inputports_indexes):
-            hardware.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
-
-        for j, i in enumerate(hardware.wired_inputports_indexes):
-            hardware.inputs_enabled[i] = settings.BPOD_WIRED_PORTS_ENABLED[j]
-
-        for j, i in enumerate(hardware.behavior_inputports_indexes):
-            hardware.inputs_enabled[i] = settings.BPOD_BEHAVIOR_PORTS_ENABLED[j]
-        #############################################################################################
+        hardware.configure_inputs()
 
         logger.debug("Requesting ports enabling (%s)", SendMessageHeader.ENABLE_PORTS)
         logger.debug("Inputs enabled (%s): %s", len(hardware.inputs_enabled), hardware.inputs_enabled)

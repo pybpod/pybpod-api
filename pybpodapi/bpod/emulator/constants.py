@@ -1,0 +1,97 @@
+"""
+The following values must be set according to Bpod firmware specification:
+https://github.com/sanworks/Bpod_StateMachine_Firmware/blob/v22/Dev/StateMachineFirmware/StateMachineFirmware.ino
+
+0 = USB (default), 1 = Ethernet (w/ Bpod Ethernet Module)
+IMPORTANT: PC via Ethernet requires State Machine v2.0 or newer.
+"""
+__author__ = "Chris Karageorgiou Kaneen"
+
+from confapp import conf as settings
+
+#################
+# from settings #
+#################
+
+FIRMWARE_VERSION = int(settings.TARGET_BPOD_FIRMWARE_VERSION)
+MACHINE_TYPE = int(settings.EMULATOR_BPOD_MACHINE_TYPE)
+
+
+class MACHINE_TYPE_ENUM:
+    ONE = 1
+    TWO = 2
+    THREE = 3
+
+
+class SM_FEATURE_PROFILE_ENUM:
+    ZERO = 0
+    ONE = 1
+    TWO = 2
+    THREE = 3
+
+
+class ETHERNET_COM_ENUM:
+    ON = 1
+    OFF = 0
+
+
+ETHERNET_COM = ETHERNET_COM_ENUM.OFF
+LIVE_TIMESTAMPS = 0
+TIMER_PERIOD = 100
+SM_FEATURE_PROFILE = {
+    MACHINE_TYPE_ENUM.ONE: SM_FEATURE_PROFILE_ENUM.ZERO,
+    MACHINE_TYPE_ENUM.TWO: SM_FEATURE_PROFILE_ENUM.ZERO,
+    MACHINE_TYPE_ENUM.THREE: SM_FEATURE_PROFILE_ENUM.ONE,
+}
+INPUT_HW = {
+    MACHINE_TYPE_ENUM.ONE: 'UUXBBWWWWPPPPPPPP',
+    MACHINE_TYPE_ENUM.TWO: 'UUUXBBWWPPPPPPPP',
+    MACHINE_TYPE_ENUM.THREE: {
+        ETHERNET_COM_ENUM.OFF: 'UUUUUXBBPPPP',
+        ETHERNET_COM_ENUM.ON: 'UUUUXBBPPPP',
+    },
+}
+OUTPUT_HW = {
+    MACHINE_TYPE_ENUM.ONE: 'UUXBBWWWWPPPPPPPPVVVVVVVV',
+    MACHINE_TYPE_ENUM.TWO: 'UUUXBBWWWPPPPPPPPVVVVVVVV',
+    MACHINE_TYPE_ENUM.THREE: {
+        ETHERNET_COM_ENUM.OFF: 'UUUUUXBBPPPPVVVV',
+        ETHERNET_COM_ENUM.ON: 'UUUUXBBPPPPVVVV',
+    },
+}
+HARDWARE_DESCRIPTION = {
+    'MAX_STATES': {
+        MACHINE_TYPE_ENUM.ONE: 128,
+        MACHINE_TYPE_ENUM.TWO: 256,
+        MACHINE_TYPE_ENUM.THREE: 256,
+    },
+    'TIMER_PERIOD': TIMER_PERIOD,
+    'MAX_SERIAL_EVENTS': {
+        MACHINE_TYPE_ENUM.ONE: 30,
+        MACHINE_TYPE_ENUM.TWO: 60,
+        MACHINE_TYPE_ENUM.THREE: {
+            ETHERNET_COM_ENUM.OFF: 90,
+            ETHERNET_COM_ENUM.ON: 75,
+        },
+    },
+    'MAX_GLOBAL_TIMERS': {
+        SM_FEATURE_PROFILE_ENUM.ZERO: 5,
+        SM_FEATURE_PROFILE_ENUM.ONE: 16,
+        SM_FEATURE_PROFILE_ENUM.TWO: 8,
+        SM_FEATURE_PROFILE_ENUM.THREE: 20,
+    },
+    'MAX_GLOBAL_COUNTERS': {
+        SM_FEATURE_PROFILE_ENUM.ZERO: 5,
+        SM_FEATURE_PROFILE_ENUM.ONE: 8,
+        SM_FEATURE_PROFILE_ENUM.TWO: 2,
+        SM_FEATURE_PROFILE_ENUM.THREE: 2,
+    },
+    'MAX_CONDITIONS': {
+        SM_FEATURE_PROFILE_ENUM.ZERO: 5,
+        SM_FEATURE_PROFILE_ENUM.ONE: 16,
+        SM_FEATURE_PROFILE_ENUM.TWO: 8,
+        SM_FEATURE_PROFILE_ENUM.THREE: 20,
+    },
+    'INPUT_HW': INPUT_HW,
+    'OUTPUT_HW': OUTPUT_HW,
+}
