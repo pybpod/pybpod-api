@@ -238,12 +238,21 @@ class StateMachineBase(object):
                 output_code
                 == self.hardware.channels.events_positions.globalTimerTrigger
             ):
-                self.global_timers.triggers_matrix[state_name_idx] = 2 ** (
-                    output_value - 1
-                )
+                # self.global_timers.triggers_matrix[state_name_idx] = 2 ** (
+                #     output_value - 1                )
+
+                # output_value here could be a decimal integer representing (more than one) bits to TRIGGER
+                # E.g.: 3 = '11' = trigger timers 1 & 2
+                self.global_timers.triggers_matrix[state_name_idx] = output_value    
 
             if output_code == self.hardware.channels.events_positions.globalTimerCancel:
-                self.global_timers.cancels_matrix[output_value - 1] = 1
+                
+                # self.global_timers.cancels_matrix[output_value - 1] = 1    # This doesn't work
+
+                # output_value here could be a decimal integer representing (more than one) bits to CANCEL
+                # E.g.: 3 = '11' = cancel timers 1 & 2
+                self.global_timers.cancels_matrix[state_name_idx] = output_value    
+                
 
             self.output_matrix[state_name_idx].append((output_code, output_value))
 
