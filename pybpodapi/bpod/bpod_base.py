@@ -14,6 +14,8 @@ from pybpodapi.bpod.hardware.channels import ChannelName
 from pybpodapi.bpod.hardware.events import EventName
 from pybpodapi.bpod.hardware.output_channels import OutputChannel
 
+from pybpodapi.bpod.emulator import Emulator
+
 from pybpodapi.bpod_modules.bpod_modules import BpodModules
 from pybpodapi.exceptions.bpod_error import BpodErrorException
 
@@ -59,7 +61,7 @@ class BpodBase(object):
 
     CHECK_STATE_MACHINE_COUNTER = 0
 
-    def __init__(self, serial_port=None, sync_channel=None, sync_mode=None, net_port=None):
+    def __init__(self, serial_port=None, sync_channel=None, sync_mode=None, net_port=None, emulator_mode=False):
         self._session = self.create_session()
 
         self.serial_port = serial_port if serial_port is not None else settings.PYBPOD_SERIAL_PORT
@@ -68,7 +70,13 @@ class BpodBase(object):
         self.sync_mode = sync_mode if sync_mode is not None else settings.PYBPOD_SYNC_MODE
         self.net_port = net_port if net_port is not None else settings.PYBPOD_NET_PORT
         self._hardware = Hardware()    # type: Hardware
-        self.bpod_modules = None          # type: BpodModules
+        if emulator_mode:
+            self._emulator = Emulator(self._hardware)
+            self.__initialize_input_command_handler()
+            self.bpod_modules = self._emulator.bpod_modules
+        else:
+            self._emulator = None
+            self.bpod_modules = None          # type: BpodModules
         self.bpod_start_timestamp = None
 
         self._new_sma_sent = False         # type: bool
@@ -163,18 +171,7 @@ class BpodBase(object):
 
         self._hardware.setup(self.bpod_modules)
 
-        # initialise the server to handle commands
-        if self.net_port is not None:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.sock.bind(('0.0.0.0', self.net_port))
-            self.socketin = NonBlockingSocketReceive(self.sock)
-        else:
-            self.sock = None
-            self.socketin = None
-
-        # initialise the thread that will handle the stdin commands
-        self.stdin = NonBlockingStreamReader(sys.stdin) if settings.PYBPOD_API_ACCEPT_STDIN else None
-        #####################################################
+        self.__initialize_input_command_handler()
 
         return self
 
@@ -188,7 +185,8 @@ class BpodBase(object):
             for varname in settings.PYBPOD_VARSNAMES:
                 self.session += ValueMessage(varname, getattr(settings, varname))
 
-        self._bpodcom_disconnect()
+        if self._emulator is None:
+            self._bpodcom_disconnect()
 
         del self._session
 
@@ -222,7 +220,7 @@ class BpodBase(object):
 
         :param pybpodapi.model.state_machine sma: initialized state machine
         """
-        if not self.bpod_com_ready:
+        if self._emulator is None and not self.bpod_com_ready:
             raise Exception('Bpod connection is closed')
 
         if self._skip_all_trials is True:
@@ -232,9 +230,13 @@ class BpodBase(object):
 
         sma.update_state_numbers()
 
-        state_machine_body = sma.build_message() + sma.build_message_global_timer() + sma.build_message_32_bits()
+        if self._emulator:
+            self._emulator.set_state_machine(sma)
+            self._emulator.log_state_machine_info()
+        else:
+            state_machine_body = sma.build_message() + sma.build_message_global_timer() + sma.build_message_32_bits()
 
-        self._bpodcom_send_state_machine(sma.build_header(run_asap, len(state_machine_body)) + state_machine_body)
+            self._bpodcom_send_state_machine(sma.build_header(run_asap, len(state_machine_body)) + state_machine_body)
 
         self._new_sma_sent = True
 
@@ -259,7 +261,7 @@ class BpodBase(object):
 
         :param (:class:`pybpodapi.state_machine.StateMachine`) sma: initialized state machine
         """
-        if not self.bpod_com_ready:
+        if self._emulator is None and not self.bpod_com_ready:
             raise Exception('Bpod connection is closed')
 
         if self._skip_all_trials is True:
@@ -271,14 +273,20 @@ class BpodBase(object):
 
         self.trial_timestamps = []  # Store the trial timestamps in case bpod is using live_timestamps
 
-        self._bpodcom_run_state_machine()
-        if self._new_sma_sent:
-            if self._bpodcom_state_machine_installation_status():
-                self._new_sma_sent = False
-            else:
-                raise BpodErrorException('Error: The last state machine sent was not acknowledged by the Bpod device.', self)
-
-        self.trial_start_timestamp = self._bpodcom_get_trial_timestamp_start()
+        if self._emulator:
+            self._emulator.set_state_machine(sma)
+            self._emulator.initialize()
+            self._emulator.mirror_state(sma.current_state)
+            # TODO: Do the BpodSystem.RefreshGUI equivalent
+            self.trial_start_timestamp = self._emulator.matrix_start_time
+        else:
+            self._bpodcom_run_state_machine()
+            if self._new_sma_sent:
+                if self._bpodcom_state_machine_installation_status():
+                    self._new_sma_sent = False
+                else:
+                    raise BpodErrorException('Error: The last state machine sent was not acknowledged by the Bpod device.', self)
+            self.trial_start_timestamp = self._bpodcom_get_trial_timestamp_start()
 
         if self.bpod_start_timestamp is None:
             self.bpod_start_timestamp = self.trial_start_timestamp
@@ -287,6 +295,7 @@ class BpodBase(object):
         # create a list of executed states
         state_change_indexes = []
 
+        pause_task = False
         # flags used to stop a trial (or all trials)
         interrupt_task = False
         kill_task = False
@@ -298,7 +307,7 @@ class BpodBase(object):
             if self.stdin is not None:
                 inline = self.stdin.readline()
                 if inline is not None:
-                    interrupt_task, kill_task = self.handle_inline(inline, sma)
+                    pause_task, interrupt_task, kill_task = self.handle_inline(inline, sma)
             #####################################################
 
             # read commands from a net socket ###################
@@ -307,18 +316,29 @@ class BpodBase(object):
 
                 if inline is not None:
                     inline = inline.decode().strip()
-                    interrupt_task, kill_task = self.handle_inline(inline, sma)
+                    pause_task, interrupt_task, kill_task = self.handle_inline(inline, sma)
             #####################################################
+            if pause_task:
+                continue
 
-            if self.data_available():
+            opcode, data = None, None
+            if self._emulator:
+                opcode, data = self._emulator.run()
+            elif self.data_available():
                 opcode, data = self._bpodcom_read_opcode_message()
-                self.__process_opcode(sma, opcode, data, state_change_indexes)
+            if opcode is not None and data is not None and \
+                not self.__process_opcode(
+                    sma, opcode, data, state_change_indexes):
+                break
 
             self.loop_handler()
 
             if interrupt_task or kill_task:
                 self._skip_all_trials = True
                 break
+
+        if self._emulator:
+            self._emulator.mirror_state(None)
 
         self.session += EndTrial('The trial ended')
 
@@ -335,19 +355,31 @@ class BpodBase(object):
         return not interrupt_task
 
     def handle_inline(self, inline, sma):
+        pause_task = False
         interrupt_task = False
         kill_task = False
         if inline.startswith('pause-trial'):
-            self.pause()
+            if self._emulator:
+                pause_task = True
+            else:
+                self.pause()
         elif inline.startswith('resume-trial'):
-            self.resume()
+            if self._emulator:
+                pause_task = False
+            else:
+                self.resume()
         elif inline.startswith('stop-trial'):
-            self.stop_trial()
+            if self._emulator:
+                interrupt_task = True
+            else:
+                self.stop_trial()
         elif inline.startswith('close'):
-            self.stop_trial()
+            if self._emulator is None:
+                self.stop_trial()
             interrupt_task = True
         elif inline.startswith('kill'):
-            self.stop_trial()
+            if self._emulator is None:
+                self.stop_trial()
             interrupt_task = kill_task = True
         elif inline.startswith('SoftCode'):
             softcode = int(inline[-1]) - 1
@@ -378,7 +410,7 @@ class BpodBase(object):
                 final_msg.append(int(x))
             self.load_message(module_index, final_msg)
 
-        return interrupt_task, kill_task
+        return pause_task, interrupt_task, kill_task
 
     def load_serial_message(self, serial_channel, message_ID, serial_message):
         """
@@ -413,17 +445,39 @@ class BpodBase(object):
     def echo_softcode(self, softcode):
         return self._bpodcom_echo_softcode(softcode)
 
+    def trigger_event_by_name(self, event_name):
+        if self._emulator:
+            self._emulator.add_manual_override_event(event_name)
+
     def trigger_event(self, event_index, event_data):
-        return self._bpodcom_manual_override_exec_event(event_index, event_data)
+        if self._emulator:
+            self._emulator.add_manual_override_event(event_index)
+        else:
+            return self._bpodcom_manual_override_exec_event(event_index, event_data)
 
     def trigger_input(self, channel_number, value):
-        return self._bpodcom_override_input_state(channel_number, value)
+        if self._emulator:
+            self._emulator.override_input_state(channel_number, int(value))
+        else:
+            return self._bpodcom_override_input_state(channel_number, value)
 
     def trigger_output(self, channel_number, value):
-        return self._bpodcom_override_digital_hardware_state(channel_number, value)
+        if self._emulator:
+            self._emulator.serial_override(channel_number, int(value))
+        else:
+            return self._bpodcom_override_digital_hardware_state(channel_number, value)
 
     def trigger_softcode(self, softcode):
-        return self._bpodcom_send_softcode(softcode)
+        if self._emulator:
+            self.softcode_handler_function(softcode)
+        else:
+            return self._bpodcom_send_softcode(softcode)
+
+    def trigger_serial(self, channel_number, value):
+        if self._emulator:
+            self._emulator.serial_override(channel_number, value)
+        else:
+            return self._bpodcom_send_byte_to_hardware_serial(channel_number, value)
 
     def load_message(self, module_index, msg):
         # get module reference
@@ -438,6 +492,60 @@ class BpodBase(object):
 
     def create_session(self):
         return Session()
+
+    def __initialize_input_command_handler(self):
+        # Initialize the server to handle commands.
+        if self.net_port is None:
+            self.sock = None
+            self.socketin = None
+        else:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.sock.bind(('0.0.0.0', self.net_port))
+            self.socketin = NonBlockingSocketReceive(self.sock)
+
+        # Initialize the thread that will handle the stdin commands.
+        self.stdin = NonBlockingStreamReader(
+            sys.stdin) if settings.PYBPOD_API_ACCEPT_STDIN else None
+
+    def __transition_to_new_state(self, sma, event_id, transition_matrix,
+                              current_trial, state_change_indexes,
+                              is_state_timer_matrix=False,
+                              debug_message=None):
+        new_state_set = False
+
+        def set_sma_current_state(new_state):
+            previous_state = sma.current_state
+            if sma.use_255_back_signal and new_state == 255:
+                sma.current_state = current_trial.states[-2]
+            else:
+                sma.current_state = new_state
+            logger.debug(('Transition occured: '
+                          f'state {previous_state} -> {sma.current_state}'))
+            if not math.isnan(sma.current_state):
+                if debug_message is not None:
+                    logger.debug(debug_message)
+                current_trial.states.append(sma.current_state)
+                state_change_indexes.append(
+                    len(current_trial.events_occurrences) - 1)
+        current_state = sma.current_state
+        if is_state_timer_matrix:
+            this_state_timer_state = transition_matrix[current_state]
+            is_event_id_tup = event_id == sma.hardware.channels.events_positions.Tup
+            if is_event_id_tup and this_state_timer_state != current_state:
+                set_sma_current_state(this_state_timer_state)
+                new_state_set = True
+        else:
+            for transition_event_code, transition_state in transition_matrix[
+                    current_state]:
+                if transition_event_code == event_id:
+                    set_sma_current_state(transition_state)
+                    new_state_set = True
+                else:
+                    logger.debug((f'Event {transition_event_code} required '
+                                  f'for transition: state '
+                                  f'{sma.current_state} -> '
+                                  f'{transition_state}'))
+        return new_state_set
 
     def __process_opcode(self, sma, opcode, data, state_change_indexes):
         """
@@ -455,11 +563,16 @@ class BpodBase(object):
         current_trial = self.session.current_trial
 
         if opcode == 1:  # Read events
-            n_current_events = data
-            current_events = self._bpodcom_read_current_events(n_current_events)
+            if self._emulator:
+                current_events = data  # virtual current events
+                logger.debug(f'virtual_current_events: {current_events}')
+            else:
+                n_current_events = data
+                current_events = self._bpodcom_read_current_events(n_current_events)
+
             transition_event_found = False
 
-            if self.hardware.live_timestamps:
+            if self.hardware.live_timestamps and self._emulator is None:
                 event_timestamp = self._bpodcom_read_event_timestamp()
             else:
                 event_timestamp = None
@@ -475,81 +588,59 @@ class BpodBase(object):
                     )
                     self.trial_timestamps.append(event_timestamp)
 
-                    # input matrix
-                    if not transition_event_found:
-                        logger.debug("transition event not found")
-                        logger.debug("Current state: %s", sma.current_state)
-                        for transition in sma.input_matrix[sma.current_state]:
-                            logger.debug("Transition: %s", transition)
-                            if transition[0] == event_id:
-                                if sma.use_255_back_signal and transition[1] == 255:
-                                    sma.current_state = current_trial.states[-2]
-                                else:
-                                    sma.current_state = transition[1]
-
-                                if not math.isnan(sma.current_state):
-                                    logger.debug("adding states input matrix")
-                                    current_trial.states.append(sma.current_state)
-                                    state_change_indexes.append(len(current_trial.events_occurrences) - 1)
-
-                                transition_event_found = True
-
-                    # state timer matrix
-                    if not transition_event_found:
-                        this_state_timer_transition = sma.state_timer_matrix[sma.current_state]
-                        if event_id == sma.hardware.channels.events_positions.Tup:
-                            if not (this_state_timer_transition == sma.current_state):
-                                if sma.use_255_back_signal and this_state_timer_transition == 255:
-                                    sma.current_state = current_trial.states[-2]
-                                else:
-                                    sma.current_state = this_state_timer_transition
-
-                                if not math.isnan(sma.current_state):
-                                    logger.debug("adding states state timer matrix")
-                                    current_trial.states.append(sma.current_state)
-                                    state_change_indexes.append(len(current_trial.events_occurrences) - 1)
-                                transition_event_found = True
-
-                    # global timers start matrix
-                    if not transition_event_found:
-                        for transition in sma.global_timers.start_matrix[sma.current_state]:
-                            if transition[0] == event_id:
-                                if sma.use_255_back_signal and transition[1] == 255:
-                                    sma.current_state = current_trial.states[-2]
-                                else:
-                                    sma.current_state = transition[1]
-
-                                if not math.isnan(sma.current_state):
-                                    logger.debug("adding states global timers start matrix")
-                                    current_trial.states.append(sma.current_state)
-                                    state_change_indexes.append(len(current_trial.events_occurrences) - 1)
-                                transition_event_found = True
-
-                    # global timers end matrix
-                    if not transition_event_found:
-                        for transition in sma.global_timers.end_matrix[sma.current_state]:
-                            if transition[0] == event_id:
-
-                                if sma.use_255_back_signal and transition[1] == 255:
-                                    sma.current_state = current_trial.states[-2]
-                                else:
-                                    sma.current_state = transition[1]
-
-                                if not math.isnan(sma.current_state):
-                                    logger.debug("adding states global timers end matrix")
-                                    current_trial.states.append(sma.current_state)
-                                    state_change_indexes.append(len(current_trial.events_occurrences) - 1)
-                                transition_event_found = True
+                    logger.debug("Current state: %s", sma.current_state)
+                    transition_matrices = {
+                        'input': sma.input_matrix,
+                        'state_timer': sma.state_timer_matrix,
+                        'global_timers_start': sma.global_timers.start_matrix,
+                        'global_timers_end': sma.global_timers.end_matrix,
+                        'global_counters': sma.global_counters.matrix,
+                        'conditions': sma.conditions.matrix,
+                    }
+                    for transition_matrix_name, transition_matrix in \
+                            transition_matrices.items():
+                        transition_event_found = \
+                            self.__transition_to_new_state(
+                                sma,
+                                event_id,
+                                transition_matrix,
+                                current_trial,
+                                state_change_indexes,
+                                is_state_timer_matrix=(transition_matrix_name ==
+                                                       'state_timer'),
+                                debug_message="Adding {} matrix states".format(
+                                    transition_matrix_name))
+                        if transition_event_found:
+                            break
 
                 logger.debug("States indexes: %s", current_trial.states)
-
+            if self._emulator:
+                self._emulator.mirror_events(current_events)
             if transition_event_found and not math.isnan(sma.current_state):
+                if self._emulator:
+                    self._emulator.mirror_state(sma.current_state)
+                    self._emulator.set_state_machine(sma)
+                    self._emulator.reset_current_state()
+                    self._emulator.set_state_start_time(
+                        self._emulator.current_time)
+                    self._emulator.set_global_timer_end_time()
+                    self._emulator.cancel_global_timers()
+                    self._emulator.reset_global_counter_counts()
+                    self._emulator.set_softcode(
+                        self.hardware.channels.events_positions.output_USB)
                 state_name = sma.state_names[sma.current_state]
                 self._session += StateTransition(state_name, event_timestamp)
+            elif math.isnan(sma.current_state):
+                if self._emulator:
+                    state_change_indexes.append(
+                        len(current_trial.events_occurrences) - 1)
+                    return False
 
         elif opcode == 2:  # Handle soft code
             self._session += SoftcodeOccurrence(data)
             self.softcode_handler_function(data)
+
+        return True
 
     def __update_timestamps(self, sma, state_change_indexes):
         """
@@ -559,29 +650,45 @@ class BpodBase(object):
         :param list state_change_indexes:
         """
 
+        def add_session_info(trial_start_timestamp, trial_end_timestamp):
+            self.session += SessionInfo(
+                self.session.INFO_TRIAL_BPODTIME,
+                trial_end_timestamp - trial_start_timestamp,
+                start_time=trial_start_timestamp,
+                end_time=trial_end_timestamp
+            )
+
         current_trial = self.session.current_trial
-        current_trial.trial_start_timestamp = self.trial_start_timestamp  # start timestamp of first trial
-        current_trial.bpod_start_timestamp = self.bpod_start_timestamp
-
-        trial_end_timestamp, discrepancy = self._bpodcom_read_timestamps()
-        current_trial.trial_end_timestamp = trial_end_timestamp
-
-        self.session += SessionInfo(
-            self.session.INFO_TRIAL_BPODTIME,
-            trial_end_timestamp-self.trial_start_timestamp,
-            start_time=self.trial_start_timestamp,
-            end_time=trial_end_timestamp
-        )
-
-        if discrepancy > 1:
-            self.session += WarningMessage("Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy))
-
-        if self.hardware.live_timestamps:
-            timestamps = self.trial_timestamps
+        if self._emulator:
+            trial_start_timestamp = \
+                self._emulator.matrix_start_time
+            timestamps = self._emulator.timestamps[
+                :self._emulator.n_events]
+            trial_end_timestamp = \
+                trial_start_timestamp + \
+                timestamps[-1]
+            current_trial.bpod_start_timestamp = trial_start_timestamp
+            current_trial.trial_start_timestamp = trial_start_timestamp
+            current_trial.trial_end_timestamp = trial_end_timestamp
+            add_session_info(current_trial.trial_start_timestamp, trial_end_timestamp)
         else:
-            timestamps = self._bpodcom_read_alltimestamps()
-            timestamps = [float(t)*self._hardware.times_scale_factor for t in timestamps]
+            current_trial.trial_start_timestamp = self.trial_start_timestamp  # start timestamp of first trial
+            current_trial.bpod_start_timestamp = self.bpod_start_timestamp
 
+            trial_end_timestamp, discrepancy = self._bpodcom_read_timestamps()
+            current_trial.trial_end_timestamp = trial_end_timestamp
+
+            add_session_info(current_trial.trial_start_timestamp, trial_end_timestamp)
+
+            if discrepancy > 1:
+                self.session += WarningMessage("Bpod missed hardware update deadline(s) on the past trial by ~{milliseconds}ms".format(milliseconds=discrepancy))
+
+            if self.hardware.live_timestamps:
+                timestamps = self.trial_timestamps
+            else:
+                timestamps = self._bpodcom_read_alltimestamps()
+                timestamps = [float(t) * self._hardware.times_scale_factor for t in timestamps]
+        if (self._emulator) or not self.hardware.live_timestamps:
             # update the timestamps of the events #############################################################
             for event, timestamp in zip(current_trial.events_occurrences, timestamps):
                 event.host_timestamp = timestamp

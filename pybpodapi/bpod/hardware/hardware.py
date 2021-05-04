@@ -3,6 +3,7 @@
 
 import logging
 
+from confapp import conf as settings
 from pybpodapi.bpod.hardware.channels import Channels
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,19 @@ class Hardware(object):
         logger.debug(self.channels)
 
         logger.debug(str(self))
+
+    def configure_inputs(self):
+        """ Set inputs enabled or disabled """
+        self.inputs_enabled = [0] * len(self.inputs)
+
+        for j, i in enumerate(self.bnc_inputports_indexes):
+            self.inputs_enabled[i] = settings.BPOD_BNC_PORTS_ENABLED[j]
+
+        for j, i in enumerate(self.wired_inputports_indexes):
+            self.inputs_enabled[i] = settings.BPOD_WIRED_PORTS_ENABLED[j]
+
+        for j, i in enumerate(self.behavior_inputports_indexes):
+            self.inputs_enabled[i] = settings.BPOD_BEHAVIOR_PORTS_ENABLED[j]
 
     def __str__(self):
         return (
